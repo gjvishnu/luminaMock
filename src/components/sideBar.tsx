@@ -1,11 +1,9 @@
  import {
-  BarChart3,
-  Bell,
+   Bell,
   Building2,
   CalendarDays,
   ChevronDown,
-  ClipboardList,
-  FileText,
+   FileText,
   GraduationCap,
   LayoutDashboard,
   Mail,

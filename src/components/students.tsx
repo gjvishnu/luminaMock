@@ -137,76 +137,8 @@ const colors = [
   "#3BAFD1",
 ];
 
-const students = [
-  {
-    name: "Rahul Kumar",
-    registerNo: "22CS101",
-    department: "CSE",
-    batch: "2022 - 2026",
-    cgpa: 8.72,
-    backlogs: 0,
-    skills: ["React", "Python", "Node.js", "MongoDB", "Express", "TypeScript", "Git"],
-    placement: "Placed",
-    drives: 8,
-    resume: "Uploaded",
-    profile: 96,
-  },
-  {
-    name: "Arun M",
-    registerNo: "22EC056",
-    department: "ECE",
-    batch: "2022 - 2026",
-    cgpa: 7.45,
-    backlogs: 1,
-    skills: ["Python", "SQL", "MATLAB", "C", "Embedded"],
-    placement: "Unplaced",
-    drives: 5,
-    resume: "Uploaded",
-    profile: 82,
-  },
-  {
-    name: "Kiran S",
-    registerNo: "22ME033",
-    department: "MECH",
-    batch: "2022 - 2026",
-    cgpa: 6.12,
-    backlogs: 3,
-    skills: ["AutoCAD", "SolidWorks", "CATIA", "CNC", "ANSYS", "Creo"],
-    placement: "Not Eligible",
-    drives: 0,
-    resume: "Not Uploaded",
-    profile: 45,
-  },
-  {
-    name: "Priya N",
-    registerNo: "22CS118",
-    department: "CSE",
-    batch: "2022 - 2026",
-    cgpa: 8.91,
-    backlogs: 0,
-    skills: ["React", "TypeScript", "Node.js", "Next.js", "Git", "MongoDB"],
-    placement: "Interview",
-    drives: 7,
-    resume: "Uploaded",
-    profile: 93,
-  },
-  {
-    name: "Vignesh P",
-    registerNo: "22EE077",
-    department: "EEE",
-    batch: "2022 - 2026",
-    cgpa: 7.88,
-    backlogs: 1,
-    skills: ["Python", "MATLAB", "Power BI", "Excel"],
-    placement: "Shortlisted",
-    drives: 6,
-    resume: "Uploaded",
-    profile: 89,
-  },
-];
+ 
 
-const profileImage =
-  "https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250";
  
   const totalStudents = departmentData.reduce(
     (total, item) => total + item.value,

@@ -3,8 +3,7 @@ import {
   CalendarDays,
   Users,
   CircleCheckBig,
-  Plus,
-  TrendingUp,
+   TrendingUp,
    ChevronDown,
   RotateCcw,
   Search,
@@ -668,7 +667,7 @@ const PlacementOverview = ()=> {
 
         <div>
 
-          {attentionItems.map((item, index) => (
+          {attentionItems.map((item) => (
             <div
               key={item.title}
               className="

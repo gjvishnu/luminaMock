@@ -6,7 +6,7 @@ import {
   Clock3,
   Users,
    ArrowRight,
-  Bell,
+ 
   CalendarDays,
   FileUp,
   MoreVertical,
@@ -14,8 +14,7 @@ import {
   Send,
   Sparkles,
   Upload,
-  UserPlus,
-} from "lucide-react";
+ } from "lucide-react";
 
 type StatCard = {
   title: string;
