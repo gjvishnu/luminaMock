@@ -11,15 +11,11 @@ import {
   ChevronRight,
   Download,
   MoreVertical,
+  X,
 } from "lucide-react";
 
-import {
-  AlertTriangle,
-  Eye,
-} from "lucide-react";
-
-import { PieChart } from "@mui/x-charts/PieChart";
-import { useMediaQuery } from "@mui/material";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 
 const stats = [
@@ -89,7 +85,22 @@ const dates = [
 ];
 
 
-export const CampusDrive = ()=>{
+export const CampusDrive = () => {
+    const navigate = useNavigate();
+    const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+    const [companyName, setCompanyName] = useState("");
+
+    const saveCompany = (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+
+      if (!companyName.trim()) {
+        return;
+      }
+
+      setCompanyName("");
+      setIsCompanyModalOpen(false);
+    };
+
     return(
     <>
     <div>
@@ -243,6 +254,95 @@ export const CampusDrive = ()=>{
   })}
 </div>
 
+<div className="mt-3 flex flex-wrap items-center justify-end gap-2">
+  <button
+    type="button"
+    onClick={() => setIsCompanyModalOpen(true)}
+    className="inline-flex h-9 items-center gap-1.5 rounded-md border border-cyan-200 bg-white px-3 text-xs font-semibold text-cyan-600 shadow-sm transition hover:bg-cyan-50"
+  >
+    <Building2 size={14} />
+    Create Company
+  </button>
+  <button
+    type="button"
+    onClick={() => navigate("/add_drives")}
+    className="inline-flex h-9 items-center gap-1.5 rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
+  >
+    <CalendarDays size={14} />
+    Create Drive
+  </button>
+</div>
+
+{isCompanyModalOpen && (
+  <div
+    className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-950/40 p-4"
+    role="presentation"
+    onMouseDown={(event) => {
+      if (event.target === event.currentTarget) {
+        setIsCompanyModalOpen(false);
+      }
+    }}
+  >
+    <div
+      className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-5 shadow-xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-company-title"
+      onMouseDown={(event) => event.stopPropagation()}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 id="create-company-title" className="text-base font-bold text-slate-900">
+            Create Company
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Add a company to use when creating a campus drive.
+          </p>
+        </div>
+        <button
+          type="button"
+          aria-label="Close create company dialog"
+          onClick={() => setIsCompanyModalOpen(false)}
+          className="rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      <form onSubmit={saveCompany} className="mt-5">
+        <label htmlFor="company-name" className="block text-xs font-semibold text-slate-700">
+          Company name
+        </label>
+        <input
+          id="company-name"
+          type="text"
+          value={companyName}
+          onChange={(event) => setCompanyName(event.target.value)}
+          placeholder="Enter company name"
+          required
+          autoFocus
+          className="mt-1.5 h-10 w-full rounded-md border border-slate-200 px-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100"
+        />
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => setIsCompanyModalOpen(false)}
+            className="h-9 rounded-md border border-slate-200 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="h-9 rounded-md bg-cyan-500 px-4 text-xs font-semibold text-white transition hover:bg-cyan-600"
+          >
+            Save Company
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
 {/* filters */}
 <div
       className="
@@ -327,9 +427,8 @@ export const CampusDrive = ()=>{
                 max-sm:text-[9px]
               "
             />
-          </div>
-        </div>
-
+    </div>
+    </div>
 
         {/* ================= DRIVE STATUS ================= */}
 
@@ -381,14 +480,14 @@ export const CampusDrive = ()=>{
               gap-1.5
               rounded-md
               border
-              border-purple-200
-              bg-purple-50
+              border-cyan-200
+              bg-cyan-50
               px-3
               text-[11px]
               font-medium
-              text-indigo-600
+              text-cyan-500
               transition
-              hover:bg-purple-100
+              hover:bg-cyan-100
 
               max-sm:h-8
               max-sm:gap-1
@@ -501,79 +600,11 @@ function FilterDropdown({
 // DATA
 // =====================================================
 
-const departmentData = [
-  {
-    id: 0,
-    value: 320,
-    label: "CSE",
-  },
-  {
-    id: 1,
-    value: 280,
-    label: "ECE",
-  },
-  {
-    id: 2,
-    value: 210,
-    label: "EEE",
-  },
-  {
-    id: 3,
-    value: 180,
-    label: "MECH",
-  },
-  {
-    id: 4,
-    value: 150,
-    label: "CIVIL",
-  },
-];
-
-const colors = [
-  "#5B3FD3",
-  "#3B82D0",
-  "#2FBA72",
-  "#FFB52B",
-  "#E96B7A",
-];
-
-const attentionItems = [
-  {
-    title: "72 students from eligible pool have not applied for upcoming drives",
-    type: "danger",
-  },
-  {
-    title: "TCS drive – 24% application (low)",
-    type: "warning",
-  },
-  {
-    title: "Infosys drive – 18% application (low)",
-    type: "warning",
-  },
-];
-
-const totalEligible = departmentData.reduce(
-  (sum, item) => sum + item.value,
-  0
-);
-
-
 // =====================================================
 // COMPONENT
 // =====================================================
 
 const PlacementOverview = ()=> {
-
-  // Actual chart dimensions change on mobile
-  const isMobile = useMediaQuery("(max-width: 639px)");
-
-  const chartSize = isMobile ? 105 : 175;
-
-  const innerRadius = isMobile ? 25 : 43;
-
-  const outerRadius = isMobile ? 48 : 75;
-
-
   return (
     <div
       className="
@@ -590,7 +621,7 @@ const PlacementOverview = ()=> {
           NEED ATTENTION
       ================================================== */}
 
-      <div
+      {/* <div
         className="
           min-w-0
           overflow-hidden
@@ -605,8 +636,7 @@ const PlacementOverview = ()=> {
         "
       >
 
-        {/* Header */}
-
+ 
         <div
           className="
             flex
@@ -663,8 +693,7 @@ const PlacementOverview = ()=> {
         </div>
 
 
-        {/* Attention Items */}
-
+ 
         <div>
 
           {attentionItems.map((item) => (
@@ -683,8 +712,7 @@ const PlacementOverview = ()=> {
               "
             >
 
-              {/* Icon */}
-
+ 
               <div
                 className={`
                   flex
@@ -716,8 +744,7 @@ const PlacementOverview = ()=> {
               </div>
 
 
-              {/* Text */}
-
+ 
               <div className="min-w-0 flex-1">
 
                 <p
@@ -737,8 +764,7 @@ const PlacementOverview = ()=> {
               </div>
 
 
-              {/* View */}
-
+ 
               <button
                 className="
                   shrink-0
@@ -766,8 +792,7 @@ const PlacementOverview = ()=> {
         </div>
 
 
-        {/* Optional footer */}
-
+ 
         <div className="pt-2 max-sm:pt-1">
 
           <button
@@ -795,14 +820,14 @@ const PlacementOverview = ()=> {
 
         </div>
 
-      </div>
+      </div> */}
 
 
       {/* =================================================
           DEPARTMENT-WISE ELIGIBLE STUDENTS
       ================================================== */}
 
-      <div
+      {/* <div
         className="
           min-w-0
           overflow-hidden
@@ -817,8 +842,7 @@ const PlacementOverview = ()=> {
         "
       >
 
-        {/* Header */}
-
+ 
         <h2
           className="
             truncate
@@ -833,8 +857,7 @@ const PlacementOverview = ()=> {
         </h2>
 
 
-        {/* Chart + Legend */}
-
+ 
         <div
           className="
             mt-2
@@ -848,10 +871,7 @@ const PlacementOverview = ()=> {
           "
         >
 
-          {/* =================================================
-              DONUT
-          ================================================== */}
-
+          
           <div
             className="
               relative
@@ -903,8 +923,7 @@ const PlacementOverview = ()=> {
             />
 
 
-            {/* Center */}
-
+ 
             <div
               className="
                 pointer-events-none
@@ -950,9 +969,7 @@ const PlacementOverview = ()=> {
           </div>
 
 
-          {/* =================================================
-              LEGEND
-          ================================================== */}
+ 
 
           <div className="min-w-0 flex-1">
 
@@ -976,8 +993,7 @@ const PlacementOverview = ()=> {
                   "
                 >
 
-                  {/* Color */}
-
+ 
                   <span
                     className="
                       h-2.5
@@ -994,8 +1010,7 @@ const PlacementOverview = ()=> {
                   />
 
 
-                  {/* Label */}
-
+ 
                   <span
                     className="
                       min-w-0
@@ -1012,8 +1027,7 @@ const PlacementOverview = ()=> {
                   </span>
 
 
-                  {/* Value */}
-
+ 
                   <span
                     className="
                       shrink-0
@@ -1028,8 +1042,7 @@ const PlacementOverview = ()=> {
                   </span>
 
 
-                  {/* Percentage */}
-
+ 
                   <span
                     className="
                       hidden
@@ -1051,7 +1064,7 @@ const PlacementOverview = ()=> {
 
         </div>
 
-      </div>
+      </div> */}
 
     </div>
   );
@@ -1136,6 +1149,8 @@ const getStatusStyle = (status: string) => {
 };
 
 const Table = ()=>{
+    const navigate = useNavigate();
+
     return(
         <>
         
@@ -1146,7 +1161,7 @@ const Table = ()=>{
       Campus Drives
     </h2>
 
-    <button className="flex items-center gap-1.5 rounded-md border border-indigo-300 px-2.5 py-1.5 text-[10px] font-medium text-indigo-600 hover:bg-indigo-50 sm:gap-2 sm:rounded-lg sm:px-3 sm:py-2 sm:text-sm">
+    <button className="flex items-center gap-1.5 rounded-md border border-cyan-300 px-2.5 py-1.5 text-[10px] font-medium text-cyan-600 hover:bg-cyan-50 sm:gap-2 sm:rounded-lg sm:px-3 sm:py-2 sm:text-sm">
       <Download size={13} className="sm:h-4 sm:w-4" />
       Export
     </button>
@@ -1203,7 +1218,17 @@ const Table = ()=>{
         {drives.map((drive) => (
           <tr
             key={drive.company}
-            className="border-t border-gray-200 hover:bg-slate-50/60"
+            onClick={() => navigate(`/campusdrive/${drive.company.toLowerCase()}`)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                navigate(`/campusdrive/${drive.company.toLowerCase()}`);
+              }
+            }}
+            tabIndex={0}
+            role="link"
+            aria-label={`Open ${drive.company} drive details`}
+            className="cursor-pointer border-t border-gray-200 hover:bg-slate-50/60 focus:bg-indigo-50/40 focus:outline-none"
           >
             {/* Company */}
             <td className="px-3 py-2 sm:px-4 sm:py-3">
@@ -1290,7 +1315,12 @@ const Table = ()=>{
 
             {/* Actions */}
             <td className="px-3 py-2 text-center sm:px-4 sm:py-3">
-              <button className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 text-slate-700 hover:bg-gray-100 sm:h-9 sm:w-9 sm:rounded-lg">
+              <button
+                type="button"
+                aria-label={`More actions for ${drive.company}`}
+                onClick={(event) => event.stopPropagation()}
+                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 text-slate-700 hover:bg-gray-100 sm:h-9 sm:w-9 sm:rounded-lg"
+              >
                 <MoreVertical size={14} className="sm:h-[18px] sm:w-[18px]" />
               </button>
             </td>

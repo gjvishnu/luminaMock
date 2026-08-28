@@ -1,7 +1,7 @@
 import {
  
   BriefcaseBusiness,
-   
+   ChartNoAxesCombined,
   CheckCircle2,
   Clock3,
   Users,
@@ -63,6 +63,13 @@ const stats: StatCard[] = [
     icon: Clock3,
     iconStyle: "bg-blue-100 text-blue-600",
   },
+   {
+    title: "Total drives",
+    value: "50",
+    description: "for this quater",
+    icon: ChartNoAxesCombined,
+    iconStyle: "bg-blue-100 text-blue-600",
+  },
 ];
 
 
@@ -116,6 +123,7 @@ const recommendedStudents = [
     cgpa: "9.1",
     skillMatch: "92%",
     overallMatch: "94%",
+    applicationStatus: "Applied",
   },
    
   {
@@ -123,18 +131,21 @@ const recommendedStudents = [
     cgpa: "8.4",
     skillMatch: "74%",
     overallMatch: "81%",
+    applicationStatus: "Not applied ",
   },
   {
     name: "Rahul Verma",
     cgpa: "7.8",
     skillMatch: "52%",
     overallMatch: "68%",
+    applicationStatus: "Applied",
   },
   {
     name: "Sneha Iyer",
     cgpa: "8.2",
     skillMatch: "48%",
     overallMatch: "63%",
+    applicationStatus: "Not applied ",
   },
 ];
 
@@ -605,7 +616,7 @@ const PlacementBottomSection =()=> {
           {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
             <h2 className="text-sm font-semibold text-gray-900 sm:text-base">
-              Top JD Based Recommendations
+              Recommendations for active drives
             </h2>
 
             <button className="flex items-center gap-1 text-xs font-medium text-cyan-500">
@@ -661,81 +672,86 @@ const PlacementBottomSection =()=> {
             </p>
           </div>
 
-          {/* Table Header */}
-          <div
-            className="
-              grid
-              grid-cols-[28px_minmax(100px,1fr)_50px_70px_70px]
-              items-center
-              gap-2
-              bg-gray-50
-              px-4
-              py-2.5
-              text-[10px]
-              font-semibold
-              text-gray-500
-              sm:grid-cols-[28px_minmax(120px,1fr)_55px_75px_75px]
-            "
-          >
-            <span />
-            <span>Student</span>
-            <span>CGPA</span>
-            <span>Skills</span>
-            <span>Match</span>
-          </div>
+          <div className="overflow-x-auto">
+            {/* Table Header */}
+            <div
+              className="
+                grid
+                grid-cols-[minmax(95px,1fr)_34px_42px_44px_76px]
+                items-center
+                gap-1
+                bg-gray-50
+                px-2
+                py-2.5
+                text-[9px]
+                font-semibold
+                text-gray-500
+                sm:grid-cols-[minmax(100px,1fr)_44px_50px_55px_82px]
+                sm:px-3
+                sm:text-[10px]
+              "
+            >
+              <span>Student</span>
+              <span>CGPA</span>
+              <span>Skills</span>
+              <span>Match</span>
+              <span>Status</span>
+            </div>
 
-          {/* Students */}
-          <div>
-            {recommendedStudents.map((student, index) => (
-              <div
-                key={student.name}
-                className="
-                  grid
-                  grid-cols-[28px_minmax(100px,1fr)_50px_70px_70px]
-                  items-center
-                  gap-2
-                  border-b
-                  border-gray-50
-                  px-4
-                  py-3
-                  sm:grid-cols-[28px_minmax(120px,1fr)_55px_75px_75px]
-                "
-              >
-                {/* Rank */}
-                <span className="text-[10px] text-gray-500">
-                  {index + 1}
-                </span>
+            {/* Students */}
+            <div>
+              {recommendedStudents.map((student) => (
+                <div
+                  key={student.name}
+                  className="
+                    grid
+                    grid-cols-[minmax(95px,1fr)_34px_42px_44px_76px]
+                    items-center
+                    gap-1
+                    border-b
+                    border-gray-50
+                    px-2.5
+                    py-3
+                    sm:grid-cols-[minmax(100px,1fr)_44px_50px_55px_82px]
+                    sm:px-3
+                  "
+                >
+                  {/* Student */}
+                  <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
 
-                {/* Student */}
-                <div className="flex min-w-0 items-center gap-2">
+                    <img
+                      src={avatarUrl}
+                      alt={student.name}
+                      className="h-6 w-6 shrink-0 rounded-full object-cover sm:h-7 sm:w-7"
+                    />
 
-                  <img
-                    src={avatarUrl}
-                    alt={student.name}
-                    className="h-7 w-7 shrink-0 rounded-full object-cover"
-                  />
+                    <span className="truncate text-[9px] font-semibold text-gray-800 sm:text-xs">
+                      {student.name}
+                    </span>
+                  </div>
 
-                  <span className="truncate text-[10px] font-semibold text-gray-800 sm:text-xs">
-                    {student.name}
+                  {/* CGPA */}
+                  <span className="text-[9px] font-medium text-gray-700 sm:text-xs">
+                    {student.cgpa}
+                  </span>
+
+                  {/* Skills */}
+                  <span className="text-[9px] font-medium text-gray-700 sm:text-xs">
+                    {student.skillMatch}
+                  </span>
+
+                  {/* Match */}
+                  <span className="w-fit rounded-md bg-green-50 px-1.5 py-1 text-[9px] font-semibold text-green-600 sm:px-2 sm:text-xs">
+                    {student.overallMatch}
+                  </span>
+
+                  {/* Application status */}
+                  <span className={`w-fit rounded-md px-1.5 py-1 text-[8px] font-semibold leading-tight sm:px-2 sm:text-[10px] ${student.applicationStatus === "Applied" ? "bg-green-50 text-green-600" : "bg-amber-50 text-amber-600"}`}>
+                    {student.applicationStatus}
                   </span>
                 </div>
-
-                {/* CGPA */}
-                <span className="text-[10px] font-medium text-gray-700 sm:text-xs">
-                  {student.cgpa}
-                </span>
-
-                {/* Skills */}
-                <span className="text-[10px] font-medium text-gray-700 sm:text-xs">
-                  {student.skillMatch}
-                </span>
-
-                {/* Match */}
-                <span className="w-fit rounded-md bg-green-50 px-2 py-1 text-[10px] font-semibold text-green-600 sm:text-xs">
-                  {student.overallMatch}
-                </span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
           {/* Footer */}

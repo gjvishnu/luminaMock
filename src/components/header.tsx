@@ -1,21 +1,20 @@
 import {
+  BarChart3,
   Bell,
   ChevronDown,
   Menu,
   Search,
-  Building2,
   CalendarDays,
   FileText,
   GraduationCap,
   LayoutDashboard,
-  Mail,
-  Settings,
-  UserCog,
+  Megaphone,
   Users,
   X,
+  CirclePlus
 } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   useLocation,
   useNavigate,
@@ -28,6 +27,19 @@ import {
 
 export const Header = () => {
   const [sideBar, setSideBar] = useState(false);
+
+  useEffect(() => {
+    if (!sideBar) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [sideBar]);
 
   return (
     <>
@@ -196,7 +208,15 @@ export const Header = () => {
         {/* ================================================== */}
 
         {sideBar && (
-          <div className="absolute z-[999] h-screen w-full bg-black/50">
+          <div
+            className="fixed inset-0 z-[999] flex h-dvh w-full overflow-hidden bg-black/50"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setSideBar(false);
+              }
+            }}
+          >
 
             <Sidebar
               onClose={setSideBar}
@@ -218,96 +238,41 @@ export const Header = () => {
 const menuSections = [
   {
     title: "MAIN",
-
     items: [
-      {
-        label: "Dashboard",
-        icon: LayoutDashboard,
-        route: "dashboard",
-      },
+      { label: "Dashboard", icon: LayoutDashboard , route :"dashboard" },
+      { label: "Students", icon: Users , route :"students" },
+      { label: "Campus Drives", icon: CalendarDays ,route :"campusdrive" },
+            { label: "Best fit Recommendation", icon: FileText , route :"jdrecommendation" },
+      { label: "Reports", icon: BarChart3, route: "reports" },
 
-      {
-        label: "Students",
-        icon: Users,
-        route: "students",
-      },
-
-      {
-        label: "Campus Drives",
-        icon: CalendarDays,
-        route: "campusdrive",
-      },
+      // { label: "Applications", icon: ClipboardList , route :"applications"  },
+      // { label: "Companies", icon: Building2 },
+      // { label: "Resume Bank", icon: FileText },
+      // { label: "Reports & Analytics", icon: BarChart3 },
     ],
   },
-
-
+  // {
+  //   title: "RECOMMENDATION",
+  //   items: [
+  //     { label: "Shortlisted Students", icon: Users ,route :"shortlistedstudents" },
+  //   ],
+  // },
   {
-    title: "RECOMMENDATION",
-
+    title: "Operation",
     items: [
-      {
-        label: "JD Based Recommendation",
-        icon: FileText,
-        route: "jdrecommendation",
-      },
+       { label: "Announcements", icon: Megaphone ,route :"announcements"},
+              { label: "Add drives", icon: CirclePlus  ,route :"add_drives"},
 
-      {
-        label: "Shortlisted Students",
-        icon: Users,
-        route: "shortlistedstudents",
-      },
-    ],
+     ],
   },
-
-
-  {
-    title: "COMMUNICATION",
-
-    items: [
-      {
-        label: "Notifications",
-        icon: Bell,
-        route: "notifications",
-      },
-
-      {
-        label: "Announcements",
-        icon: Bell,
-        route: "announcements",
-      },
-
-      {
-        label: "Emails",
-        icon: Mail,
-        route: "emails",
-      },
-    ],
-  },
-
-
-  {
-    title: "SETTINGS",
-
-    items: [
-      {
-        label: "Settings",
-        icon: Settings,
-        route: "settings",
-      },
-
-      {
-        label: "User Management",
-        icon: UserCog,
-        route: "usermanagement",
-      },
-
-      {
-        label: "Drive Templates",
-        icon: FileText,
-        route: "drivetemplates",
-      },
-    ],
-  },
+  // {
+  //   title: "SETTINGS",
+  //   items: [
+  //     { label: "Settings", icon: Settings ,route :"settings"},
+  //     { label: "User Management", icon: UserCog ,route :"usermanagement"},
+  //     { label: "Drive Templates", icon: FileText ,route :"drivetemplates"},
+  //   ],
+  // },
 ];
 
 
@@ -501,57 +466,7 @@ export const Sidebar = ({
       {/* COLLEGE */}
       {/* ================================================== */}
 
-      <div className="pt-5">
-
-        <p className="mb-3 text-[10px] font-bold tracking-wide text-gray-500">
-          COLLEGE
-        </p>
-
-
-        <button
-          type="button"
-          className="
-            flex
-            w-full
-            items-center
-            gap-2
-            rounded-xl
-            border
-            border-gray-200
-            bg-white
-            p-2.5
-            hover:bg-gray-50
-          "
-        >
-
-          <Building2
-            size={22}
-            strokeWidth={1.7}
-            className="shrink-0 text-gray-700"
-          />
-
-
-          <div className="min-w-0 flex-1">
-
-            <p className="truncate text-[10px] font-semibold text-gray-700">
-              ABC Engineering College
-            </p>
-
-            <p className="text-[9px] text-gray-500">
-              2024 - 2025
-            </p>
-
-          </div>
-
-
-          <ChevronDown
-            size={14}
-            className="shrink-0 text-gray-500"
-          />
-
-        </button>
-
-      </div>
+      
 
     </div>
   );
