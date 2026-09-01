@@ -40,12 +40,9 @@ navigate("/dashboard")
               </div>
 
               <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                Welcome back
+               Welcome to Gloris Lumina Placement intelligence
               </h1>
-
-              <p className="mt-2 text-sm text-slate-500">
-                Sign in to your placement management account
-              </p>
+ 
             </div>
 
             {/* Login Card */}
@@ -161,7 +158,7 @@ navigate("/dashboard")
 
             {/* Bottom text */}
             <p className="mt-6 text-center text-[11px] text-slate-400">
-              © 2026 Campus Placement Management System
+              © 2026 Gloris Digital 
             </p>
 
           </div>

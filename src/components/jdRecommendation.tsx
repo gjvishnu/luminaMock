@@ -6,7 +6,6 @@ import {
   CircleCheckBig,
   Download,
   Eye,
-  Info,
   RotateCcw,
   ShieldCheck,
   Users,
@@ -144,12 +143,11 @@ const initialFilters = {
 };
 
 const filterOptions = {
-  driveStatus: ["All Drives", "Registration Open", "Upcoming", "Completed"],
+  driveStatus: ["All Drives", "Pool Campus Drive", "Virtual Drive", "Joint Campus Drive"],
   department: ["All Departments", "CSE", "ECE", "EEE", "IT", "MECH"],
   batch: ["2026", "2025", "2024"],
   jobRole: ["All Roles", "Software Engineer", "System Engineer", "Developer"],
-  cgpa: ["All", "8.0 and above", "7.0 and above"],
-  backlogs: ["No Active Backlogs", "With Active Backlogs"],
+ 
 };
 
 const recommendationStats = [
@@ -190,8 +188,7 @@ export const JDRecommendation = () => {
           <RecommendationFilter label="Department" value={filters.department} options={filterOptions.department} onChange={(value) => updateFilter("department", value)} />
           <RecommendationFilter label="Batch" value={filters.batch} options={filterOptions.batch} onChange={(value) => updateFilter("batch", value)} />
           <RecommendationFilter label="Job Role" value={filters.jobRole} options={filterOptions.jobRole} onChange={(value) => updateFilter("jobRole", value)} />
-          <RecommendationFilter label="CGPA" value={filters.cgpa} options={filterOptions.cgpa} onChange={(value) => updateFilter("cgpa", value)} />
-          <RecommendationFilter label="Backlogs" value={filters.backlogs} options={filterOptions.backlogs} onChange={(value) => updateFilter("backlogs", value)} />
+         
         </div>
       </section>
 
@@ -257,9 +254,9 @@ function RecommendationTable({
             <tr className="bg-slate-50 text-slate-700">
               <th className="w-[175px] border-b border-slate-200 px-3 py-3 font-semibold">Drive / Job Role</th>
               <th className="w-[165px] border-b border-slate-200 px-3 py-3 font-semibold">Drive Date &amp; Time</th>
-              <th className="w-[145px] border-b border-slate-200 px-3 py-3 font-semibold">Eligible Students <Info size={12} className="ml-1 inline text-cyan-500" /></th>
+              <th className="w-[145px] border-b border-slate-200 px-3 py-3 font-semibold">Eligible Students  </th>
               <th className="w-[245px] border-b border-slate-200 px-3 py-3 font-semibold"><span className="block">Match Distribution</span><span className="mt-1 block text-[9px] font-medium text-slate-500">● H / M / L</span></th>
-              <th className="w-[385px] border-b border-slate-200 px-3 py-3 font-semibold">Department-wise Eligibility (Eligible Students) <Info size={12} className="ml-1 inline text-cyan-500" /></th>
+              <th className="w-[385px] border-b border-slate-200 px-3 py-3 font-semibold">Department-wise Eligibility (Eligible Students) </th>
               <th className="w-[160px] border-b border-slate-200 px-3 py-3 text-center font-semibold">Actions</th>
             </tr>
           </thead>
@@ -273,8 +270,7 @@ function RecommendationTable({
                 </td>
                 <td className="px-3 py-3">
                   <p className="flex items-center gap-2 font-semibold text-slate-700"><CalendarDays size={14} />{drive.date}</p>
-                  <p className="mt-3 flex items-center gap-2 font-semibold text-slate-700"><span className="text-sm leading-none">◷</span>{drive.time}</p>
-                  <p className="mt-3 flex items-center gap-2 font-medium text-slate-600"><Building2 size={14} />{drive.venue}</p>
+                   <p className="mt-3 flex items-center gap-2 font-medium text-slate-600"><Building2 size={14} />{drive.venue}</p>
                 </td>
                 <td className="px-3 py-3 text-center">
                   <p className="mt-6 text-xl font-bold text-slate-800">{drive.eligible}</p>

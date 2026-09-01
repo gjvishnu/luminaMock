@@ -1,19 +1,19 @@
 import {
- 
+  
   BriefcaseBusiness,
    ChartNoAxesCombined,
   CheckCircle2,
-  Clock3,
-  Users,
+  AlertTriangle,
+   Users,
    ArrowRight,
- 
+   Trophy,
+ Percent,
   CalendarDays,
-  FileUp,
-  MoreVertical,
+  CirclePlus,
   Megaphone,
   Send,
   Sparkles,
-  Upload,
+  
  } from "lucide-react";
 
 type StatCard = {
@@ -49,105 +49,35 @@ const stats: StatCard[] = [
     iconStyle: "bg-purple-100 text-purple-600",
   },
   {
-    title: "Active Drives",
-    value: "16",
-    description: "View all drives",
-    action: "arrow",
-    icon: CalendarDays,
+    title: "Placement percentage",
+    value: "75.2 %",
+    description: "of eligible students",
+     icon: Percent,
     iconStyle: "bg-orange-100 text-orange-600",
   },
   {
-    title: "Upcoming Drives",
-    value: "08",
-    description: "Next 30 days",
-    icon: Clock3,
-    iconStyle: "bg-blue-100 text-blue-600",
-  },
-   {
-    title: "Total drives",
-    value: "50",
-    description: "for this quater",
+    title: "Average CTC",
+    value: "₹6,20000",
+    description: "Across all placed students",
     icon: ChartNoAxesCombined,
     iconStyle: "bg-blue-100 text-blue-600",
   },
-];
-
-
-const avatarUrl = "https://placehold.net/avatar.svg";
-
-type Drive = {
-  company: string;
-  role: string;
-  companyName: string;
-  date: string;
-  eligible: string;
-  applied: string;
-  status: "Active" | "Upcoming" | "Completed";
-};
-
-const drives: Drive[] = [
   {
-    company: "TCS",
-    role: "Ninja Hiring 2025",
-    companyName: "Tata Consultancy Services",
-    date: "20 May 2025",
-    eligible: "1,240",
-    applied: "980",
-    status: "Active",
+    title: "Highest CTC",
+    value: "₹9,20000",
+    description: "Across all placed students",
+    icon: Trophy,
+    iconStyle: "bg-orange-100 text-orange-600",
   },
-  {
-    company: "Infosys",
-    role: "Systems Engineer",
-    companyName: "Infosys Limited",
-    date: "25 May 2025",
-    eligible: "890",
-    applied: "650",
-    status: "Active",
-  },
-  {
-    company: "Wipro",
-    role: "Project Engineer",
-    companyName: "Wipro Technologies",
-    date: "02 Jun 2025",
-    eligible: "760",
-    applied: "420",
-    status: "Upcoming",
-  },
-   
-   
-];
-
-const recommendedStudents = [
-  {
-    name: "Arun Prakash",
-    cgpa: "9.1",
-    skillMatch: "92%",
-    overallMatch: "94%",
-    applicationStatus: "Applied",
-  },
-   
-  {
-    name: "Karthik Raja",
-    cgpa: "8.4",
-    skillMatch: "74%",
-    overallMatch: "81%",
-    applicationStatus: "Not applied ",
-  },
-  {
-    name: "Rahul Verma",
-    cgpa: "7.8",
-    skillMatch: "52%",
-    overallMatch: "68%",
-    applicationStatus: "Applied",
-  },
-  {
-    name: "Sneha Iyer",
-    cgpa: "8.2",
-    skillMatch: "48%",
-    overallMatch: "63%",
-    applicationStatus: "Not applied ",
+   {
+    title: " Drives conducted",
+    value: "50",
+    description: "This acedemic year",
+    icon: Megaphone,
+    iconStyle: "bg-blue-100 text-blue-600",
   },
 ];
+
 
 const announcements = [
   {
@@ -164,24 +94,299 @@ const announcements = [
   },
 ];
 
-function getStatusStyle(status: Drive["status"]) {
-  switch (status) {
-    case "Active":
-      return "bg-green-50 text-green-600";
+const luminaInsights = [
+  {
+    title: "CSE students have strong readiness",
+    description: "CSE is leading the cohort with strong assessment scores and application activity.",
+    action: "Keep momentum",
+    icon: CheckCircle2,
+    tone: "bg-emerald-50 text-emerald-600",
+    accent: "border-emerald-100",
+  },
+  {
+    title: "ECE readiness is lagging",
+    description: "ECE readiness is below the campus average. Targeted aptitude and interview practice can close the gap.",
+    action: "Focus area",
+    icon: AlertTriangle,
+    tone: "bg-amber-50 text-amber-600",
+    accent: "border-amber-100",
+  },
+  {
+    title: "87 students are at risk of remaining unplaced",
+    description: "These eligible students show low application activity or incomplete placement readiness.",
+    action: "Needs review",
+    icon: Users,
+    tone: "bg-rose-50 text-rose-600",
+    accent: "border-rose-100",
+  },
+];
 
-    case "Upcoming":
-      return "bg-blue-50 text-blue-600";
+type PlacementTrendPoint = {
+  year: string;
+  placementRate: number;
+  avgCtc: number;
+  highestCtc: number;
+  companies: number;
+  students: number;
+};
 
-    case "Completed":
-      return "bg-gray-100 text-gray-600";
+type PlacementMetricKey = Exclude<keyof PlacementTrendPoint, "year">;
 
-    default:
-      return "bg-gray-100 text-gray-600";
-  }
+type PlacementTrendMetric = {
+  key: PlacementMetricKey;
+  label: string;
+  color: string;
+  min: number;
+  max: number;
+  format: (value: number) => string;
+  formatChange: (value: number) => string;
+};
+
+const placementTrend: PlacementTrendPoint[] = [
+  { year: "2022", placementRate: 62, avgCtc: 4.2, highestCtc: 12, companies: 28, students: 1180 },
+  { year: "2023", placementRate: 65.8, avgCtc: 4.8, highestCtc: 14.5, companies: 34, students: 1240 },
+  { year: "2024", placementRate: 68.9, avgCtc: 5.2, highestCtc: 16, companies: 39, students: 1290 },
+  { year: "2025", placementRate: 71.6, avgCtc: 5.8, highestCtc: 19, companies: 45, students: 1375 },
+  { year: "2026", placementRate: 74.5, avgCtc: 6.4, highestCtc: 22, companies: 51, students: 1430 },
+];
+
+const placementTrendMetrics: PlacementTrendMetric[] = [
+  {
+    key: "placementRate",
+    label: "Placement %",
+    color: "#0891b2",
+    min: 50,
+    max: 80,
+    format: (value) => `${value}%`,
+    formatChange: (value) => `${value.toFixed(1)} pts`,
+  },
+  {
+    key: "avgCtc",
+    label: "Avg CTC",
+    color: "#7c3aed",
+    min: 3,
+    max: 8,
+    format: (value) => `₹${value.toFixed(1)} LPA`,
+    formatChange: (value) => `₹${value.toFixed(1)} LPA`,
+  },
+  {
+    key: "highestCtc",
+    label: "Highest CTC",
+    color: "#f59e0b",
+    min: 8,
+    max: 24,
+    format: (value) => `₹${value.toFixed(1)} LPA`,
+    formatChange: (value) => `₹${value.toFixed(1)} LPA`,
+  },
+  {
+    key: "companies",
+    label: "Companies",
+    color: "#16a34a",
+    min: 20,
+    max: 60,
+    format: (value) => value.toString(),
+    formatChange: (value) => value.toString(),
+  },
+  {
+    key: "students",
+    label: "Students placed",
+    color: "#2563eb",
+    min: 1000,
+    max: 1600,
+    format: (value) => value.toLocaleString("en-IN"),
+    formatChange: (value) => value.toLocaleString("en-IN"),
+  },
+];
+
+const chartDimensions = {
+  width: 820,
+  height: 280,
+  left: 42,
+  right: 18,
+  top: 18,
+  bottom: 38,
+};
+
+function getChartX(index: number) {
+  const plotWidth = chartDimensions.width - chartDimensions.left - chartDimensions.right;
+  return chartDimensions.left + index * (plotWidth / (placementTrend.length - 1));
 }
 
+function getChartY(metric: PlacementTrendMetric, value: number) {
+  const plotHeight = chartDimensions.height - chartDimensions.top - chartDimensions.bottom;
+  const ratio = Math.min(Math.max((value - metric.min) / (metric.max - metric.min), 0), 1);
+  return chartDimensions.top + (1 - ratio) * plotHeight;
+}
 
+function PlacementTrendChart() {
+  const latest = placementTrend[placementTrend.length - 1];
+  const first = placementTrend[0];
 
+  return (
+    <section className="min-w-0 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:col-span-2">
+      <div className="border-b  border-gray-100 px-4 py-3 sm:px-5 sm:py-4">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900 sm:text-base">Placement Trend</h2>
+            <p className="mt-1 text-[10px] text-gray-500 sm:text-xs">Placement performance across the last five years</p>
+          </div>
+          <span className="w-fit rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-semibold text-cyan-700 sm:text-xs">2022 – 2026</span>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+          {placementTrendMetrics.map((metric) => (
+            <div key={metric.key} className="flex items-center gap-1.5 text-[10px] font-medium text-gray-600 sm:text-xs">
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: metric.color }} />
+              {metric.label}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-3 sm:p-5 ">
+        <div className="w-full overflow-hidden rounded-lg bg-slate-50/70 px-1 pt-2 sm:px-3 sm:pt-3">
+          <svg
+            className="h-auto w-full"
+            viewBox={`0 0 ${chartDimensions.width} ${chartDimensions.height}`}
+            role="img"
+            aria-label="Placement trend from 2022 to 2026 for placement rate, CTC, companies, and students placed"
+          >
+            <title>Placement trend from 2022 to 2026</title>
+            <desc>All lines are scaled to their own range to compare the direction of each placement metric.</desc>
+
+            {[0, 0.25, 0.5, 0.75, 1].map((position) => {
+              const y = chartDimensions.top + position * (chartDimensions.height - chartDimensions.top - chartDimensions.bottom);
+
+              return (
+                <line
+                  key={position}
+                  x1={chartDimensions.left}
+                  x2={chartDimensions.width - chartDimensions.right}
+                  y1={y}
+                  y2={y}
+                  stroke="#dbe4ee"
+                  strokeDasharray="4 5"
+                  strokeWidth="1"
+                />
+              );
+            })}
+
+            {placementTrend.map((point, index) => (
+              <text
+                key={point.year}
+                x={getChartX(index)}
+                y={chartDimensions.height - 10}
+                fill="#64748b"
+                fontSize="12"
+                textAnchor="middle"
+              >
+                {point.year}
+              </text>
+            ))}
+
+            {placementTrendMetrics.map((metric) => {
+              const points = placementTrend
+                .map((point, index) => `${getChartX(index)},${getChartY(metric, point[metric.key])}`)
+                .join(" ");
+
+              return (
+                <g key={metric.key}>
+                  <polyline points={points} fill="none" stroke={metric.color} strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+                  {placementTrend.map((point, index) => (
+                    <circle
+                      key={`${metric.key}-${point.year}`}
+                      cx={getChartX(index)}
+                      cy={getChartY(metric, point[metric.key])}
+                      r="4"
+                      fill="white"
+                      stroke={metric.color}
+                      strokeWidth="2.5"
+                    />
+                  ))}
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+
+        <p className="mt-2 text-[10px] text-gray-400">Each metric is scaled to its own range so trends across different units remain easy to compare.</p>
+
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          {placementTrendMetrics.map((metric) => {
+            const currentValue = latest[metric.key];
+            const change = currentValue - first[metric.key];
+
+            return (
+              <div key={metric.key} className="rounded-lg border border-gray-100 bg-gray-50/80 p-2.5 sm:p-3">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: metric.color }} />
+                  <p className="truncate text-[10px] font-medium text-gray-500 sm:text-xs">{metric.label}</p>
+                </div>
+                <p className="mt-1.5 text-sm font-bold text-gray-900 sm:text-base">{metric.format(currentValue)}</p>
+                <p className="mt-1 text-[9px] font-medium text-emerald-600 sm:text-[10px]">↑ {metric.formatChange(change)} since {first.year}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LuminaInsights() {
+  return (
+    <section className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:col-span-1">
+      <div className="border-b border-violet-100 bg-gradient-to-r from-violet-50 via-white to-cyan-50 px-4 py-3 sm:px-5 sm:py-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
+              <Sparkles size={19} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold text-gray-900 sm:text-base">Lumina Insights</h2>
+              <p className="mt-0.5 truncate text-[10px] text-gray-500 sm:text-xs">AI-powered placement intelligence</p>
+            </div>
+          </div>
+          <span className="shrink-0 rounded-full bg-violet-100 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-violet-700 sm:text-[10px]">AI</span>
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        <div className="space-y-2.5">
+          {luminaInsights.map((insight) => {
+            const Icon = insight.icon;
+
+            return (
+              <article key={insight.title} className={`rounded-lg border bg-white p-3 ${insight.accent}`}>
+                <div className="flex items-start gap-2.5">
+                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${insight.tone}`}>
+                    <Icon size={16} />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-[11px] font-semibold leading-4 text-gray-900 sm:text-xs sm:leading-5">{insight.title}</h3>
+                    <p className="mt-1 text-[10px] leading-4 text-gray-500 sm:text-[11px] sm:leading-5">{insight.description}</p>
+                  </div>
+                </div>
+                <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-gray-100 pt-2">
+                  <span className="text-[9px] font-medium text-gray-400 sm:text-[10px]">Lumina recommendation</span>
+                  <span className="shrink-0 text-[9px] font-semibold text-cyan-600 sm:text-[10px]">{insight.action}</span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        <div className="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-3">
+          <p className="text-[10px] text-gray-400">Updated from current placement data</p>
+          <button type="button" className="inline-flex shrink-0 items-center gap-1 text-[10px] font-semibold text-cyan-600 transition hover:text-cyan-800 sm:text-xs">
+            View analysis
+            <ArrowRight size={13} />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export const Dashboard = ()=>{
     return(
@@ -326,466 +531,17 @@ const PlacementBottomSection =()=> {
   return (
     <section className="w-full mt-5">
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <LuminaInsights />
+        <PlacementTrendChart />
 
-        {/* ================================================= */}
-        {/* RECENT CAMPUS DRIVES */}
-        {/* ================================================= */}
-
-      
-<div className="min-w-0 overflow-hidden max-h-[550px] overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-
-  {/* Header */}
-  <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 sm:px-5 sm:py-4">
-    <h2 className="text-sm font-semibold text-gray-900 sm:text-base">
-      Recent Campus Drives
-    </h2>
-
-    <button className="flex items-center gap-1 text-[10px] font-medium text-cyan-500 transition hover:text-cyan-700 sm:text-xs">
-      View All Drives
-      <ArrowRight size={13} />
-    </button>
-  </div>
-
-  {/* Drive List */}
-  <div>
-    {drives.map((drive, index) => (
-      <div
-        key={`${drive.company}-${drive.role}`}
-        className={`
-          px-4
-          py-2.5
-
-          sm:px-5
-          sm:py-4
-
-          transition
-          hover:bg-gray-50
-
-          ${
-            index !== drives.length - 1
-              ? "border-b border-gray-100"
-              : ""
-          }
-        `}
-      >
-
-        {/* ================= MAIN ROW ================= */}
-
-        <div className="flex items-center justify-between gap-2 sm:gap-3">
-
-          {/* Company + Role */}
-          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-
-            {/* Company Logo */}
-            <div className="
-              flex
-              h-8
-              w-8
-              shrink-0
-              items-center
-              justify-center
-              overflow-hidden
-              rounded-full
-              border
-              border-gray-100
-              bg-white
-
-              sm:h-10
-              sm:w-10
-            ">
-              <img
-                src={avatarUrl}
-                alt={drive.company}
-                className="h-full w-full object-cover"
-              />
-            </div>
-
-            <div className="min-w-0">
-
-              {/* Company Name */}
-              <p className="
-                text-[10px]
-                font-semibold
-                text-cyan-500
-
-                sm:text-sm
-              ">
-                {drive.company}
-              </p>
-
-              {/* Job */}
-              <p className="
-                mt-0
-                truncate
-                text-[10px]
-                font-semibold
-                leading-tight
-                text-gray-900
-
-                sm:mt-0.5
-                sm:text-sm
-              ">
-                {drive.role}
-              </p>
-
-              {/* Full Company Name */}
-              <p className="
-                mt-0
-                truncate
-                text-[8px]
-                leading-tight
-                text-gray-500
-
-                sm:mt-0.5
-                sm:text-xs
-              ">
-                {drive.companyName}
-              </p>
-
-            </div>
-          </div>
-
-          {/* Menu */}
-          <button className="
-            shrink-0
-            text-gray-400
-            transition
-            hover:text-gray-700
-          ">
-            <MoreVertical
-              size={14}
-              className="sm:h-[17px] sm:w-[17px]"
-            />
-          </button>
-
-        </div>
-
-
-        {/* ================= DETAILS ================= */}
-
-        <div
-          className="
-            mt-2
-            grid
-            grid-cols-2
-            gap-x-3
-            gap-y-1.5
-
-            sm:mt-4
-            sm:grid-cols-4
-            sm:gap-x-4
-            sm:gap-y-3
-
-            lg:grid-cols-2
-            xl:grid-cols-4
-          "
-        >
-
-          {/* Date */}
-          <div>
-            <p className="
-              text-[8px]
-              font-medium
-              leading-none
-              text-gray-400
-
-              sm:text-[11px]
-            ">
-              Date
-            </p>
-
-            <p className="
-              mt-0.5
-              text-[9px]
-              font-medium
-              leading-tight
-              text-gray-700
-
-              sm:mt-1
-              sm:text-xs
-            ">
-              {drive.date}
-            </p>
-          </div>
-
-
-          {/* Eligible */}
-          <div>
-            <p className="
-              text-[8px]
-              font-medium
-              leading-none
-              text-gray-400
-
-              sm:text-[11px]
-            ">
-              Eligible
-            </p>
-
-            <p className="
-              mt-0.5
-              text-[9px]
-              font-medium
-              leading-tight
-              text-gray-700
-
-              sm:mt-1
-              sm:text-xs
-            ">
-              {drive.eligible}
-            </p>
-          </div>
-
-
-          {/* Applied */}
-          <div>
-            <p className="
-              text-[8px]
-              font-medium
-              leading-none
-              text-gray-400
-
-              sm:text-[11px]
-            ">
-              Applied
-            </p>
-
-            <p className="
-              mt-0.5
-              text-[9px]
-              font-medium
-              leading-tight
-              text-gray-700
-
-              sm:mt-1
-              sm:text-xs
-            ">
-              {drive.applied}
-            </p>
-          </div>
-
-
-          {/* Status */}
-          <div>
-            <p className="
-              text-[8px]
-              font-medium
-              leading-none
-              text-gray-400
-
-              sm:text-[11px]
-            ">
-              Status
-            </p>
-
-            <span
-              className={`
-                mt-0.5
-                inline-flex
-                rounded-md
-                px-1.5
-                py-0.5
-                text-[8px]
-                leading-none
-                font-semibold
-
-                sm:mt-1
-                sm:px-2
-                sm:py-1
-                sm:text-[11px]
-
-                ${getStatusStyle(drive.status)}
-              `}
-            >
-              {drive.status}
-            </span>
-          </div>
-
-        </div>
-      </div>
-    ))}
-  </div>
-</div>
-
-        {/* ================================================= */}
-        {/* JD BASED RECOMMENDATIONS */}
-        {/* ================================================= */}
-
-        <div className="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-            <h2 className="text-sm font-semibold text-gray-900 sm:text-base">
-              Recommendations for active drives
-            </h2>
-
-            <button className="flex items-center gap-1 text-xs font-medium text-cyan-500">
-              View All
-              <ArrowRight size={14} />
-            </button>
-          </div>
-
-          {/* Job */}
-          <div className="border-b border-gray-100 p-5">
-
-            <div className="flex items-start justify-between gap-3">
-
-              <div className="flex min-w-0 items-start gap-3">
-
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
-                  <Sparkles size={21} />
-                </div>
-
-                <div className="min-w-0">
-                  <h3 className="truncate text-sm font-semibold text-gray-900">
-                    Software Developer
-                  </h3>
-
-                  <p className="mt-1 text-xs text-gray-500">
-                    ABC Technologies
-                  </p>
-                </div>
-              </div>
-
-              <span className="shrink-0 rounded-md bg-green-50 px-2.5 py-1.5 text-[10px] font-semibold text-green-600 sm:text-xs">
-                92% Match
-              </span>
-            </div>
-
-            <p className="mt-4 text-[10px] leading-5 text-gray-500 sm:text-xs">
-              <span className="font-medium text-gray-700">
-                Skills:
-              </span>{" "}
-              React, Node.js, TypeScript, PostgreSQL
-            </p>
-
-            <p className="text-[10px] leading-5 text-gray-500 sm:text-xs">
-              <span className="font-medium text-gray-700">
-                Min CGPA:
-              </span>{" "}
-              7.5
-              <span className="mx-2">|</span>
-              <span className="font-medium text-gray-700">
-                Eligible:
-              </span>{" "}
-              CSE, IT
-            </p>
-          </div>
-
-          <div className="overflow-x-auto">
-            {/* Table Header */}
-            <div
-              className="
-                grid
-                grid-cols-[minmax(95px,1fr)_34px_42px_44px_76px]
-                items-center
-                gap-1
-                bg-gray-50
-                px-2
-                py-2.5
-                text-[9px]
-                font-semibold
-                text-gray-500
-                sm:grid-cols-[minmax(100px,1fr)_44px_50px_55px_82px]
-                sm:px-3
-                sm:text-[10px]
-              "
-            >
-              <span>Student</span>
-              <span>CGPA</span>
-              <span>Skills</span>
-              <span>Match</span>
-              <span>Status</span>
-            </div>
-
-            {/* Students */}
-            <div>
-              {recommendedStudents.map((student) => (
-                <div
-                  key={student.name}
-                  className="
-                    grid
-                    grid-cols-[minmax(95px,1fr)_34px_42px_44px_76px]
-                    items-center
-                    gap-1
-                    border-b
-                    border-gray-50
-                    px-2.5
-                    py-3
-                    sm:grid-cols-[minmax(100px,1fr)_44px_50px_55px_82px]
-                    sm:px-3
-                  "
-                >
-                  {/* Student */}
-                  <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
-
-                    <img
-                      src={avatarUrl}
-                      alt={student.name}
-                      className="h-6 w-6 shrink-0 rounded-full object-cover sm:h-7 sm:w-7"
-                    />
-
-                    <span className="truncate text-[9px] font-semibold text-gray-800 sm:text-xs">
-                      {student.name}
-                    </span>
-                  </div>
-
-                  {/* CGPA */}
-                  <span className="text-[9px] font-medium text-gray-700 sm:text-xs">
-                    {student.cgpa}
-                  </span>
-
-                  {/* Skills */}
-                  <span className="text-[9px] font-medium text-gray-700 sm:text-xs">
-                    {student.skillMatch}
-                  </span>
-
-                  {/* Match */}
-                  <span className="w-fit rounded-md bg-green-50 px-1.5 py-1 text-[9px] font-semibold text-green-600 sm:px-2 sm:text-xs">
-                    {student.overallMatch}
-                  </span>
-
-                  {/* Application status */}
-                  <span className={`w-fit rounded-md px-1.5 py-1 text-[8px] font-semibold leading-tight sm:px-2 sm:text-[10px] ${student.applicationStatus === "Applied" ? "bg-green-50 text-green-600" : "bg-amber-50 text-amber-600"}`}>
-                    {student.applicationStatus}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="p-4">
-            <button
-              className="
-                flex
-                w-full
-                items-center
-                justify-center
-                gap-1.5
-                rounded-lg
-                border
-                border-gray-200
-                py-2.5
-                text-xs
-                font-medium
-                text-cyan-500
-                transition
-                hover:bg-indigo-50
-              "
-            >
-              View All Recommended Students
-              <ArrowRight size={14} />
-            </button>
-          </div>
-        </div>
+        
 
 
         {/* ================================================= */}
         {/* RIGHT COLUMN */}
         {/* ================================================= */}
 
-        <div className="flex min-w-0 flex-col gap-5">
+        <div className="flex min-w-0 flex-col gap-5 lg:col-span-3 lg:grid lg:grid-cols-2 lg:gap-5">
 
           {/* =============================================== */}
           {/* ANNOUNCEMENTS */}
@@ -879,36 +635,11 @@ const PlacementBottomSection =()=> {
                   className="text-indigo-600"
                 />
 
-                <span>Create Drive</span>
+                <span>Schedule events</span>
               </button>
 
               {/* Upload JD */}
-              <button
-                className="
-                  flex
-                  h-16
-                  items-center
-                  justify-center
-                  gap-2
-                  rounded-lg
-                  border
-                  border-gray-200
-                  bg-white
-                  text-xs
-                  font-medium
-                  text-gray-700
-                  transition
-                  hover:border-green-100
-                  hover:bg-green-50
-                "
-              >
-                <Upload
-                  size={20}
-                  className="text-green-600"
-                />
-
-                <span>Upload JD</span>
-              </button>
+             
 
               {/* Send Notification */}
               <button
@@ -935,7 +666,7 @@ const PlacementBottomSection =()=> {
                   className="text-orange-500"
                 />
 
-                <span>Send Notification</span>
+                <span> Create announcement</span>
               </button>
 
               {/* Generate Report */}
@@ -958,12 +689,11 @@ const PlacementBottomSection =()=> {
                   hover:bg-purple-50
                 "
               >
-                <FileUp
-                  size={20}
-                  className="text-purple-600"
-                />
+                <CirclePlus size={20}
+                  className="text-purple-600"/>
+                
 
-                <span>Generate Report</span>
+                <span>Create Drives</span>
               </button>
 
             </div>

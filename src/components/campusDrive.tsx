@@ -255,14 +255,7 @@ export const CampusDrive = () => {
 </div>
 
 <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-  <button
-    type="button"
-    onClick={() => setIsCompanyModalOpen(true)}
-    className="inline-flex h-9 items-center gap-1.5 rounded-md border border-cyan-200 bg-white px-3 text-xs font-semibold text-cyan-600 shadow-sm transition hover:bg-cyan-50"
-  >
-    <Building2 size={14} />
-    Create Company
-  </button>
+  
   <button
     type="button"
     onClick={() => navigate("/add_drives")}
@@ -1077,10 +1070,8 @@ const PlacementOverview = ()=> {
     logo: "tcs",
     role: "Software Engineer",
     ctc: "₹7.5 LPA",
-    date: "05 Sep 2026",
-    time: "09:00 AM",
-    venue: "Seminar Hall",
-    eligible: 320,
+    date: " Sep 2026",
+     eligible: 320,
     applied: 248,
     appliedPercent: "77.5%",
     notApplied: 72,
@@ -1093,10 +1084,8 @@ const PlacementOverview = ()=> {
     logo: "infosys",
     role: "System Engineer",
     ctc: "₹6.5 LPA",
-    date: "08 Sep 2026",
-    time: "10:00 AM",
-    venue: "Auditorium",
-    eligible: 280,
+    date: "Sep 2026",
+     eligible: 280,
     applied: 214,
     appliedPercent: "76.4%",
     notApplied: 66,
@@ -1109,9 +1098,9 @@ const PlacementOverview = ()=> {
     logo: "zoho",
     role: "Developer",
     ctc: "₹6.0 LPA",
-    date: "12 Sep 2026",
-    time: "09:30 AM",
-    venue: "Lab 3",
+    date: "Sep 2026",
+
+ 
     eligible: 180,
     applied: 156,
     appliedPercent: "86.7%",
@@ -1125,10 +1114,129 @@ const PlacementOverview = ()=> {
     logo: "accenture",
     role: "Analyst",
     ctc: "₹4.5 LPA",
-    date: "20 Aug 2026",
-    time: "10:00 AM",
-    venue: "Main Block",
-    eligible: 410,
+       date: "Sep 2026",
+
+     eligible: 410,
+    applied: 324,
+    appliedPercent: "79.0%",
+    notApplied: 86,
+    notAppliedPercent: "21.0%",
+    status: "Completed",
+  },
+   {
+    company: "TCS",
+    companyFull: "Tata Consultancy Services",
+    logo: "tcs",
+    role: "Software Engineer",
+    ctc: "₹7.5 LPA",
+       date: "Sep 2026",
+
+     eligible: 320,
+    applied: 248,
+    appliedPercent: "77.5%",
+    notApplied: 72,
+    notAppliedPercent: "22.5%",
+    status: "Upcoming",
+  },
+  {
+    company: "Infosys",
+    companyFull: "Infosys Limited",
+    logo: "infosys",
+    role: "System Engineer",
+    ctc: "₹6.5 LPA",
+      date: "Sep 2026",
+
+     eligible: 280,
+    applied: 214,
+    appliedPercent: "76.4%",
+    notApplied: 66,
+    notAppliedPercent: "23.6%",
+    status: "Registration Open",
+  },
+  {
+    company: "Zoho",
+    companyFull: "Zoho Corporation",
+    logo: "zoho",
+    role: "Developer",
+    ctc: "₹6.0 LPA",
+     date: "Sep 2026",
+
+     eligible: 180,
+    applied: 156,
+    appliedPercent: "86.7%",
+    notApplied: 24,
+    notAppliedPercent: "13.3%",
+    status: "Upcoming",
+  },
+  {
+    company: "Accenture",
+    companyFull: "Accenture",
+    logo: "accenture",
+    role: "Analyst",
+    ctc: "₹4.5 LPA",
+       date: "Sep 2026",
+
+     eligible: 410,
+    applied: 324,
+    appliedPercent: "79.0%",
+    notApplied: 86,
+    notAppliedPercent: "21.0%",
+    status: "Completed",
+  },
+   {
+    company: "TCS",
+    companyFull: "Tata Consultancy Services",
+    logo: "tcs",
+    role: "Software Engineer",
+    ctc: "₹7.5 LPA",
+       date: "Sep 2026",
+
+     eligible: 320,
+    applied: 248,
+    appliedPercent: "77.5%",
+    notApplied: 72,
+    notAppliedPercent: "22.5%",
+    status: "Upcoming",
+  },
+  {
+    company: "Infosys",
+    companyFull: "Infosys Limited",
+    logo: "infosys",
+    role: "System Engineer",
+    ctc: "₹6.5 LPA",
+       date: "Sep 2026",
+
+     eligible: 280,
+    applied: 214,
+    appliedPercent: "76.4%",
+    notApplied: 66,
+    notAppliedPercent: "23.6%",
+    status: "Registration Open",
+  },
+  {
+    company: "Zoho",
+    companyFull: "Zoho Corporation",
+    logo: "zoho",
+    role: "Developer",
+    ctc: "₹6.0 LPA",
+       date: "Sep 2026",
+
+     eligible: 180,
+    applied: 156,
+    appliedPercent: "86.7%",
+    notApplied: 24,
+    notAppliedPercent: "13.3%",
+    status: "Upcoming",
+  },
+  {
+    company: "Accenture",
+    companyFull: "Accenture",
+    logo: "accenture",
+    role: "Analyst",
+    ctc: "₹4.5 LPA",
+       date: "Sep 2026",
+
+     eligible: 410,
     applied: 324,
     appliedPercent: "79.0%",
     notApplied: 86,
@@ -1168,47 +1276,45 @@ const Table = ()=>{
   </div>
 
   {/* Responsive table */}
-  <div className="w-full overflow-x-auto">
+  <div className="w-full overflow-x-auto max-h-110">
     <table className="w-full min-w-[950px] border-collapse sm:min-w-[1100px]">
       <thead>
         <tr className="bg-slate-50 text-left">
-          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-[11px]">
             Company
           </th>
 
-          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-[11px]">
             Job Role
           </th>
 
-          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-[11px]">
             CTC
           </th>
 
-          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
-            Date & Time
+          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-[11px]">
+            Month & Year
           </th>
 
-          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
-            Venue
-          </th>
+       
 
-          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-[11px]">
             Eligible
           </th>
 
-          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-[11px]">
             Applied
           </th>
 
-          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-[11px]">
             Not Applied
           </th>
 
-          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+          <th className="px-3 py-2 text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-[11px]">
             Status
           </th>
 
-          <th className="px-3 py-2 text-center text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-xs">
+          <th className="px-3 py-2 text-center text-[10px] font-semibold text-slate-700 sm:px-4 sm:py-3 sm:text-[11px]">
             Actions
           </th>
         </tr>
@@ -1234,7 +1340,7 @@ const Table = ()=>{
             <td className="px-3 py-2 sm:px-4 sm:py-3">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div>
-                  <p className="text-[10px] font-semibold text-slate-900 sm:text-sm">
+                  <p className="text-[10px] font-semibold text-slate-900 sm:text-[12px]">
                     {drive.company}
                   </p>
 
@@ -1246,44 +1352,39 @@ const Table = ()=>{
             </td>
 
             {/* Job Role */}
-            <td className="px-3 py-2 text-[10px] font-medium text-slate-700 sm:px-4 sm:py-3 sm:text-sm">
+            <td className="px-3 py-2 text-[10px] font-medium text-slate-700 sm:px-4 sm:py-3 sm:text-[12px]">
               {drive.role}
             </td>
 
             {/* CTC */}
-            <td className="px-3 py-2 text-[10px] font-medium text-slate-700 sm:px-4 sm:py-3 sm:text-sm">
+            <td className="px-3 py-2 text-[10px] font-medium text-slate-700 sm:px-4 sm:py-3 sm:text-[12px]">
               {drive.ctc}
             </td>
 
             {/* Date */}
             <td className="px-3 py-2 sm:px-4 sm:py-3">
-              <p className="text-[10px] font-medium text-slate-700 sm:text-sm">
+              <p className="text-[10px] font-medium text-slate-700 sm:text-[12px]">
                 {drive.date}
               </p>
 
-              <p className="text-[10px] text-slate-700 sm:text-sm">
-                {drive.time}
-              </p>
+               
             </td>
 
             {/* Venue */}
-            <td className="px-3 py-2 text-[10px] text-slate-700 sm:px-4 sm:py-3 sm:text-sm">
-              {drive.venue}
-            </td>
-
+            
             {/* Eligible */}
-            <td className="px-3 py-2 text-[10px] font-medium text-slate-700 sm:px-4 sm:py-3 sm:text-sm">
+            <td className="px-3 py-2 text-[10px] font-medium text-slate-700 sm:px-4 sm:py-3 sm:text-[12px]">
               {drive.eligible}
             </td>
 
             {/* Applied */}
             <td className="px-3 py-2 sm:px-4 sm:py-3">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-[10px] font-semibold text-slate-800 sm:text-sm">
+                <span className="text-[10px] font-semibold text-slate-800 sm:text-[12px]">
                   {drive.applied}
                 </span>
 
-                <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[9px] font-semibold text-green-700 sm:px-2 sm:py-1 sm:text-[11px]">
+                <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-[9px] font-semibold text-green-700 sm:px-2 sm:py-1 sm:text-[9px]">
                   {drive.appliedPercent}
                 </span>
               </div>
@@ -1292,11 +1393,11 @@ const Table = ()=>{
             {/* Not Applied */}
             <td className="px-3 py-2 sm:px-4 sm:py-3">
               <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-[10px] font-semibold text-slate-800 sm:text-sm">
+                <span className="text-[10px] font-semibold text-slate-800 sm:text-[10px]">
                   {drive.notApplied}
                 </span>
 
-                <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[9px] font-semibold text-red-600 sm:px-2 sm:py-1 sm:text-[11px]">
+                <span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[9px] font-semibold text-red-600 sm:px-2 sm:py-1 sm:text-[10px]">
                   {drive.notAppliedPercent}
                 </span>
               </div>
@@ -1305,7 +1406,7 @@ const Table = ()=>{
             {/* Status */}
             <td className="px-3 py-2 sm:px-4 sm:py-3">
               <span
-                className={`inline-flex whitespace-nowrap rounded-md px-2 py-1 text-[9px] font-semibold sm:rounded-lg sm:px-3 sm:py-1.5 sm:text-xs ${getStatusStyle(
+                className={`inline-flex whitespace-nowrap rounded-md px-2 py-1 text-[9px] font-semibold sm:rounded-lg sm:px-3 sm:py-1.5 sm:text-[10px] ${getStatusStyle(
                   drive.status
                 )}`}
               >

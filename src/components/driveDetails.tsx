@@ -4,7 +4,7 @@ import {
   Building2,
   CalendarDays,
   ClipboardCheck,
-  Clock3,
+ 
   Download,
   FileText,
   ListChecks,
@@ -205,7 +205,7 @@ const summaryTabs = [
 const overviewSteps = [
   { label: "Eligible", key: "eligible", icon: Users, color: "text-blue-600", border: "border-blue-500" },
   { label: "Applied", key: "applied", icon: FileText, color: "text-emerald-600", border: "border-emerald-500" },
-  { label: "Shortlisted", key: "shortlisted", icon: ListChecks, color: "text-indigo-600", border: "border-indigo-500" },
+  { label: "Shortlisted", key: "shortlisted", icon: ListChecks, color: "text-cyan-500", border: "border-indigo-500" },
   { label: "Interview In Progress", key: "inProgress", icon: UserCheck, color: "text-orange-500", border: "border-orange-400" },
   { label: "Interview Completed", key: "completed", icon: ClipboardCheck, color: "text-blue-600", border: "border-blue-500" },
   { label: "Selected", key: "selected", icon: ShieldCheck, color: "text-emerald-600", border: "border-emerald-500" },
@@ -246,7 +246,7 @@ export const DriveDetails = () => {
       <button
         type="button"
         onClick={() => navigate("/campusdrive")}
-        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-indigo-600"
+        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-cyan-500"
       >
         <ArrowLeft size={15} />
         Back to Campus Drives
@@ -258,7 +258,7 @@ export const DriveDetails = () => {
               <h1 className="text-lg font-bold tracking-tight text-slate-900 sm:text-2xl">
                 {drive.company} – {drive.role} Drive
               </h1>
-              <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${drive.status === "Completed" ? "bg-emerald-50 text-emerald-700" : "bg-indigo-50 text-indigo-700"}`}>
+              <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${drive.status === "Completed" ? "bg-emerald-50 text-emerald-700" : "bg-indigo-50 text-cyan-500"}`}>
                 {drive.status}
               </span>
             </div>
@@ -273,7 +273,7 @@ export const DriveDetails = () => {
             <button type="button" className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-300 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 sm:h-9">
               <Pencil size={14} /> Edit Drive
             </button>
-            <button type="button" className="inline-flex h-8 items-center gap-1.5 rounded-md bg-indigo-600 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 sm:h-9">
+            <button type="button" className="inline-flex h-8 items-center gap-1.5 rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-500 sm:h-9">
               <Download size={14} /> Download Report
             </button>
             <button type="button" aria-label="More drive actions" className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-700 transition hover:bg-slate-50 sm:h-9 sm:w-9">
@@ -381,7 +381,7 @@ function DepartmentCard({ drive }: { drive: DriveDetail }) {
     <section className="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
       <div className="flex items-center gap-1.5">
         <h2 className="text-sm font-bold text-slate-900 sm:text-base">Department-wise Eligible Students</h2>
-        <span className="text-[11px] font-bold text-indigo-500">ⓘ</span>
+        <span className="text-[11px] font-bold text-cyan-500">ⓘ</span>
       </div>
       <div className="mt-2 overflow-x-auto">
         <table className="w-full min-w-[480px] border-collapse text-left text-[10px] sm:text-xs">
@@ -401,7 +401,7 @@ function DepartmentCard({ drive }: { drive: DriveDetail }) {
                   <div className="flex items-center gap-2">
                     <span className="w-7 shrink-0 font-semibold text-slate-700">{department.eligible}</span>
                     <span className="h-1.5 w-full max-w-[150px] rounded-full bg-slate-100">
-                      <span className="block h-full rounded-full bg-indigo-600" style={{ width: `${(department.eligible / maxEligible) * 100}%` }} />
+                      <span className="block h-full rounded-full bg-cyan-500" style={{ width: `${(department.eligible / maxEligible) * 100}%` }} />
                     </span>
                   </div>
                 </td>
@@ -418,19 +418,10 @@ function DepartmentCard({ drive }: { drive: DriveDetail }) {
 
 function TimelineCard({ drive }: { drive: DriveDetail }) {
   return (
-    <section className="min-w-0 rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
+    <section className="min-w-0 w-[80%] rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
       <h2 className="text-sm font-bold text-slate-900 sm:text-base">Drive Timeline / Schedule</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
-        <div className="relative space-y-2 pl-1">
-          <span className="absolute bottom-2 left-[9px] top-2 border-l-2 border-dashed border-indigo-200" />
-          {drive.timeline.map((item) => (
-            <div key={`${item.time}-${item.title}`} className="relative flex items-center gap-2 text-[10px] sm:text-xs">
-              <span className="z-10 flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-full border-2 border-indigo-500 bg-white text-indigo-600"><Clock3 size={9} /></span>
-              <span className="w-[68px] shrink-0 font-semibold text-slate-700">{item.time}</span>
-              <span className="min-w-0 truncate border-l border-slate-100 pl-3 font-medium text-slate-600">{item.title}</span>
-            </div>
-          ))}
-        </div>
+        
         <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-3 text-[10px] sm:text-xs">
           <DetailLine label="Date" value={drive.date} />
           <DetailLine label="Venue" value={drive.venue} />
@@ -470,7 +461,7 @@ function ApplicationsSummary({
               key={tab}
               type="button"
               onClick={() => onTabChange(tab)}
-              className={`border-b-2 px-1 pb-2 pt-1 text-[10px] font-semibold transition sm:text-xs ${activeTab === tab ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-600 hover:border-slate-300 hover:text-slate-900"}`}
+              className={`border-b-2 px-1 pb-2 pt-1 text-[10px] font-semibold transition sm:text-xs ${activeTab === tab ? "border-cyan-500 text-cyan-500" : "border-transparent text-slate-600 hover:border-slate-300 hover:text-slate-900"}`}
             >
               {tab}
             </button>
