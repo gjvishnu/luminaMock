@@ -15,6 +15,8 @@ import {
   Sparkles,
   
  } from "lucide-react";
+import { useUserRole } from "../context/useUserRole";
+import { StudentDashboard } from "./studentDashboard";
 
 type StatCard = {
   title: string;
@@ -32,7 +34,7 @@ const stats: StatCard[] = [
     description: "View all students",
     action: "arrow",
     icon: Users,
-    iconStyle: "bg-indigo-100 text-indigo-600",
+    iconStyle: "bg-cyan-100 text-cyan-600",
   },
   {
     title: "Placement Eligible",
@@ -49,22 +51,22 @@ const stats: StatCard[] = [
     iconStyle: "bg-purple-100 text-purple-600",
   },
   {
-    title: "Placement percentage",
-    value: "75.2 %",
+    title: "Placement %",
+    value: "75.2 ",
     description: "of eligible students",
      icon: Percent,
     iconStyle: "bg-orange-100 text-orange-600",
   },
   {
-    title: "Average CTC",
-    value: "₹6,20000",
+    title: "Avg CTC",
+    value: "₹6,20,000",
     description: "Across all placed students",
     icon: ChartNoAxesCombined,
     iconStyle: "bg-blue-100 text-blue-600",
   },
   {
     title: "Highest CTC",
-    value: "₹9,20000",
+    value: "₹9,20,000",
     description: "Across all placed students",
     icon: Trophy,
     iconStyle: "bg-orange-100 text-orange-600",
@@ -233,14 +235,7 @@ function PlacementTrendChart() {
           <span className="w-fit rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-semibold text-cyan-700 sm:text-xs">2022 – 2026</span>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-          {placementTrendMetrics.map((metric) => (
-            <div key={metric.key} className="flex items-center gap-1.5 text-[10px] font-medium text-gray-600 sm:text-xs">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: metric.color }} />
-              {metric.label}
-            </div>
-          ))}
-        </div>
+        
       </div>
 
       <div className="p-3 sm:p-5 ">
@@ -309,8 +304,7 @@ function PlacementTrendChart() {
           </svg>
         </div>
 
-        <p className="mt-2 text-[10px] text-gray-400">Each metric is scaled to its own range so trends across different units remain easy to compare.</p>
-
+ 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
           {placementTrendMetrics.map((metric) => {
             const currentValue = latest[metric.key];
@@ -368,7 +362,7 @@ function LuminaInsights() {
                   </div>
                 </div>
                 <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-gray-100 pt-2">
-                  <span className="text-[9px] font-medium text-gray-400 sm:text-[10px]">Lumina recommendation</span>
+                  <span className="text-[9px] font-medium text-gray-400 sm:text-[10px]">Lumina recommendation's</span>
                   <span className="shrink-0 text-[9px] font-semibold text-cyan-600 sm:text-[10px]">{insight.action}</span>
                 </div>
               </article>
@@ -377,7 +371,7 @@ function LuminaInsights() {
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-2 border-t border-gray-100 pt-3">
-          <p className="text-[10px] text-gray-400">Updated from current placement data</p>
+      
           <button type="button" className="inline-flex shrink-0 items-center gap-1 text-[10px] font-semibold text-cyan-600 transition hover:text-cyan-800 sm:text-xs">
             View analysis
             <ArrowRight size={13} />
@@ -388,7 +382,7 @@ function LuminaInsights() {
   );
 }
 
-export const Dashboard = ()=>{
+function OfficerDashboard() {
     return(
         <>
   <section className="w-full">
@@ -512,7 +506,7 @@ export const Dashboard = ()=>{
             {stat.action && (
               <ArrowRight
                 size={8}
-                className="mt-0.5 shrink-0 text-indigo-600 sm:h-2.5 sm:w-2.5"
+                className="mt-0.5 shrink-0 text-cyan-600 sm:h-2.5 sm:w-2.5"
               />
             )}
           </div>
@@ -525,6 +519,12 @@ export const Dashboard = ()=>{
         </>
     )
 }
+
+export const Dashboard = () => {
+  const { role } = useUserRole();
+
+  return role === "student" ? <StudentDashboard /> : <OfficerDashboard />;
+};
 
 
 const PlacementBottomSection =()=> {
@@ -626,13 +626,13 @@ const PlacementBottomSection =()=> {
                   font-medium
                   text-gray-700
                   transition
-                  hover:border-indigo-100
-                  hover:bg-indigo-50
+                  hover:border-cyan-100
+                  hover:bg-cyan-50
                 "
               >
                 <CalendarDays
                   size={20}
-                  className="text-indigo-600"
+                  className="text-cyan-600"
                 />
 
                 <span>Schedule events</span>
@@ -666,7 +666,7 @@ const PlacementBottomSection =()=> {
                   className="text-orange-500"
                 />
 
-                <span> Create announcement</span>
+                <span> Create announcements</span>
               </button>
 
               {/* Generate Report */}

@@ -9,8 +9,15 @@ import { DriveDetails } from "./components/driveDetails";
 import { JDRecommendation } from "./components/jdRecommendation";
 import Login from "./components/login";
 import  { AddDrive } from "./components/addDrive";
-import { Announcements } from "./components/announcements";
+import { AnnouncementsRoute } from "./components/announcementsRoute";
 import { Reports } from "./components/reports";
+import {
+  StudentApplications,
+  StudentJobDetails,
+  StudentJobs,
+  StudentProfile,
+  StudentResume,
+} from "./components/studentPages";
 
 export const router = createBrowserRouter([
   {
@@ -56,11 +63,31 @@ export const router = createBrowserRouter([
       },
       {
         path: "announcements",
-        element: <Announcements />,
+        element: <AnnouncementsRoute />,
       },
       {
         path: "reports",
         element: <Reports />,
+      },
+      {
+        path: "jobs",
+        element: <StudentJobs />,
+      },
+      {
+        path: "jobs/:jobId",
+        element: <StudentJobDetails />,
+      },
+      {
+        path: "applications",
+        element: <StudentApplications />,
+      },
+      {
+        path: "profile",
+        element: <StudentProfile />,
+      },
+      {
+        path: "resume",
+        element: <StudentResume />,
       },
     ],
   },

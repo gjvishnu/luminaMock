@@ -4,7 +4,6 @@ import {
   Building2,
   CalendarDays,
   ClipboardCheck,
- 
   Download,
   FileText,
   ListChecks,
@@ -205,7 +204,7 @@ const summaryTabs = [
 const overviewSteps = [
   { label: "Eligible", key: "eligible", icon: Users, color: "text-blue-600", border: "border-blue-500" },
   { label: "Applied", key: "applied", icon: FileText, color: "text-emerald-600", border: "border-emerald-500" },
-  { label: "Shortlisted", key: "shortlisted", icon: ListChecks, color: "text-cyan-500", border: "border-indigo-500" },
+  { label: "Shortlisted", key: "shortlisted", icon: ListChecks, color: "text-cyan-500", border: "border-cyan-500" },
   { label: "Interview In Progress", key: "inProgress", icon: UserCheck, color: "text-orange-500", border: "border-orange-400" },
   { label: "Interview Completed", key: "completed", icon: ClipboardCheck, color: "text-blue-600", border: "border-blue-500" },
   { label: "Selected", key: "selected", icon: ShieldCheck, color: "text-emerald-600", border: "border-emerald-500" },
@@ -258,7 +257,7 @@ export const DriveDetails = () => {
               <h1 className="text-lg font-bold tracking-tight text-slate-900 sm:text-2xl">
                 {drive.company} – {drive.role} Drive
               </h1>
-              <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${drive.status === "Completed" ? "bg-emerald-50 text-emerald-700" : "bg-indigo-50 text-cyan-500"}`}>
+              <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${drive.status === "Completed" ? "bg-emerald-50 text-emerald-700" : "bg-cyan-50 text-cyan-500"}`}>
                 {drive.status}
               </span>
             </div>
@@ -419,7 +418,7 @@ function DepartmentCard({ drive }: { drive: DriveDetail }) {
 function TimelineCard({ drive }: { drive: DriveDetail }) {
   return (
     <section className="min-w-0 w-[80%] rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
-      <h2 className="text-sm font-bold text-slate-900 sm:text-base">Drive Timeline / Schedule</h2>
+      <h2 className="text-sm font-bold text-slate-900 sm:text-base">Schedule</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
         
         <div className="rounded-lg border border-slate-100 bg-slate-50/50 p-3 text-[10px] sm:text-xs">

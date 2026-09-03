@@ -146,14 +146,7 @@ navigate("/dashboard")
               </form>
 
               {/* Footer */}
-              <div className="mt-6 border-t border-gray-100 pt-5 text-center">
-                <p className="text-xs text-slate-500">
-                  Need help?{" "}
-                  <button className="font-medium text-cyan-500 hover:text-cyan-700">
-                    Contact placement office
-                  </button>
-                </p>
-              </div>
+              
             </div>
 
             {/* Bottom text */}

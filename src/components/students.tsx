@@ -705,7 +705,7 @@ const outerRadius = isMobile ? 48 : 88;
                     : item.type === "warning"
                     ? "text-orange-500"
                     : item.type === "purple"
-                    ? "text-indigo-500"
+                    ? "text-cyan-500"
                     : "text-blue-500"
                 }
               `}
@@ -989,7 +989,7 @@ export default function StudentTable() {
       <div className="w-[30px] sm:w-[35px] shrink-0">
         <input
           type="checkbox"
-          className="h-3.5 w-3.5 sm:h-4 sm:w-4 accent-indigo-600"
+          className="h-3.5 w-3.5 sm:h-4 sm:w-4 accent-cyan-600"
         />
       </div>
 
@@ -1053,7 +1053,7 @@ export default function StudentTable() {
         <div className="w-[30px] sm:w-[35px] shrink-0">
           <input
             type="checkbox"
-            className="h-3.5 w-3.5 sm:h-4 sm:w-4 accent-indigo-600"
+            className="h-3.5 w-3.5 sm:h-4 sm:w-4 accent-cyan-600"
           />
         </div>
 
@@ -1194,7 +1194,7 @@ export default function StudentTable() {
       ←
     </button>
 
-    <button className="rounded-md border border-indigo-300 bg-indigo-50 px-2 py-1 sm:px-2.5 sm:py-1.5 text-[10px] sm:text-xs text-indigo-600">
+    <button className="rounded-md border border-cyan-300 bg-cyan-50 px-2 py-1 sm:px-2.5 sm:py-1.5 text-[10px] sm:text-xs text-cyan-600">
       1
     </button>
 

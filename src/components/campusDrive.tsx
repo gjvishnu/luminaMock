@@ -24,8 +24,8 @@ const stats = [
     value: "12",
     growth: "20%",
     icon: Building2,
-    bg: "bg-indigo-50",
-    iconColor: "text-indigo-600",
+    bg: "bg-cyan-50",
+    iconColor: "text-cyan-600",
   },
   {
     title: "Upcoming Drives",
@@ -229,7 +229,7 @@ export const CampusDrive = () => {
               "
             >
               <span className="hidden sm:inline">
-                vs last month
+                vs last Year
               </span>
 
               <TrendingUp
@@ -769,7 +769,7 @@ const PlacementOverview = ()=> {
                   py-1
                   text-[9px]
                   font-medium
-                  text-indigo-600
+                  text-cyan-600
 
                   max-sm:px-1
                   max-sm:py-0.5
@@ -1334,7 +1334,7 @@ const Table = ()=>{
             tabIndex={0}
             role="link"
             aria-label={`Open ${drive.company} drive details`}
-            className="cursor-pointer border-t border-gray-200 hover:bg-slate-50/60 focus:bg-indigo-50/40 focus:outline-none"
+            className="cursor-pointer border-t border-gray-200 hover:bg-slate-50/60 focus:bg-cyan-50/40 focus:outline-none"
           >
             {/* Company */}
             <td className="px-3 py-2 sm:px-4 sm:py-3">
@@ -1442,7 +1442,7 @@ const Table = ()=>{
         <ChevronLeft size={13} className="sm:h-4 sm:w-4" />
       </button>
 
-      <button className="flex h-7 w-7 items-center justify-center rounded-md border border-indigo-400 bg-indigo-50 text-[10px] font-semibold text-indigo-600 sm:h-8 sm:w-8 sm:rounded-lg sm:text-sm">
+      <button className="flex h-7 w-7 items-center justify-center rounded-md border border-cyan-400 bg-cyan-50 text-[10px] font-semibold text-cyan-600 sm:h-8 sm:w-8 sm:rounded-lg sm:text-sm">
         1
       </button>
 

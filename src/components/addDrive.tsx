@@ -125,7 +125,7 @@ function InputField({ label, placeholder, required = false }: { label: string; p
   return (
     <label className="block">
       <FieldLabel label={label} required={required} />
-      <input type="text" placeholder={placeholder} className="h-9 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 sm:text-xs" />
+      <input type="text" placeholder={placeholder} className="h-9 w-full rounded-md border border-slate-200 bg-white px-2.5 text-[11px] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100 sm:text-xs" />
     </label>
   );
 }
@@ -134,7 +134,7 @@ function TextAreaField({ label, placeholder, required = false, className = "h-[7
   return (
     <label className="block">
       <FieldLabel label={label} required={required} />
-      <textarea placeholder={placeholder} className={`w-full resize-none rounded-md border border-slate-200 bg-white p-2.5 text-[11px] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 sm:text-xs ${className}`} />
+      <textarea placeholder={placeholder} className={`w-full resize-none rounded-md border border-slate-200 bg-white p-2.5 text-[11px] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100 sm:text-xs ${className}`} />
     </label>
   );
 }
@@ -144,7 +144,7 @@ function SelectField({ label, options, required = false }: { label: string; opti
     <label className="block">
       <FieldLabel label={label} required={required} />
       <span className="relative block">
-        <select defaultValue={options[0]} className="h-9 w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 pr-8 text-[11px] font-medium text-slate-700 outline-none transition focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 sm:text-xs">
+        <select defaultValue={options[0]} className="h-9 w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 pr-8 text-[11px] font-medium text-slate-700 outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100 sm:text-xs">
           {options.map((option) => <option key={option}>{option}</option>)}
         </select>
         <ChevronDown size={14} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -159,7 +159,7 @@ function DateField({ label, placeholder, required = false, time = false }: { lab
       <FieldLabel label={label} required={required} />
       <span className="relative block">
         {time ? <Clock3 size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" /> : <CalendarDays size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />}
-        <input type="text" placeholder={placeholder} className="h-9 w-full rounded-md border border-slate-200 bg-white pl-8 pr-2.5 text-[11px] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 sm:text-xs" />
+        <input type="text" placeholder={placeholder} className="h-9 w-full rounded-md border border-slate-200 bg-white pl-8 pr-2.5 text-[11px] text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100 sm:text-xs" />
       </span>
     </label>
   );
@@ -187,13 +187,13 @@ function RichTextField({ label, placeholder, required = false }: { label: string
       <FieldLabel label={label} required={required} />
       <div className="overflow-hidden rounded-md border border-slate-200">
         <div className="flex h-9 items-center gap-3 border-b border-slate-200 px-2 text-slate-600">
-          <button type="button" aria-label="Bold" className="hover:text-indigo-600"><Bold size={14} /></button>
-          <button type="button" aria-label="Italic" className="hover:text-indigo-600"><Italic size={14} /></button>
-          <button type="button" aria-label="Underline" className="hover:text-indigo-600"><Underline size={14} /></button>
+          <button type="button" aria-label="Bold" className="hover:text-cyan-600"><Bold size={14} /></button>
+          <button type="button" aria-label="Italic" className="hover:text-cyan-600"><Italic size={14} /></button>
+          <button type="button" aria-label="Underline" className="hover:text-cyan-600"><Underline size={14} /></button>
           <span className="h-5 border-l border-slate-200" />
-          <button type="button" aria-label="Bulleted list" className="hover:text-indigo-600"><List size={14} /></button>
-          <button type="button" aria-label="Align left" className="hover:text-indigo-600"><AlignLeft size={14} /></button>
-          <button type="button" aria-label="Add link" className="hover:text-indigo-600"><Link size={14} /></button>
+          <button type="button" aria-label="Bulleted list" className="hover:text-cyan-600"><List size={14} /></button>
+          <button type="button" aria-label="Align left" className="hover:text-cyan-600"><AlignLeft size={14} /></button>
+          <button type="button" aria-label="Add link" className="hover:text-cyan-600"><Link size={14} /></button>
         </div>
         <textarea placeholder={placeholder} className="h-[84px] w-full resize-none p-2.5 text-[11px] text-slate-700 outline-none placeholder:text-slate-400 sm:text-xs" />
       </div>
@@ -206,7 +206,7 @@ function UploadFiles({ files, onRemove, onUpload }: { files: UploadedFile[]; onR
     <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
       <h2 className="flex items-center gap-1.5 text-sm font-bold text-slate-800 sm:text-base">Upload Files <Info size={13} className="text-slate-400" /></h2>
       <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">Upload related documents (Optional)</p>
-      <label className="mt-3 flex h-40 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-indigo-200 bg-indigo-50/10 px-3 text-center transition hover:bg-indigo-50/40">
+      <label className="mt-3 flex h-40 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-cyan-200 bg-cyan-50/10 px-3 text-center transition hover:bg-cyan-50/40">
         <Upload size={29} className="text-cyan-600" />
         <span className="mt-2 text-xs font-medium text-slate-600">Drag &amp; drop files here</span>
         <span className="my-1 text-xs text-slate-500">or</span>

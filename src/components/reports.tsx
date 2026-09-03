@@ -178,8 +178,7 @@ const driveHistory: DriveHistoryRow[] = [
   },
 ];
 
-const metricChangeText = "vs Jan - Mar 2026";
-
+ 
 const pipelineStages: PipelineStage[] = [
   { label: "Applications Received", value: 3842, caption: "100% of applications", color: "#2f7ef8", background: "#eff6ff", icon: FileText },
   { label: "Applications In Progress", value: 3078, caption: "80.1% of applications", color: "#6366f1", background: "#eef2ff", icon: ListChecks },
@@ -262,8 +261,7 @@ export const Reports = () => {
               <p className="mt-3 flex items-center gap-1 text-[9px] font-semibold text-emerald-600 sm:text-[10px]">
                 <TrendingUp size={12} />
                 <span>↑ {metric.change}</span>
-                <span className="truncate font-medium text-slate-500">{metricChangeText}</span>
-              </p>
+               </p>
             </div>
           );
         })}
@@ -291,8 +289,8 @@ export const Reports = () => {
                 <TableHeader rowSpan={2}>Action</TableHeader>
               </tr>
               <tr className="bg-white">
-                <TableHeader> 2026</TableHeader>
-                <TableHeader> 2026</TableHeader>
+                <TableHeader> 2024</TableHeader>
+                <TableHeader> 2025</TableHeader>
                 <TableHeader> 2026</TableHeader>
               </tr>
             </thead>

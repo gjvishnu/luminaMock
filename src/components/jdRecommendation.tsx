@@ -143,7 +143,7 @@ const initialFilters = {
 };
 
 const filterOptions = {
-  driveStatus: ["All Drives", "Pool Campus Drive", "Virtual Drive", "Joint Campus Drive"],
+  driveStatus: ["All Drives", "TCS", "HCL", "Google"],
   department: ["All Departments", "CSE", "ECE", "EEE", "IT", "MECH"],
   batch: ["2026", "2025", "2024"],
   jobRole: ["All Roles", "Software Engineer", "System Engineer", "Developer"],
@@ -153,7 +153,7 @@ const filterOptions = {
 const recommendationStats = [
   { title: "Total Drives", value: "18", caption: "All Drives", icon: Building2, tone: "bg-cyan-50 text-cyan-600" },
   { title: "Total Eligible Students", value: "1,248", caption: "Across all drives", icon: Users, tone: "bg-emerald-50 text-emerald-600" },
-  { title: "High Match Students", value: "842", caption: "Best suited for roles", icon: ShieldCheck, tone: "bg-violet-50 text-violet-600" },
+  { title: "Highest Match Students", value: "842", caption: "Best suited for roles", icon: ShieldCheck, tone: "bg-violet-50 text-violet-600" },
   { title: "Medium Match Students", value: "298", caption: "May require training", icon: CircleCheckBig, tone: "bg-orange-50 text-orange-500" },
   { title: "Low Match Students", value: "108", caption: "Not ideal fit", icon: AlertTriangle, tone: "bg-rose-50 text-rose-500" },
 ];
@@ -184,7 +184,7 @@ export const JDRecommendation = () => {
 
       <section className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
         <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-6">
-          <RecommendationFilter label="Drive Status" value={filters.driveStatus} options={filterOptions.driveStatus} onChange={(value) => updateFilter("driveStatus", value)} />
+          <RecommendationFilter label="Drives" value={filters.driveStatus} options={filterOptions.driveStatus} onChange={(value) => updateFilter("driveStatus", value)} />
           <RecommendationFilter label="Department" value={filters.department} options={filterOptions.department} onChange={(value) => updateFilter("department", value)} />
           <RecommendationFilter label="Batch" value={filters.batch} options={filterOptions.batch} onChange={(value) => updateFilter("batch", value)} />
           <RecommendationFilter label="Job Role" value={filters.jobRole} options={filterOptions.jobRole} onChange={(value) => updateFilter("jobRole", value)} />

@@ -113,7 +113,7 @@ export const Announcements = () => {
           </section>
 
           <section className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
-            <SectionTitle number="3" title="Delivery Medium" />
+            <SectionTitle number="3" title="Mode of communication " />
             <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">Select one or more channels to send this announcement</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
               {channelOptions.map((channel) => {
