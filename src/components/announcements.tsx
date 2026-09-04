@@ -135,7 +135,7 @@ export const Announcements = () => {
 };
 
 function SectionTitle({ number, title }: { number: string; title: string }) {
-  return <h2 className="text-sm font-bold text-cyan-600 sm:text-base"><span className="mr-1">{number}.</span>{title}</h2>;
+  return <h2 className="text-sm font-bold text-cyan-500 sm:text-base"><span className="mr-1">{number}.</span>{title}</h2>;
 }
 
 function FieldLabel({ label, required = false }: { label: string; required?: boolean }) {
