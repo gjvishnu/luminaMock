@@ -362,7 +362,7 @@ function LuminaInsights() {
                   </div>
                 </div>
                 <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-gray-100 pt-2">
-                  <span className="text-[9px] font-medium text-gray-400 sm:text-[10px]">Lumina recommendation's</span>
+                  <span className="text-[9px] font-medium text-gray-400 sm:text-[10px]">Lumina's recommendations</span>
                   <span className="shrink-0 text-[9px] font-semibold text-cyan-600 sm:text-[10px]">{insight.action}</span>
                 </div>
               </article>
