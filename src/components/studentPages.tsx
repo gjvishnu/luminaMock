@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, Bookmark, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronRight, CircleMinus, Clock3, FileText, Filter, MapPin, Megaphone, Pencil, Search, Share2, Trophy, Upload, UserRound } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Bookmark, BrainCircuit, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronRight, CircleMinus, Clock3, FileText, Filter, GraduationCap, Lightbulb, Mail, MapPin, Megaphone, Pencil, Phone, RefreshCw, Search, Share2, Sparkles, Target, Trophy, TrendingUp, Upload, UserRound } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -33,6 +33,135 @@ const jobFilterOptions = {
   role: ["All Roles", "Software Engineer", "System Engineer", "Developer", "Analyst"],
   location: ["All Locations", "Bangalore", "Pune", "Chennai", "Hyderabad", "Mumbai"],
   type: ["All Job Types", "Full-time", "Internship", "Contract"],
+};
+
+type StudentProfileSnapshot = {
+  branch: string;
+  cgpa: string;
+  skills: string[];
+  projectCount: number;
+};
+
+type PlacementFeedbackInsight = {
+  reviewedStudents: number;
+  averageRating: number;
+  focusStage: string;
+  commonChallenge: string;
+  toughRoundShare: number;
+  copingStrategies: string[];
+  improvementSkills: string[];
+  successfulPattern: string;
+  nextAction: string;
+};
+
+const studentProfileSnapshot: StudentProfileSnapshot = {
+  branch: "CSE",
+  cgpa: "8.72",
+  skills: ["Java", "SQL", "OOPs", "DSA", "Python", "React"],
+  projectCount: 3,
+};
+
+const studentProfileData = {
+  name: "Arjun Mehta",
+  initials: "AM",
+  registrationNumber: "CSE2026-014",
+  department: "Computer Science & Engineering",
+  program: "B.E. Computer Science",
+  batch: "2026",
+  semester: "7th Semester",
+  email: "arjun.mehta@lumina.edu",
+  phone: "+91 98765 43210",
+  location: "Bengaluru, Karnataka",
+  dateOfBirth: "14 May 2004",
+  gender: "Male",
+  cgpa: "8.72",
+  percentage: "82.4%",
+  attendance: "91%",
+  backlogs: "0",
+  profileCompletion: 92,
+  semesterScores: [
+    { label: "Sem 1", score: "8.1", percentage: 81, attendance: 88 },
+    { label: "Sem 2", score: "8.4", percentage: 84, attendance: 90 },
+    { label: "Sem 3", score: "8.6", percentage: 86, attendance: 89 },
+    { label: "Sem 4", score: "8.8", percentage: 88, attendance: 92 },
+    { label: "Sem 5", score: "8.9", percentage: 89, attendance: 93 },
+    { label: "Sem 6", score: "9.1", percentage: 91, attendance: 94 },
+  ],
+  skillGroups: [
+    { label: "Programming", skills: ["Java", "Python", "C++", "JavaScript"] },
+    { label: "Core CS", skills: ["DSA", "OOPs", "DBMS", "Computer Networks"] },
+    { label: "Tools & Frameworks", skills: ["React", "Node.js", "Git", "SQL"] },
+  ],
+  projects: [
+    { title: "Placement Prep AI", type: "Full-stack web application", description: "Personalized placement preparation dashboard with job matching and interview insights.", technologies: ["React", "Node.js", "MongoDB"] },
+    { title: "Smart Attendance System", type: "Academic project", description: "Automated attendance tracking system with reports for students and faculty.", technologies: ["Python", "Flask", "MySQL"] },
+    { title: "Campus Connect Portal", type: "Team project", description: "Student community platform for events, announcements, and peer collaboration.", technologies: ["JavaScript", "Express", "PostgreSQL"] },
+  ],
+  internships: [
+    { role: "Frontend Developer Intern", company: "BlueOrbit Technologies", duration: "May 2025 – Jul 2025", description: "Built responsive dashboard screens and reusable React components." },
+    { role: "Software Engineering Intern", company: "Lumina Labs", duration: "Jan 2025 – Mar 2025", description: "Worked on REST APIs, database queries, and automated testing." },
+  ],
+  resume: { name: "Arjun_Mehta_Resume_2026.pdf", size: "1.2 MB", updated: "28 Aug 2026" },
+  sports: [
+    { title: "University Cricket Team", detail: "Vice Captain · Inter-college runner-up", period: "2024 – 2026" },
+    { title: "100m Athletics", detail: "Department sports meet · Gold medal", period: "2025" },
+  ],
+  extracurriculars: [
+    { title: "Coding Club Lead", detail: "Organised weekly problem-solving sessions for 60+ students." },
+    { title: "Placement Cell Volunteer", detail: "Supported employer events and student interview coordination." },
+  ],
+  awards: [
+    { title: "Hackathon Winner", detail: "1st place · Lumina Buildathon 2025", year: "2025" },
+    { title: "Academic Excellence Award", detail: "Top 10% of the department", year: "2024" },
+  ],
+};
+
+const placementFeedbackByCompany: Record<string, PlacementFeedbackInsight> = {
+  TCS: {
+    reviewedStudents: 320,
+    averageRating: 4.2,
+    focusStage: "Technical interview",
+    commonChallenge: "DSA under time pressure",
+    toughRoundShare: 38,
+    copingStrategies: ["Clarify the approach before coding.", "Think aloud while comparing solutions.", "Test edge cases before optimising."],
+    improvementSkills: ["Timed DSA practice", "Complexity analysis", "Project explanation"],
+    successfulPattern: "Students who practised timed problems and explained their approach clearly progressed more often.",
+    nextAction: "Complete two timed DSA problems and rehearse one project walkthrough before the technical round.",
+  },
+  Infosys: {
+    reviewedStudents: 246,
+    averageRating: 4.1,
+    focusStage: "Online assessment",
+    commonChallenge: "Aptitude speed and accuracy",
+    toughRoundShare: 34,
+    copingStrategies: ["Use a fixed time limit per question.", "Skip and return instead of getting stuck.", "Review SQL and Python patterns daily."],
+    improvementSkills: ["Aptitude speed", "SQL joins", "Python fundamentals"],
+    successfulPattern: "Recent candidates found a short daily aptitude routine more useful than last-minute preparation.",
+    nextAction: "Set aside 30 minutes for aptitude practice, then revise Python and SQL fundamentals.",
+  },
+  Zoho: {
+    reviewedStudents: 184,
+    averageRating: 4.4,
+    focusStage: "Problem-solving round",
+    commonChallenge: "Turning ideas into working code",
+    toughRoundShare: 46,
+    copingStrategies: ["Start with a simple working solution.", "Explain trade-offs as you improve it.", "Practise coding without autocomplete."],
+    improvementSkills: ["Problem decomposition", "JavaScript fundamentals", "Debugging"],
+    successfulPattern: "Candidates who built and discussed one complete project stood out in the later rounds.",
+    nextAction: "Prepare a concise demo of your strongest project and practise coding it from a blank file.",
+  },
+};
+
+const defaultPlacementFeedback: PlacementFeedbackInsight = {
+  reviewedStudents: 120,
+  averageRating: 4.0,
+  focusStage: "Technical interview",
+  commonChallenge: "Explaining the reasoning behind solutions",
+  toughRoundShare: 31,
+  copingStrategies: ["Restate the problem in your own words.", "Talk through trade-offs before committing.", "Finish with a quick test and recap."],
+  improvementSkills: ["Problem solving", "Technical communication", "Core role skills"],
+  successfulPattern: "Candidates who connected their projects to the role and explained trade-offs made stronger impressions.",
+  nextAction: "Review the core requirements and prepare one project story that demonstrates them.",
 };
 
 type ApplicationStatus = "Shortlisted" | "In Process" | "Rejected" | "Offer" | "Withdrawn";
@@ -231,17 +360,35 @@ function DetailSkills() {
   );
 }
 
-function ImproveSkills() {
-  const skills = ["System Design", "TypeScript", "Cloud (AWS / Azure)", "Docker"];
+function ImproveSkills({ job }: { job: JobListing }) {
+  const feedback = placementFeedbackByCompany[job.company] ?? defaultPlacementFeedback;
 
   return (
-    <DetailCard>
-      <h2 className="text-sm font-bold text-slate-800 sm:text-base">Skills You May Want to Improve</h2>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        {skills.map((skill) => <div key={skill} className="flex items-center gap-2 text-xs text-slate-700"><span className="rounded-md bg-rose-50 px-2 py-1 text-[10px] font-semibold text-rose-500">Missing</span>{skill}</div>)}
+    <div className="mt-5 border-t border-slate-200 pt-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-bold text-slate-800 sm:text-base">Skills You May Want to Improve</h2>
+          <p className="mt-1 text-[10px] text-slate-500">AI-selected focus areas for the {job.role} role.</p>
+        </div>
+        <span className="rounded-md bg-rose-50 px-2.5 py-1 text-[10px] font-bold text-rose-500">{feedback.toughRoundShare}% found this round tough</span>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        {feedback.improvementSkills.map((skill) => <div key={skill} className="flex items-start gap-2 rounded-md border border-slate-100 bg-slate-50/80 p-2.5 text-xs text-slate-700"><span className="rounded-md bg-rose-50 px-2 py-1 text-[10px] font-semibold text-rose-500">Focus</span><span className="leading-4">{skill}</span></div>)}
+      </div>
+      <div className="mt-5 border-t border-slate-100 pt-4">
+        <div className="flex items-start gap-2">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-violet-50 text-violet-600"><BrainCircuit size={16} /></span>
+          <div>
+            <p className="text-xs font-bold text-slate-800">Technical round: ways to cope</p>
+            <p className="mt-1 text-[10px] leading-4 text-slate-500">{feedback.toughRoundShare}% of students in previous drives found the {feedback.focusStage.toLowerCase()} challenging. These habits helped them stay composed.</p>
+          </div>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+          {feedback.copingStrategies.map((strategy, index) => <div key={strategy} className="flex items-start gap-2 rounded-md bg-violet-50/60 px-3 py-2.5"><span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-100 text-[10px] font-bold text-violet-700">{index + 1}</span><p className="text-[10px] leading-4 text-slate-700">{strategy}</p></div>)}
+        </div>
       </div>
       <button type="button" className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-500 hover:text-cyan-700">Explore Courses to Improve <ChevronRight size={14} /></button>
-    </DetailCard>
+    </div>
   );
 }
 
@@ -275,6 +422,89 @@ function MatchCard({ job }: { job: JobListing }) {
       </div>
       <div className="mt-4 space-y-2.5 text-[11px] text-slate-700"><p className="flex items-start gap-2"><CheckCircle2 size={15} className="shrink-0 text-emerald-500" />Your CGPA (8.72) is eligible (Min. 7.0)</p><p className="flex items-start gap-2"><CheckCircle2 size={15} className="shrink-0 text-emerald-500" />Your branch (CSE) is eligible</p><p className="flex items-start gap-2"><CheckCircle2 size={15} className="shrink-0 text-emerald-500" />You have 8 out of 10 required skills</p><p className="flex items-start gap-2"><AlertTriangle size={15} className="shrink-0 text-rose-500" />You are missing 2 preferred skills</p></div>
       <button type="button" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-500 hover:text-cyan-700">Improve Your Match <ChevronRight size={14} /></button>
+    </DetailCard>
+  );
+}
+
+function InsightSignal({ icon: Icon, label, value, tone }: { icon: React.ElementType; label: string; value: string; tone: string }) {
+  return (
+    <div className="rounded-lg border border-slate-100 bg-slate-50/80 p-3">
+      <div className={`flex h-7 w-7 items-center justify-center rounded-md ${tone}`}><Icon size={15} /></div>
+      <p className="mt-2 text-[10px] font-medium text-slate-500">{label}</p>
+      <p className="mt-0.5 text-xs font-bold text-slate-800">{value}</p>
+    </div>
+  );
+}
+
+function AiPlacementInsights({ job }: { job: JobListing }) {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const feedback = placementFeedbackByCompany[job.company] ?? defaultPlacementFeedback;
+  const coreSkills = job.skills.filter((skill) => !skill.startsWith("+"));
+  const matchedSkills = coreSkills.filter((skill) => studentProfileSnapshot.skills.some((profileSkill) => {
+    const normalizedSkill = skill.toLowerCase();
+    const normalizedProfileSkill = profileSkill.toLowerCase();
+    return normalizedSkill.includes(normalizedProfileSkill) || normalizedProfileSkill.includes(normalizedSkill);
+  }));
+  const profileCoverage = Math.round((matchedSkills.length / Math.max(coreSkills.length, 1)) * 100);
+  const unmatchedSkill = coreSkills.find((skill) => !matchedSkills.includes(skill));
+
+  const refreshAnalysis = () => {
+    setIsRefreshing(true);
+    window.setTimeout(() => setIsRefreshing(false), 650);
+  };
+
+  return (
+    <DetailCard className="relative overflow-hidden border-cyan-100 bg-gradient-to-br from-white via-white to-cyan-50/70 p-0">
+      <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-cyan-100/50 blur-3xl" />
+      <div className="relative p-4 sm:p-5">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-cyan-700"><Sparkles size={12} />AI Placement Insights</span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-500"><BrainCircuit size={13} className="text-cyan-500" />High confidence</span>
+            </div>
+            <h2 className="mt-3 text-base font-bold text-slate-900 sm:text-lg">Your preparation plan for {job.company}</h2>
+            <p className="mt-1 max-w-2xl text-[11px] leading-5 text-slate-600 sm:text-xs">Personalized from your profile, this role&apos;s skill requirements, and feedback from students who completed previous {job.company} placement drives.</p>
+          </div>
+          <button type="button" onClick={refreshAnalysis} disabled={isRefreshing} className="inline-flex shrink-0 items-center justify-center gap-1.5 self-start rounded-md border border-cyan-200 bg-white px-3 py-2 text-[10px] font-semibold text-cyan-700 transition hover:border-cyan-400 hover:bg-cyan-50 disabled:cursor-wait disabled:opacity-70"><RefreshCw size={13} className={isRefreshing ? "animate-spin" : ""} />{isRefreshing ? "Refreshing..." : "Refresh analysis"}</button>
+        </div>
+
+        <div className="mt-5 grid gap-3 xl:grid-cols-[1.15fr_.85fr]">
+          <div className="rounded-lg border border-cyan-100 bg-white p-4 shadow-sm">
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><Lightbulb size={18} /></span>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wide text-cyan-600">Personalized recommendation</p>
+                <p className="mt-1.5 text-xs font-semibold leading-5 text-slate-800">Focus first on {feedback.commonChallenge.toLowerCase()} — it is the most repeated challenge in the previous drive feedback.</p>
+              </div>
+            </div>
+            <p className="mt-4 rounded-md bg-cyan-50/70 px-3 py-2.5 text-[11px] leading-5 text-cyan-800">Your {studentProfileSnapshot.branch} profile and {studentProfileSnapshot.cgpa} CGPA are a strong starting point. You already align with {matchedSkills.length} of {coreSkills.length} listed core skills{unmatchedSkill ? `; revise ${unmatchedSkill} next.` : "."}</p>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <InsightSignal icon={Target} label="Profile fit" value={`${job.match}%`} tone="bg-emerald-50 text-emerald-600" />
+              <InsightSignal icon={CheckCircle2} label="Skill coverage" value={`${profileCoverage}%`} tone="bg-violet-50 text-violet-600" />
+              <InsightSignal icon={TrendingUp} label="Projects ready" value={`${studentProfileSnapshot.projectCount} projects`} tone="bg-amber-50 text-amber-600" />
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-bold text-slate-800">What past drives tell us</p>
+                <p className="mt-1 text-[10px] text-slate-500">{feedback.reviewedStudents} student reviews analysed</p>
+              </div>
+              <span className="rounded-md bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-600">{feedback.averageRating}/5 useful</span>
+            </div>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
+              <div className="flex items-center gap-2 rounded-md bg-slate-50 px-3 py-2.5"><TrendingUp size={15} className="shrink-0 text-cyan-500" /><span className="text-[10px] text-slate-500">Highest-impact stage</span><span className="ml-auto text-right text-[10px] font-bold text-slate-700">{feedback.focusStage}</span></div>
+              <div className="flex items-center gap-2 rounded-md bg-slate-50 px-3 py-2.5"><Target size={15} className="shrink-0 text-rose-500" /><span className="text-[10px] text-slate-500">Common gap</span><span className="ml-auto text-right text-[10px] font-bold text-slate-700">{feedback.commonChallenge}</span></div>
+            </div>
+            <p className="mt-3 text-[10px] leading-4 text-slate-600"><span className="font-bold text-slate-700">Successful pattern: </span>{feedback.successfulPattern}</p>
+          </div>
+        </div>
+
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-100 bg-amber-50/70 px-3 py-2.5 text-[10px] leading-4 text-amber-800 sm:text-xs"><Lightbulb size={15} className="mt-0.5 shrink-0 text-amber-500" /><span><span className="font-bold">Best next step: </span>{feedback.nextAction}</span></div>
+        <ImproveSkills job={job} />
+      </div>
     </DetailCard>
   );
 }
@@ -335,8 +565,10 @@ export function StudentJobDetails() {
 
       <nav className="flex overflow-x-auto border-b border-slate-200 bg-white" aria-label="Job details sections">{tabs.map((tab) => <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`shrink-0 border-b-2 px-4 py-3 text-xs font-medium transition first:pl-2 sm:px-5 ${activeTab === tab ? "border-cyan-500 text-cyan-600" : "border-transparent text-slate-600 hover:text-cyan-600"}`}>{tab}</button>)}</nav>
 
+      <AiPlacementInsights job={job} />
+
       <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_275px]">
-        <main className="space-y-3"><SelectionProcess /><DetailSkills /><ImproveSkills /><AboutRole job={job} /></main>
+        <main className="space-y-3"><SelectionProcess /><DetailSkills /><AboutRole job={job} /></main>
         <aside className="space-y-3"><MatchCard job={job} /><DocumentsCard /><TipsCard /><ReviewsCard /></aside>
       </div>
 
@@ -453,22 +685,105 @@ export function StudentApplications() {
 }
 
 export function StudentProfile() {
+  const [notice, setNotice] = useState("");
+
   return (
-    <div className="space-y-4 pb-5">
-      <PageHeader title="My Profile" description="Keep your profile updated to improve your job matches." />
-      <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3"><div className="flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100 text-lg font-bold text-cyan-600">AM</div><div><h2 className="font-bold text-slate-800">Arjun Mehta</h2><p className="mt-1 text-xs text-slate-500">B.E. Computer Science · 2026 Batch</p></div></div>
-          <button type="button" className="inline-flex items-center justify-center gap-1.5 rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 hover:bg-cyan-50"><Pencil size={14} /> Edit Profile</button>
+    <div className="space-y-4 pb-5 text-slate-800">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <PageHeader title="My Profile" description="Keep your personal, academic, and placement details up to date." />
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 py-2 text-[10px] font-bold text-emerald-600"><CheckCircle2 size={14} />{studentProfileData.profileCompletion}% complete</span>
+          <button type="button" onClick={() => setNotice("Profile editing will be available in the next update.")} className="inline-flex items-center justify-center gap-1.5 rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"><Pencil size={14} /> Edit Profile</button>
         </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3"><InfoItem label="CGPA" value="8.4 / 10" /><InfoItem label="Email" value="arjun.mehta@lumina.edu" /><InfoItem label="Phone" value="+91 98765 43210" /></div>
+      </div>
+
+      {notice && <p role="status" className="rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-700">{notice}</p>}
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-xl font-bold text-cyan-600">{studentProfileData.initials}</div>
+            <div className="min-w-0"><h2 className="text-lg font-bold text-slate-900">{studentProfileData.name}</h2><p className="mt-1 text-xs text-slate-600">{studentProfileData.program} · {studentProfileData.batch} Batch</p><div className="mt-2 flex flex-wrap gap-2"><ProfileChip icon={Building2} text={studentProfileData.department} /><ProfileChip icon={FileText} text={`Reg. No. ${studentProfileData.registrationNumber}`} /><ProfileChip icon={Clock3} text={studentProfileData.semester} /></div></div>
+          </div>
+          <div className="w-full sm:max-w-[220px]">
+            <div className="flex items-center justify-between text-[10px] font-semibold"><span className="text-slate-500">Profile completion</span><span className="text-cyan-600">{studentProfileData.profileCompletion}%</span></div>
+            <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-cyan-500" style={{ width: `${studentProfileData.profileCompletion}%` }} /></div>
+            <p className="mt-2 text-[10px] text-slate-500">Add a certification to reach 100%.</p>
+          </div>
+        </div>
       </section>
+
+      <div className="grid items-start gap-4 xl:grid-cols-2">
+        <div className="space-y-4">
+          <BasicDetailsCard />
+          <SkillsCard />
+          <ProjectsCard />
+          <ResumeCard onNotice={setNotice} />
+          <ExtracurricularsCard />
+        </div>
+        <div className="space-y-4">
+          <AcademicPerformanceCard />
+          <InternshipsCard />
+          <SportsPrizesCard />
+          <AwardsCard />
+        </div>
+      </div>
     </div>
   );
 }
 
-function InfoItem({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-lg bg-slate-50 p-3"><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</p><p className="mt-1 truncate text-xs font-semibold text-slate-800">{value}</p></div>;
+function BasicDetailsCard() {
+  return <ProfileSection title="Basic Details" icon={UserRound}><div className="grid gap-x-5 gap-y-4 sm:grid-cols-2"><InfoItem icon={FileText} label="Registration Number" value={studentProfileData.registrationNumber} /><InfoItem icon={Building2} label="Department" value={studentProfileData.department} /><InfoItem icon={GraduationCap} label="Program" value={studentProfileData.program} /><InfoItem icon={CalendarDays} label="Batch / Semester" value={`${studentProfileData.batch} · ${studentProfileData.semester}`} /><InfoItem icon={Mail} label="Email" value={studentProfileData.email} /><InfoItem icon={Phone} label="Phone" value={studentProfileData.phone} /><InfoItem icon={CalendarDays} label="Date of Birth" value={studentProfileData.dateOfBirth} /><InfoItem icon={MapPin} label="Location" value={studentProfileData.location} /></div></ProfileSection>;
+}
+
+function AcademicPerformanceCard() {
+  return <ProfileSection title="Academic Performance" icon={GraduationCap}><div className="grid grid-cols-2 gap-2 sm:grid-cols-4"><ProfileMetric label="CGPA" value={`${studentProfileData.cgpa} / 10`} tone="bg-cyan-50 text-cyan-600" /><ProfileMetric label="Attendance" value={studentProfileData.attendance} tone="bg-emerald-50 text-emerald-600" /><ProfileMetric label="Backlogs" value={studentProfileData.backlogs} tone="bg-amber-50 text-amber-600" /></div><div className="mt-5 border-t border-slate-100 pt-4"><div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-xs font-bold text-slate-800">Semester performance</p><p className="mt-1 text-[10px] text-slate-500">Academic performance and attendance by semester</p></div><span className="text-[10px] font-medium text-emerald-600">Improving trend</span></div><div className="mt-4 space-y-3">{studentProfileData.semesterScores.map((semester) => <div key={semester.label} className="rounded-lg bg-slate-50/80 p-2.5"><div className="flex items-center justify-between text-[10px]"><span className="font-bold text-slate-700">{semester.label}</span><span className="text-slate-500">Attendance <span className="font-bold text-emerald-600">{semester.attendance}%</span></span></div><div className="mt-2 grid gap-2 sm:grid-cols-[64px_minmax(0,1fr)_30px] sm:items-center"><span className="text-[9px] font-medium text-slate-500">Academic</span><div className="h-1.5 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-cyan-400" style={{ width: `${semester.percentage}%` }} /></div><span className="text-right text-[10px] font-bold text-slate-700">{semester.score}</span></div><div className="grid gap-2 sm:grid-cols-[64px_minmax(0,1fr)_30px] sm:items-center"><span className="text-[9px] font-medium text-slate-500">Attendance</span><div className="h-1.5 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-emerald-400" style={{ width: `${semester.attendance}%` }} /></div><span className="text-right text-[10px] font-bold text-emerald-600">{semester.attendance}%</span></div></div>)}</div></div></ProfileSection>;
+}
+
+function SkillsCard() {
+  const skillCount = studentProfileData.skillGroups.reduce((total, group) => total + group.skills.length, 0);
+
+  return <ProfileSection title="Skills" icon={CheckCircle2} action={<span className="text-[10px] font-medium text-slate-500">{skillCount} skills added</span>}><div className="grid gap-4 md:grid-cols-3">{studentProfileData.skillGroups.map((group) => <div key={group.label}><p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{group.label}</p><div className="mt-2 flex flex-wrap gap-1.5">{group.skills.map((skill) => <span key={skill} className="rounded-md bg-violet-50 px-2.5 py-1.5 text-[10px] font-semibold text-violet-600">{skill}</span>)}</div></div>)}</div></ProfileSection>;
+}
+
+function ProjectsCard() {
+  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><FileText size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Projects</h2><p className="mt-1 text-[10px] text-slate-500">Work that demonstrates your technical experience.</p></div></div><span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-600">{studentProfileData.projects.length} projects</span></div><div className="mt-4 space-y-3">{studentProfileData.projects.map((project) => <article key={project.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><div className="flex flex-wrap items-start justify-between gap-2"><div><h3 className="text-xs font-bold text-slate-800">{project.title}</h3><p className="mt-1 text-[10px] text-slate-500">{project.type}</p></div><span className="text-[10px] font-semibold text-cyan-600">View details <ChevronRight size={12} className="inline" /></span></div><p className="mt-2 text-[11px] leading-4 text-slate-600">{project.description}</p><div className="mt-2 flex flex-wrap gap-1.5">{project.technologies.map((technology) => <span key={technology} className="rounded bg-white px-2 py-1 text-[9px] font-medium text-slate-600">{technology}</span>)}</div></article>)}</div></DetailCard>;
+}
+
+function InternshipsCard() {
+  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600"><BriefcaseBusiness size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Internships</h2><p className="mt-1 text-[10px] text-slate-500">Your practical industry experience.</p></div></div><span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">{studentProfileData.internships.length} completed</span></div><div className="mt-4 space-y-3">{studentProfileData.internships.map((internship) => <article key={`${internship.company}-${internship.role}`} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><div className="flex items-start justify-between gap-2"><div><h3 className="text-xs font-bold text-slate-800">{internship.role}</h3><p className="mt-1 text-[11px] font-semibold text-emerald-600">{internship.company}</p></div><span className="whitespace-nowrap text-[9px] font-medium text-slate-500">{internship.duration}</span></div><p className="mt-2 text-[11px] leading-4 text-slate-600">{internship.description}</p><span className="mt-3 inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-[9px] font-semibold text-emerald-600"><CheckCircle2 size={11} />Verified experience</span></article>)}</div></DetailCard>;
+}
+
+function ResumeCard({ onNotice }: { onNotice: (message: string) => void }) {
+  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-500"><FileText size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Resume</h2><p className="mt-1 text-[10px] text-slate-500">Your latest resume shared with recruiters.</p></div></div><span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">Ready to share</span></div><div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50/80 p-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-rose-50 text-rose-500"><FileText size={20} /></span><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold text-slate-800">{studentProfileData.resume.name}</p><p className="mt-1 text-[10px] text-slate-500">PDF · {studentProfileData.resume.size} · Updated {studentProfileData.resume.updated}</p></div><CheckCircle2 size={17} className="shrink-0 text-emerald-500" /></div><div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={() => onNotice(`Opening ${studentProfileData.resume.name}.`)} className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">View Resume</button><button type="button" onClick={() => onNotice("Resume update flow will be available in the next update.")} className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600"><Upload size={14} /> Update Resume</button></div></DetailCard>;
+}
+
+function SportsPrizesCard() {
+  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-500"><Trophy size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Sports &amp; Prizes</h2><p className="mt-1 text-[10px] text-slate-500">Participation and achievements outside academics.</p></div></div><span className="rounded-md bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-600">{studentProfileData.sports.length} entries</span></div><div className="mt-4 space-y-3">{studentProfileData.sports.map((sport) => <div key={sport.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-amber-500"><Trophy size={16} /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-2"><p className="text-xs font-bold text-slate-800">{sport.title}</p><span className="text-[9px] font-medium text-slate-500">{sport.period}</span></div><p className="mt-1 text-[10px] leading-4 text-slate-600">{sport.detail}</p></div></div>)}</div></DetailCard>;
+}
+
+function ExtracurricularsCard() {
+  return <DetailCard><div className="flex items-start gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600"><Megaphone size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Extra-curricular Activities</h2><p className="mt-1 text-[10px] text-slate-500">Leadership, volunteering, and campus involvement.</p></div></div><div className="mt-4 space-y-3">{studentProfileData.extracurriculars.map((activity) => <div key={activity.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-violet-500"><Megaphone size={16} /></span><div><p className="text-xs font-bold text-slate-800">{activity.title}</p><p className="mt-1 text-[10px] leading-4 text-slate-600">{activity.detail}</p></div></div>)}</div></DetailCard>;
+}
+
+function AwardsCard() {
+  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><CheckCircle2 size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Awards &amp; Recognition</h2><p className="mt-1 text-[10px] text-slate-500">Honours that strengthen your placement profile.</p></div></div><span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-600">{studentProfileData.awards.length} awards</span></div><div className="mt-4 space-y-3">{studentProfileData.awards.map((award) => <div key={award.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-cyan-500"><CheckCircle2 size={16} /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-2"><p className="text-xs font-bold text-slate-800">{award.title}</p><span className="text-[9px] font-medium text-slate-500">{award.year}</span></div><p className="mt-1 text-[10px] leading-4 text-slate-600">{award.detail}</p></div></div>)}</div></DetailCard>;
+}
+
+function ProfileSection({ title, icon: Icon, action, children }: { title: string; icon: React.ElementType; action?: React.ReactNode; children: React.ReactNode }) {
+  return <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><Icon size={16} /></span><h2 className="text-sm font-bold text-slate-800 sm:text-base">{title}</h2></div>{action}</div><div className="mt-4">{children}</div></section>;
+}
+
+function ProfileChip({ icon: Icon, text }: { icon: React.ElementType; text: string }) {
+  return <span className="inline-flex items-center gap-1 rounded-md bg-slate-50 px-2 py-1 text-[10px] font-medium text-slate-600"><Icon size={12} className="text-slate-400" />{text}</span>;
+}
+
+function ProfileMetric({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return <div className="rounded-lg bg-slate-50 p-2.5"><p className="text-[10px] font-medium text-slate-500">{label}</p><p className={`mt-1 text-sm font-bold ${tone.split(" ").filter((className) => className.startsWith("text-")).join(" ")}`}>{value}</p></div>;
+}
+
+function InfoItem({ icon: Icon, label, value }: { icon?: React.ElementType; label: string; value: string }) {
+  return <div className="flex min-w-0 items-start gap-2.5"><span className="mt-0.5 text-slate-400">{Icon && <Icon size={15} />}</span><div className="min-w-0"><p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{label}</p><p className="mt-1 truncate text-xs font-semibold text-slate-800">{value}</p></div></div>;
 }
 
 export function StudentResume() {
