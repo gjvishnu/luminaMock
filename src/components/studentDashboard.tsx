@@ -299,8 +299,8 @@ function LuminaInsightsCard() {
       <div className="relative">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-1.5 text-cyan-600"><Sparkles size={15} /><span className="text-[10px] font-bold uppercase tracking-wide">Lumina AI</span></div>
-            <h2 className="mt-1 text-sm font-bold text-slate-800 sm:text-base">AI Insights</h2>
+            <div className="flex items-center gap-1.5 text-cyan-600"><Sparkles size={15} /><span className="text-[15px] font-bold uppercase tracking-wide">Lumina AI Insights</span></div>
+            {/* <h2 className="mt-1 text-sm font-bold text-slate-800 sm:text-base">AI Insights</h2> */}
             <p className="mt-1 text-[10px] leading-4 text-slate-500">Small improvements that can help you convert more applications into offers.</p>
           </div>
           <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-cyan-100 px-2 py-1 text-[9px] font-bold text-cyan-700"><BrainCircuit size={11} /> Personalised</span>
