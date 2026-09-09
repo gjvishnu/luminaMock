@@ -299,7 +299,7 @@ function LuminaInsightsCard() {
       <div className="relative">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-1.5 text-cyan-600"><Sparkles size={15} /><span className="text-[15px] font-bold uppercase tracking-wide">Lumina AI Insights</span></div>
+            <div className="flex items-center gap-1.5 text-cyan-600"><Sparkles size={15} /><span className="text-[15px] font-bold uppercase tracking-wide">Lumina's AI Insights</span></div>
             {/* <h2 className="mt-1 text-sm font-bold text-slate-800 sm:text-base">AI Insights</h2> */}
             <p className="mt-1 text-[10px] leading-4 text-slate-500">Small improvements that can help you convert more applications into offers.</p>
           </div>
