@@ -38,7 +38,7 @@ const officerMenuSections: MenuSection[] = [
     ],
   },
   {
-    title: "OPERATIONS",
+    title: "Actions",
     items: [
       { label: "Create Announcements", icon: Megaphone, route: "announcements" },
       { label: "Create Drives", icon: CirclePlus, route: "add_drives" },

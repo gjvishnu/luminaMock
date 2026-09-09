@@ -1,10 +1,14 @@
 import {
   AlertTriangle,
   ArrowRight,
+  BrainCircuit,
   CheckCircle2,
   ChevronRight,
   FileText,
+  Sparkles,
   Megaphone,
+  Target,
+  TrendingUp,
 } from "lucide-react";
 
 type ChecklistItem = {
@@ -23,7 +27,7 @@ const profileChecklist: ChecklistItem[] = [
 
 const readinessChecklist: ChecklistItem[] = [
   { label: "CGPA", status: "done" },
-  { label: "Medjels", status: "done" },
+  { label: "Certificates", status: "done" },
   { label: "Resume", status: "done" },
   { label: "Add 1 more project", status: "warning" },
   { label: "Projects", status: "done" },
@@ -52,13 +56,6 @@ const upcomingDrives = [
   { month: "SEP", day: "05", company: "TCS", role: "Software Engineer", package: "₹7.5 LPA", status: "Applied" },
   { month: "SEP", day: "12", company: "Zoho", role: "Developer", package: "₹8.0 LPA", status: "Apply Now" },
   { month: "SEP", day: "18", company: "Wipro", role: "Project Engineer", package: "₹6.0 LPA", status: "Apply Now" },
-];
-
-const recentActivity = [
-  { text: "You applied for TCS Software Engineer", date: "2 hours ago", icon: CheckCircle2, tone: "bg-emerald-50 text-emerald-500" },
-  { text: "You were shortlisted for Infosys Drive", date: "Yesterday", icon: CheckCircle2, tone: "bg-emerald-50 text-emerald-500" },
-  { text: "Your profile is missing internship details", date: "2 days ago", icon: AlertTriangle, tone: "bg-amber-50 text-amber-500" },
-  { text: "New campus drive from Zoho", date: "3 days ago", icon: Megaphone, tone: "bg-cyan-50 text-cyan-500" },
 ];
 
 const announcements = [
@@ -119,7 +116,7 @@ function SectionHeading({ title, action = "View All" }: { title: string; action?
 
 function ProfileCompletionCard() {
   return (
-    <section className={`${cardClass} p-4 sm:p-5`}>
+    <section className={`${cardClass} bg-white p-4 sm:p-5`}>
       <h2 className="text-base font-bold text-slate-800">Profile Completion</h2>
       <div className="mt-4 flex items-center gap-4 sm:gap-6">
         <ProgressRing value={78} label="Profile Completion" />
@@ -140,7 +137,7 @@ function ProfileCompletionCard() {
 
 function PlacementReadinessCard() {
   return (
-    <section className={`${cardClass} p-4 sm:p-5`}>
+    <section className={`${cardClass} bg-white p-4 sm:p-5`}>
       <h2 className="text-base font-bold text-slate-800">Placement Readiness</h2>
       <div className="mt-4 flex items-center gap-4 sm:gap-6">
         <ProgressRing value={82} label="Placement Readiness" color="#45c484" />
@@ -166,7 +163,7 @@ function ApplicationsCard() {
   ];
 
   return (
-    <section className={`${cardClass} p-4 sm:p-5`}>
+    <section className={`${cardClass} bg-white p-4 sm:p-5`}>
       <h2 className="text-base font-bold text-slate-800">My Applications</h2>
       <div className="mt-4 grid grid-cols-[120px_minmax(0,1fr)] gap-4 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-6">
         <div className="flex flex-col items-center border-r border-slate-100 pr-4 sm:pr-6">
@@ -195,7 +192,7 @@ function ApplicationsCard() {
 
 function RecommendedJobsCard() {
   return (
-    <section className={`${cardClass} min-h-[280px] max-h-[360px] overflow-x-hidden overflow-y-auto xl:col-span-4`}>
+    <section className={`${cardClass} min-h-[280px] max-h-[360px] overflow-x-hidden overflow-y-auto bg-white xl:col-span-4`}>
       <div className="border-b border-slate-100 p-4 sm:px-5">
         <SectionHeading title="Recommended For You" />
       </div>
@@ -271,7 +268,7 @@ function MissingSkillsCard() {
 
 function UpcomingDrivesCard() {
   return (
-    <section className={`${cardClass} p-4 sm:p-5 xl:col-span-4`}>
+    <section className={`${cardClass} min-w-0 bg-white p-4 sm:p-5`}>
       <SectionHeading title="Upcoming Drives" />
       <div className="mt-4 divide-y divide-slate-100">
         {upcomingDrives.map((drive) => (
@@ -295,48 +292,78 @@ function UpcomingDrivesCard() {
   );
 }
 
-function RecentActivityCard() {
+function LuminaInsightsCard() {
   return (
-    <section className={`${cardClass} p-4 sm:p-5 xl:col-span-4`}>
-      <h2 className="text-sm font-bold text-slate-800 sm:text-base">Recent Activity</h2>
-      <div className="mt-4 space-y-3.5">
-        {recentActivity.map((activity) => {
-          const Icon = activity.icon;
-
-          return (
-            <div key={activity.text} className="flex items-start gap-3">
-              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${activity.tone}`}><Icon size={15} /></span>
-              <div className="min-w-0">
-                <p className="text-[11px] font-medium leading-4 text-slate-700">{activity.text}</p>
-                <p className="mt-0.5 text-[10px] text-slate-500">{activity.date}</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <button type="button" className="mt-5 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-500 hover:text-cyan-700">
-        View All Activity
-        <ArrowRight size={14} />
-      </button>
-    </section>
-  );
-}
-
-function ResumeCard() {
-  return (
-    <section className={`${cardClass} p-4 sm:p-5`}>
-      <div className="flex items-start gap-3">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500"><FileText size={25} /></div>
-        <div className="min-w-0">
-          <h2 className="text-sm font-bold text-slate-800">Resume</h2>
-          <p className="mt-1 truncate text-xs font-semibold text-cyan-500">Resume_2026.pdf</p>
-          <p className="mt-0.5 text-[10px] text-slate-500">Last updated: Aug 28, 2026</p>
+    <section className={`${cardClass} relative min-w-0 overflow-hidden border-cyan-200 bg-gradient-to-br from-white via-white to-cyan-50/80 p-4 shadow-md shadow-cyan-100/70 ring-1 ring-cyan-100 sm:p-5 xl:h-full`}>
+      <div className="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-cyan-100/60 blur-2xl" />
+      <div className="relative">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-1.5 text-cyan-600"><Sparkles size={15} /><span className="text-[10px] font-bold uppercase tracking-wide">Lumina AI</span></div>
+            <h2 className="mt-1 text-sm font-bold text-slate-800 sm:text-base">AI Insights</h2>
+            <p className="mt-1 text-[10px] leading-4 text-slate-500">Small improvements that can help you convert more applications into offers.</p>
+          </div>
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-cyan-100 px-2 py-1 text-[9px] font-bold text-cyan-700"><BrainCircuit size={11} /> Personalised</span>
         </div>
-      </div>
-      <div className="mt-3 flex items-center gap-1.5 text-[10px] font-medium text-emerald-600"><CheckCircle2 size={14} /> Resume uploaded</div>
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <button type="button" className="h-8 rounded-md border border-cyan-300 text-[10px] font-semibold text-cyan-600 hover:bg-cyan-50">View Resume</button>
-        <button type="button" className="h-8 rounded-md border border-cyan-300 text-[10px] font-semibold text-cyan-600 hover:bg-cyan-50">Update Resume</button>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="rounded-lg border border-emerald-100 bg-emerald-50/70 p-2.5">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-700"><TrendingUp size={13} /> What&apos;s helping</div>
+            <p className="mt-2 text-[10px] leading-4 text-slate-700">8.72 CGPA and 3 projects give you a strong base.</p>
+          </div>
+          <div className="rounded-lg border border-rose-100 bg-rose-50/70 p-2.5">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-rose-600"><AlertTriangle size={13} /> What&apos;s holding you back</div>
+            <p className="mt-2 text-[10px] leading-4 text-slate-700">AWS, Docker and TypeScript are missing.</p>
+          </div>
+        </div>
+
+       
+        <div className="mt-3 grid gap-2 md:grid-cols-3">
+          <div className="rounded-lg border border-cyan-100 bg-cyan-50/60 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-cyan-700">Eligibility</p>
+            <p className="mt-1.5 text-[10px] leading-4 text-slate-700">You are currently eligible for <span className="font-bold text-cyan-700">12 of 25 active jobs.</span></p>
+          </div>
+          <div className="rounded-lg border border-emerald-100 bg-emerald-50/60 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-emerald-700">Skill Improvement</p>
+            <p className="mt-1.5 text-[10px] leading-4 text-slate-700">Improve your SQL skills to become eligible for <span className="font-bold text-emerald-700">6 more jobs.</span></p>
+          </div>
+          <div className="rounded-lg border border-rose-100 bg-rose-50/60 p-3">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-rose-600">Missing Skills</p>
+            <p className="mt-1.5 text-[10px] leading-4 text-slate-700">You&apos;re missing React and TypeScript skills required by <span className="font-bold text-rose-600">10 active jobs.</span></p>
+          </div>
+        </div>
+         <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="rounded-lg bg-cyan-50/80 p-2.5 text-center">
+            <p className="text-sm font-bold text-cyan-700">82/100</p>
+            <p className="mt-1 text-[9px] font-medium leading-3 text-slate-500">Placement readiness</p>
+          </div>
+          <div className="rounded-lg bg-violet-50/80 p-2.5 text-center">
+            <p className="text-sm font-bold text-violet-700">6</p>
+            <p className="mt-1 text-[9px] font-medium leading-3 text-slate-500">Core skills ready</p>
+          </div>
+          <div className="rounded-lg bg-amber-50/80 p-2.5 text-center">
+            <p className="text-sm font-bold text-amber-700">30 min</p>
+            <p className="mt-1 text-[9px] font-medium leading-3 text-slate-500">Daily prep target</p>
+          </div>
+        </div>
+
+
+        <div className="mt-3 rounded-lg border border-slate-100 bg-white p-3">
+          <div className="flex items-start gap-2">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-violet-50 text-violet-600"><Target size={14} /></span>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-violet-600">Next Best Action</p>
+              <p className="mt-1 text-xs font-bold leading-5 text-slate-800">Learn TypeScript <span className="text-violet-600">→</span> potentially unlock 5 more jobs.</p>
+              <p className="mt-1 text-[10px] leading-4 text-slate-500">Start with a small React project, then add it to your profile to strengthen your match score.</p>
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3 text-[10px] font-semibold text-slate-700"><CheckCircle2 size={14} className="text-emerald-500" />Keep your CGPA at 8.7+ to stay in the top 30% of opportunities.</div>
+        </div>
+
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-cyan-100 bg-cyan-50/60 px-3 py-2.5 text-[10px] leading-4 text-cyan-800">
+          <TrendingUp size={14} className="mt-0.5 shrink-0 text-cyan-600" />
+          <span><span className="font-bold">Offer tip:</span> Apply early to drives above 80% match and tailor one project story to each role.</span>
+        </div>
       </div>
     </section>
   );
@@ -344,17 +371,19 @@ function ResumeCard() {
 
 function AnnouncementsCard() {
   return (
-    <section className={`${cardClass} overflow-hidden`}>
+    <section className={`${cardClass} min-w-0 overflow-hidden bg-white`}>
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5">
         <h2 className="text-sm font-bold text-slate-800">Announcements</h2>
         <button type="button" className="inline-flex items-center gap-1 text-[10px] font-semibold text-cyan-500">View All <ArrowRight size={13} /></button>
       </div>
       <div className="divide-y divide-slate-100 px-4 sm:px-5">
         {announcements.map((announcement) => (
-          <div key={announcement.text} className="flex items-center gap-2.5 py-3">
+          <div key={announcement.text} className="flex items-start gap-2.5 py-3">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-500"><Megaphone size={14} /></span>
-            <p className="min-w-0 flex-1 truncate text-[10px] font-medium text-slate-700">{announcement.text}</p>
-            <span className="shrink-0 text-[9px] text-slate-500">{announcement.date}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-medium leading-4 text-slate-700 sm:truncate">{announcement.text}</p>
+              <p className="mt-0.5 text-[9px] text-slate-500">{announcement.date}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -371,19 +400,18 @@ export function StudentDashboard() {
         <ApplicationsCard />
       </div>
 
+      <div className="grid gap-4 xl:grid-cols-[7fr_3fr]">
+        <LuminaInsightsCard />
+        <div className="flex min-w-0 flex-col gap-4">
+          <UpcomingDrivesCard />
+          <AnnouncementsCard />
+        </div>
+      </div>
+
       <div className="grid items-start gap-4 xl:grid-cols-12">
         <RecommendedJobsCard />
         <SkillDemandCard />
         <MissingSkillsCard />
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-12">
-        <UpcomingDrivesCard />
-        <RecentActivityCard />
-        <div className="flex min-w-0 flex-col gap-4 xl:col-span-4">
-          <ResumeCard />
-          <AnnouncementsCard />
-        </div>
       </div>
     </div>
   );

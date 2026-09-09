@@ -80,12 +80,12 @@ const studentProfileData = {
   backlogs: "0",
   profileCompletion: 92,
   semesterScores: [
-    { label: "Sem 1", score: "8.1", percentage: 81, attendance: 88 },
-    { label: "Sem 2", score: "8.4", percentage: 84, attendance: 90 },
-    { label: "Sem 3", score: "8.6", percentage: 86, attendance: 89 },
-    { label: "Sem 4", score: "8.8", percentage: 88, attendance: 92 },
-    { label: "Sem 5", score: "8.9", percentage: 89, attendance: 93 },
-    { label: "Sem 6", score: "9.1", percentage: 91, attendance: 94 },
+    { label: "Sem 1", score: "8.1", percentage: 81, attendance: 88, backlogs: 0 },
+    { label: "Sem 2", score: "8.4", percentage: 84, attendance: 90, backlogs: 0 },
+    { label: "Sem 3", score: "8.6", percentage: 86, attendance: 89, backlogs: 0 },
+    { label: "Sem 4", score: "8.8", percentage: 88, attendance: 92, backlogs: 0 },
+    { label: "Sem 5", score: "8.9", percentage: 89, attendance: 93, backlogs: 0 },
+    { label: "Sem 6", score: "9.1", percentage: 91, attendance: 94, backlogs: 0 },
   ],
   skillGroups: [
     { label: "Programming", skills: ["Java", "Python", "C++", "JavaScript"] },
@@ -571,8 +571,6 @@ export function StudentJobDetails() {
         <main className="space-y-3"><SelectionProcess /><DetailSkills /><AboutRole job={job} /></main>
         <aside className="space-y-3"><MatchCard job={job} /><DocumentsCard /><TipsCard /><ReviewsCard /></aside>
       </div>
-
-      <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-3 text-[10px] font-medium text-emerald-600 sm:text-xs"><CheckCircle2 size={15} />By applying, you agree to our Terms &amp; Conditions and placement process guidelines.</div>
     </div>
   );
 }
@@ -713,22 +711,61 @@ export function StudentProfile() {
         </div>
       </section>
 
-      <div className="grid items-start gap-4 xl:grid-cols-2">
-        <div className="space-y-4">
-          <BasicDetailsCard />
-          <SkillsCard />
-          <ProjectsCard />
-          <ResumeCard onNotice={setNotice} />
-          <ExtracurricularsCard />
-        </div>
-        <div className="space-y-4">
+      <ProfileGroup
+        title="Basic Information & Academic Performance"
+        description="Keep your personal details and academic progress current for placement eligibility."
+        icon={GraduationCap}
+      >
+        <div className="grid items-start gap-4 xl:grid-cols-2">
+          <div className="flex min-w-0 flex-col gap-4">
+            <BasicDetailsCard />
+            <ResumeCard onNotice={setNotice} />
+          </div>
           <AcademicPerformanceCard />
-          <InternshipsCard />
+        </div>
+      </ProfileGroup>
+
+      <ProfileGroup
+        title="Placement Profile"
+        description="Build a stronger profile with the skills, experience, and documents recruiters look for."
+        icon={BriefcaseBusiness}
+      >
+        <div className="grid items-start gap-4 xl:grid-cols-2">
+          <div className="flex min-w-0 flex-col gap-4">
+            <SkillsCard />
+            <InternshipsCard />
+          </div>
+          <ProjectsCard />
+        </div>
+      </ProfileGroup>
+
+      <ProfileGroup
+        title="Activities & Recognition"
+        description="Showcase the achievements and involvement that make your profile stand out."
+        icon={Trophy}
+      >
+        <div className="grid items-start gap-4 xl:grid-cols-3">
+          <ExtracurricularsCard />
           <SportsPrizesCard />
           <AwardsCard />
         </div>
-      </div>
+      </ProfileGroup>
     </div>
+  );
+}
+
+function ProfileGroup({ title, description, icon: Icon, children }: { title: string; description: string; icon: React.ElementType; children: React.ReactNode }) {
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 shadow-sm sm:p-4">
+      <div className="flex items-start gap-3 px-1 sm:px-2">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-cyan-600 shadow-sm"><Icon size={18} /></span>
+        <div>
+          <h2 className="text-sm font-bold text-slate-800 sm:text-base">{title}</h2>
+          <p className="mt-1 text-[10px] leading-4 text-slate-500 sm:text-xs">{description}</p>
+        </div>
+      </div>
+      <div className="mt-4">{children}</div>
+    </section>
   );
 }
 
@@ -737,7 +774,44 @@ function BasicDetailsCard() {
 }
 
 function AcademicPerformanceCard() {
-  return <ProfileSection title="Academic Performance" icon={GraduationCap}><div className="grid grid-cols-2 gap-2 sm:grid-cols-4"><ProfileMetric label="CGPA" value={`${studentProfileData.cgpa} / 10`} tone="bg-cyan-50 text-cyan-600" /><ProfileMetric label="Attendance" value={studentProfileData.attendance} tone="bg-emerald-50 text-emerald-600" /><ProfileMetric label="Backlogs" value={studentProfileData.backlogs} tone="bg-amber-50 text-amber-600" /></div><div className="mt-5 border-t border-slate-100 pt-4"><div className="flex flex-wrap items-center justify-between gap-2"><div><p className="text-xs font-bold text-slate-800">Semester performance</p><p className="mt-1 text-[10px] text-slate-500">Academic performance and attendance by semester</p></div><span className="text-[10px] font-medium text-emerald-600">Improving trend</span></div><div className="mt-4 space-y-3">{studentProfileData.semesterScores.map((semester) => <div key={semester.label} className="rounded-lg bg-slate-50/80 p-2.5"><div className="flex items-center justify-between text-[10px]"><span className="font-bold text-slate-700">{semester.label}</span><span className="text-slate-500">Attendance <span className="font-bold text-emerald-600">{semester.attendance}%</span></span></div><div className="mt-2 grid gap-2 sm:grid-cols-[64px_minmax(0,1fr)_30px] sm:items-center"><span className="text-[9px] font-medium text-slate-500">Academic</span><div className="h-1.5 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-cyan-400" style={{ width: `${semester.percentage}%` }} /></div><span className="text-right text-[10px] font-bold text-slate-700">{semester.score}</span></div><div className="grid gap-2 sm:grid-cols-[64px_minmax(0,1fr)_30px] sm:items-center"><span className="text-[9px] font-medium text-slate-500">Attendance</span><div className="h-1.5 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-emerald-400" style={{ width: `${semester.attendance}%` }} /></div><span className="text-right text-[10px] font-bold text-emerald-600">{semester.attendance}%</span></div></div>)}</div></div></ProfileSection>;
+  return (
+    <ProfileSection title="Academic Performance" icon={GraduationCap}>
+      <div className="grid grid-cols-3 gap-2">
+        <ProfileMetric label="CGPA" value={`${studentProfileData.cgpa} / 10`} tone="bg-cyan-50 text-cyan-600" />
+        <ProfileMetric label="Attendance" value={studentProfileData.attendance} tone="bg-emerald-50 text-emerald-600" />
+        <ProfileMetric label="Backlogs" value={studentProfileData.backlogs} tone="bg-amber-50 text-amber-600" />
+      </div>
+      <div className="mt-4 border-t border-slate-100 pt-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-xs font-bold text-slate-800">Semester performance</p>
+            <p className="mt-1 text-[10px] text-slate-500">Academic performance and backlog history by semester</p>
+          </div>
+          <span className="text-[10px] font-medium text-emerald-600">Improving trend</span>
+        </div>
+        <div className="mt-3 max-h-72 space-y-2 overflow-y-auto pr-1">
+          {studentProfileData.semesterScores.map((semester) => (
+            <div key={semester.label} className="rounded-lg bg-slate-50/80 p-2">
+              <div className="flex items-center justify-between text-[10px]">
+                <span className="font-bold text-slate-700">{semester.label}</span>
+                <span className="text-slate-500">Score <span className="font-bold text-cyan-600">{semester.score}</span></span>
+              </div>
+              <div className="mt-2 grid gap-2 sm:grid-cols-[64px_minmax(0,1fr)_30px] sm:items-center">
+                <span className="text-[9px] font-medium text-slate-500">Academic</span>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-cyan-400" style={{ width: `${semester.percentage}%` }} /></div>
+                <span className="text-right text-[10px] font-bold text-slate-700">{semester.score}</span>
+              </div>
+              <div className="mt-1.5 grid gap-2 sm:grid-cols-[64px_minmax(0,1fr)_30px] sm:items-center">
+                <span className="text-[9px] font-medium text-slate-500">Backlogs</span>
+                <div className="flex min-w-0 items-center"><span className={`text-[10px] font-semibold ${semester.backlogs === 0 ? "text-emerald-600" : "text-amber-600"}`}>{semester.backlogs === 0 ? "No backlogs" : `${semester.backlogs} backlog${semester.backlogs === 1 ? "" : "s"}`}</span></div>
+                <span className="text-right text-[10px] font-bold text-amber-600">{semester.backlogs}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </ProfileSection>
+  );
 }
 
 function SkillsCard() {
@@ -755,7 +829,7 @@ function InternshipsCard() {
 }
 
 function ResumeCard({ onNotice }: { onNotice: (message: string) => void }) {
-  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-500"><FileText size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Resume</h2><p className="mt-1 text-[10px] text-slate-500">Your latest resume shared with recruiters.</p></div></div><span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">Ready to share</span></div><div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50/80 p-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-rose-50 text-rose-500"><FileText size={20} /></span><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold text-slate-800">{studentProfileData.resume.name}</p><p className="mt-1 text-[10px] text-slate-500">PDF · {studentProfileData.resume.size} · Updated {studentProfileData.resume.updated}</p></div><CheckCircle2 size={17} className="shrink-0 text-emerald-500" /></div><div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={() => onNotice(`Opening ${studentProfileData.resume.name}.`)} className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">View Resume</button><button type="button" onClick={() => onNotice("Resume update flow will be available in the next update.")} className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600"><Upload size={14} /> Update Resume</button></div></DetailCard>;
+  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-500"><FileText size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Resume</h2><p className="mt-1 text-[10px] text-slate-500">Your latest resume shared with recruiters.</p></div></div><span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">Ready to share</span></div><div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50/80 p-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-rose-50 text-rose-500"><FileText size={20} /></span><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold text-slate-800">{studentProfileData.resume.name}</p><p className="mt-1 text-[10px] text-slate-500">PDF · {studentProfileData.resume.size} · Updated {studentProfileData.resume.updated}</p></div><CheckCircle2 size={17} className="shrink-0 text-emerald-500" /></div><div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={() => onNotice(`Opening ${studentProfileData.resume.name}.`)} className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">View Resume</button><button type="button" onClick={() => onNotice("Resume update flow will be available in the next update.")} className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600"><Upload size={14} /> Update Resume</button><button type="button" onClick={() => onNotice(`Opening ${studentProfileData.resume.name}.`)} className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">Download Resume</button></div></DetailCard>;
 }
 
 function SportsPrizesCard() {
