@@ -460,7 +460,7 @@ function AiPlacementInsights({ job }: { job: JobListing }) {
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-cyan-700"><Sparkles size={12} />Lumina AI Placement Insights</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-cyan-700"><Sparkles size={12} />Lumina's AI Placement Insights</span>
               <span className="inline-flex items-center gap-1 text-[10px] font-medium text-slate-500"><BrainCircuit size={13} className="text-cyan-500" />High confidence</span>
             </div>
             <h2 className="mt-3 text-base font-bold text-slate-900 sm:text-lg">Your preparation plan for {job.company}</h2>
