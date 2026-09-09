@@ -248,8 +248,8 @@ function SkillDemandCard() {
 
 function MissingSkillsCard() {
   return (
-    <section className={`${cardClass} min-h-[280px] max-h-[360px] bg-red-50 p-4 sm:p-5 xl:col-span-4`}>
-      <h2 className="text-sm font-bold text-slate-800 sm:text-base">Skills You&apos;re Missing</h2>
+    <section className={` rounded-lg min-h-[280px] max-h-[360px] bg-red-50 border border-red-300 p-4 sm:p-5 xl:col-span-4`}>
+      <h2 className="text-sm text-red-500 font-bold  sm:text-base">Skills You&apos;re Missing</h2>
       <div className="mt-5 space-y-4">
         {missingSkills.map((skill) => (
           <div key={skill} className="flex items-center gap-3 text-xs font-medium text-slate-700">
@@ -258,7 +258,7 @@ function MissingSkillsCard() {
           </div>
         ))}
       </div>
-      <button type="button" className="mt-7 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-500 hover:text-cyan-700">
+      <button type="button" className="mt-7 inline-flex items-center gap-1.5 text-xs font-semibold ">
         Explore Skills
         <ArrowRight size={14} />
       </button>
