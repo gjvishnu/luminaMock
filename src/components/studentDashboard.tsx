@@ -3,7 +3,6 @@ import {
   ArrowRight,
   BrainCircuit,
   CheckCircle2,
-  ChevronRight,
   FileText,
   Sparkles,
   Megaphone,
@@ -50,12 +49,12 @@ const skillDemand = [
   { name: "AWS", companies: 9, width: "38%" },
 ];
 
-const missingSkills = ["AWS", "Docker", "TypeScript", "System Design"];
+// const missingSkills = ["AWS", "Docker", "TypeScript", "System Design"];
 
 const upcomingDrives = [
-  { month: "SEP", day: "05", company: "TCS", role: "Software Engineer", package: "₹7.5 LPA", status: "Applied" },
-  { month: "SEP", day: "12", company: "Zoho", role: "Developer", package: "₹8.0 LPA", status: "Apply Now" },
-  { month: "SEP", day: "18", company: "Wipro", role: "Project Engineer", package: "₹6.0 LPA", status: "Apply Now" },
+  { month: "SEP", day: "05", company: "TCS", role: "Software Engineer", package: "₹7.5 LPA", type: "ongoing", status: "Applied" },
+  { month: "SEP", day: "12", company: "Zoho", role: "Developer", package: "₹8.0 LPA", type: "upcoming", status: "Apply Now" },
+  { month: "SEP", day: "18", company: "Wipro", role: "Project Engineer", package: "₹6.0 LPA", type: "upcoming", status: "Apply Now" },
 ];
 
 const announcements = [
@@ -66,38 +65,16 @@ const announcements = [
 
 const cardClass = "rounded-2xl border border-slate-200  shadow-sm";
 
-function ProgressRing({ value, label, color = "#06b6d4" }: { value: number; label: string; color?: string }) {
-  const radius = 45;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (value / 100) * circumference;
-
+function ProgressBar({ value, label, color }: { value: number; label: string; color: string }) {
   return (
-    <div className="relative h-28 w-28 shrink-0 sm:h-32 sm:w-32" role="img" aria-label={`${label}: ${value} percent`}>
-      <svg viewBox="0 0 110 110" className="h-full w-full -rotate-90">
-        <circle cx="55" cy="55" r={radius} fill="none" stroke="#eef2f7" strokeWidth="8" />
-        <circle cx="55" cy="55" r={radius} fill="none" stroke={color} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset} />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold leading-none text-slate-800">{value}{label === "Profile Completion" ? "%" : ""}</span>
-        {label !== "Profile Completion" && <span className="mt-1 text-[10px] font-medium text-slate-500">/ 100</span>}
+    <div role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}>
+      <div className="flex items-center justify-between gap-3 text-[10px] font-semibold">
+        <span className="text-slate-600">{label}</span>
+        <span className="text-slate-800">{value}%</span>
       </div>
-    </div>
-  );
-}
-
-function Checklist({ items }: { items: ChecklistItem[] }) {
-  return (
-    <div className="grid min-w-0 grid-cols-1 gap-x-4 gap-y-2 text-[11px] sm:grid-cols-2">
-      {items.map((item) => {
-        const Icon = item.status === "done" ? CheckCircle2 : AlertTriangle;
-
-        return (
-          <div key={item.label} className="flex min-w-0 items-center gap-2">
-            <Icon size={15} className={item.status === "done" ? "shrink-0 text-emerald-500" : "shrink-0 text-amber-500"} />
-            <span className="truncate text-slate-700">{item.label}</span>
-          </div>
-        );
-      })}
+      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100">
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
+      </div>
     </div>
   );
 }
@@ -114,46 +91,7 @@ function SectionHeading({ title, action = "View All" }: { title: string; action?
   );
 }
 
-function ProfileCompletionCard() {
-  return (
-    <section className={`${cardClass} bg-white p-4 sm:p-5`}>
-      <h2 className="text-base font-bold text-slate-800">Profile Completion</h2>
-      <div className="mt-4 flex items-center gap-4 sm:gap-6">
-        <ProgressRing value={78} label="Profile Completion" />
-        <div className="min-w-0">
-          <p className="text-sm leading-5 text-slate-700">Your profile is<br />almost complete</p>
-          <button type="button" className="mt-3 inline-flex h-9 items-center gap-1.5 rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600">
-            Complete Profile
-            <ChevronRight size={14} />
-          </button>
-        </div>
-      </div>
-      <div className="mt-5 border-t border-slate-100 pt-4">
-        <Checklist items={profileChecklist} />
-      </div>
-    </section>
-  );
-}
-
-function PlacementReadinessCard() {
-  return (
-    <section className={`${cardClass} bg-white p-4 sm:p-5`}>
-      <h2 className="text-base font-bold text-slate-800">Placement Readiness</h2>
-      <div className="mt-4 flex items-center gap-4 sm:gap-6">
-        <ProgressRing value={82} label="Placement Readiness" color="#45c484" />
-        <div>
-          <p className="text-base font-bold text-emerald-600">Good</p>
-          <p className="mt-1 text-sm text-slate-700">You are doing great!</p>
-        </div>
-      </div>
-      <div className="mt-5 border-t border-slate-100 pt-4">
-        <Checklist items={readinessChecklist} />
-      </div>
-    </section>
-  );
-}
-
-function ApplicationsCard() {
+function PlacementOverviewCard() {
   const applicationCounts = [
     ["Applied", "12", "text-blue-500"],
     ["Shortlisted", "6", "text-emerald-500"],
@@ -163,27 +101,56 @@ function ApplicationsCard() {
   ];
 
   return (
-    <section className={`${cardClass} bg-white p-4 sm:p-5`}>
-      <h2 className="text-base font-bold text-slate-800">My Applications</h2>
-      <div className="mt-4 grid grid-cols-[120px_minmax(0,1fr)] gap-4 sm:grid-cols-[140px_minmax(0,1fr)] sm:gap-6">
-        <div className="flex flex-col items-center border-r border-slate-100 pr-4 sm:pr-6">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-50 text-blue-500 sm:h-24 sm:w-24">
-            <FileText size={40} strokeWidth={1.8} />
-          </div>
-          <p className="mt-3 text-3xl font-bold leading-none text-slate-800">12</p>
-          <p className="mt-1 text-[11px] text-slate-600">Total Applications</p>
+    <section className={`${cardClass} h-full bg-white p-4 sm:p-5`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-bold text-slate-800">Placement Overview</h2>
+          <p className="mt-1 text-[10px] text-slate-500">Your readiness, profile, and application activity.</p>
         </div>
-        <div className="space-y-0.5">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500"><FileText size={17} /></span>
+      </div>
+      <div className="mt-4 space-y-3 border-b border-slate-100 pb-4">
+        <ProgressBar value={78} label="Profile Completion" color="bg-cyan-500" />
+        <ProgressBar value={82} label="Placement Readiness" color="bg-emerald-500" />
+      </div>
+      <span className="text-cyan-400 border-b text-xs cursor-pointer mt-2">Comple profile</span>
+
+      <div className="mt-4">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-xs font-bold text-slate-800">Application Activity</h3>
+          <span className="text-[10px] font-semibold text-slate-500">12 total</span>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
           {applicationCounts.map(([label, count, tone]) => (
-            <div key={label} className="flex items-center justify-between gap-3 border-b border-slate-100 py-1.5 text-xs last:border-b-0">
-              <span className="text-slate-700">{label}</span>
-              <span className={`font-bold ${tone}`}>{count}</span>
+            <div key={label} className="rounded-lg bg-slate-50 px-2 py-2 text-center">
+              <p className={`text-lg font-bold leading-none ${tone}`}>{count}</p>
+              <p className="mt-1 truncate text-[9px] font-medium text-slate-500">{label}</p>
             </div>
           ))}
         </div>
       </div>
+
+      <div className="mt-4 border-t border-slate-100 pt-3">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Quick checklist</p>
+          <span className="text-[10px] font-semibold text-emerald-600">Good progress</span>
+        </div>
+        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
+          {profileChecklist.slice(0, 4).map((item) => {
+            const Icon = item.status === "done" ? CheckCircle2 : AlertTriangle;
+
+            return <span key={`profile-${item.label}`} className="flex min-w-0 items-center gap-1.5 text-[9px] text-slate-600"><Icon size={12} className={item.status === "done" ? "shrink-0 text-emerald-500" : "shrink-0 text-amber-500"} /> <span className="truncate">{item.label}</span></span>;
+          })}
+          {readinessChecklist.slice(0, 4).map((item) => {
+            const Icon = item.status === "done" ? CheckCircle2 : AlertTriangle;
+
+            return <span key={`readiness-${item.label}`} className="flex min-w-0 items-center gap-1.5 text-[9px] text-slate-600"><Icon size={12} className={item.status === "done" ? "shrink-0 text-emerald-500" : "shrink-0 text-amber-500"} /> <span className="truncate">{item.label}</span></span>;
+          })}
+        </div>
+      </div>
+
       <button type="button" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-500 hover:text-cyan-700">
-        View All Applications
+        View Applications
         <ArrowRight size={14} />
       </button>
     </section>
@@ -246,30 +213,37 @@ function SkillDemandCard() {
   );
 }
 
-function MissingSkillsCard() {
-  return (
-    <section className={` rounded-lg min-h-[280px] max-h-[360px] bg-red-50 border border-red-300 p-4 sm:p-5 xl:col-span-4`}>
-      <h2 className="text-sm text-red-500 font-bold  sm:text-base">Skills You&apos;re Missing</h2>
-      <div className="mt-5 space-y-4">
-        {missingSkills.map((skill) => (
-          <div key={skill} className="flex items-center gap-3 text-xs font-medium text-slate-700">
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-400"><AlertTriangle size={14} /></span>
-            {skill}
-          </div>
-        ))}
-      </div>
-      <button type="button" className="mt-7 inline-flex items-center gap-1.5 text-xs font-semibold ">
-        Explore Skills
-        <ArrowRight size={14} />
-      </button>
-    </section>
-  );
-}
+// function MissingSkillsCard() {
+//   return (
+//     <section className={` rounded-lg min-h-[280px] max-h-[360px] bg-red-50 border border-red-300 p-4 sm:p-5 xl:col-span-4`}>
+//       <h2 className="text-sm text-red-500 font-bold  sm:text-base">Skills You&apos;re Missing</h2>
+//       <div className="mt-5 space-y-4">
+//         {missingSkills.map((skill) => (
+//           <div key={skill} className="flex items-center gap-3 text-xs font-medium text-slate-700">
+//             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-400"><AlertTriangle size={14} /></span>
+//             {skill}
+//           </div>
+//         ))}
+//       </div>
+//       <button type="button" className="mt-7 inline-flex items-center gap-1.5 text-xs font-semibold ">
+//         Explore Skills
+//         <ArrowRight size={14} />
+//       </button>
+//     </section>
+//   );
+// }
 
-function UpcomingDrivesCard() {
+function UpcomingOngoingDrivesCard() {
+  const ongoingCount = upcomingDrives.filter((drive) => drive.type === "ongoing").length;
+  const upcomingCount = upcomingDrives.filter((drive) => drive.type === "upcoming").length;
+
   return (
-    <section className={`${cardClass} min-w-0 bg-white p-4 sm:p-5`}>
-      <SectionHeading title="Upcoming Drives" />
+    <section className={`${cardClass} h-full min-w-0 bg-white p-4 sm:p-5`}>
+      <SectionHeading title="Upcoming & Ongoing Drives" />
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />{ongoingCount} Ongoing</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-semibold text-cyan-600"><span className="h-1.5 w-1.5 rounded-full bg-cyan-500" />{upcomingCount} Upcoming</span>
+      </div>
       <div className="mt-4 divide-y divide-slate-100">
         {upcomingDrives.map((drive) => (
           <div key={drive.company} className="grid grid-cols-[50px_minmax(0,1fr)_auto] items-center gap-3 py-3 first:pt-0 last:pb-0">
@@ -280,6 +254,7 @@ function UpcomingDrivesCard() {
             <div className="min-w-0">
               <p className="truncate text-xs font-bold text-slate-800">{drive.company}</p>
               <p className="truncate text-[11px] text-slate-600">{drive.role}</p>
+              <p className={`mt-1 flex items-center gap-1 text-[9px] font-semibold ${drive.type === "ongoing" ? "text-emerald-600" : "text-cyan-600"}`}><span className={`h-1.5 w-1.5 rounded-full ${drive.type === "ongoing" ? "bg-emerald-500" : "bg-cyan-500"}`} />{drive.type === "ongoing" ? "Ongoing" : "Upcoming"}</p>
             </div>
             <div className="text-right">
               <p className="text-[11px] font-medium text-slate-700">{drive.package}</p>
@@ -371,7 +346,7 @@ function LuminaInsightsCard() {
 
 function AnnouncementsCard() {
   return (
-    <section className={`${cardClass} min-w-0 overflow-hidden bg-white`}>
+    <section className={`${cardClass} h-full min-w-0 overflow-hidden bg-white`}>
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5">
         <h2 className="text-sm font-bold text-slate-800">Announcements</h2>
         <button type="button" className="inline-flex items-center gap-1 text-[10px] font-semibold text-cyan-500">View All <ArrowRight size={13} /></button>
@@ -394,24 +369,20 @@ function AnnouncementsCard() {
 export function StudentDashboard() {
   return (
     <div className="-m-3 min-h-full space-y-4 bg-slate-50 p-3 pb-5 text-slate-800 sm:p-4">
-      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        <ProfileCompletionCard />
-        <PlacementReadinessCard />
-        <ApplicationsCard />
+      <div className="grid items-stretch gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        <PlacementOverviewCard />
+        <UpcomingOngoingDrivesCard />
+        <AnnouncementsCard />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[7fr_3fr]">
+      <div>
         <LuminaInsightsCard />
-        <div className="flex min-w-0 flex-col gap-4">
-          <UpcomingDrivesCard />
-          <AnnouncementsCard />
-        </div>
       </div>
 
       <div className="grid items-start gap-4 xl:grid-cols-12">
         <RecommendedJobsCard />
         <SkillDemandCard />
-        <MissingSkillsCard />
+        {/* <MissingSkillsCard /> */}
       </div>
     </div>
   );

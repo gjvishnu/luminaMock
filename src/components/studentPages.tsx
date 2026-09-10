@@ -794,7 +794,7 @@ function AcademicPerformanceCard() {
             <div key={semester.label} className="rounded-lg bg-slate-50/80 p-2">
               <div className="flex items-center justify-between text-[10px]">
                 <span className="font-bold text-slate-700">{semester.label}</span>
-                <span className="text-slate-500">Score <span className="font-bold text-cyan-600">{semester.score}</span></span>
+                {/* <span className="text-slate-500">Score <span className="font-bold text-cyan-600">{semester.score}</span></span> */}
               </div>
               <div className="mt-2 grid gap-2 sm:grid-cols-[64px_minmax(0,1fr)_30px] sm:items-center">
                 <span className="text-[9px] font-medium text-slate-500">Academic</span>
