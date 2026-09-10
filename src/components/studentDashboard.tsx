@@ -115,7 +115,7 @@ function PlacementOverviewCard() {
 
 function RecommendedJobsCard() {
   return (
-    <section className={`${cardClass} min-h-[280px] max-h-[360px] overflow-x-hidden overflow-y-auto bg-white`}>
+    <section className={`${cardClass} h-full min-h-[280px] max-h-[360px] overflow-x-hidden overflow-y-auto bg-white`}>
       <div className="border-b border-slate-100 p-4 sm:px-5">
         <SectionHeading title="Recommended For You" />
       </div>
@@ -152,7 +152,7 @@ function RecommendedJobsCard() {
 
 function SkillDemandCard() {
   return (
-    <section className={`${cardClass} min-h-[280px] max-h-[360px] p-4 sm:p-5`}>
+    <section className={`${cardClass} h-full min-h-[280px] max-h-[360px] bg-white p-4 sm:p-5`}>
       <SectionHeading title="Skills Companies Are Looking For" />
       <div className="mt-5 space-y-3.5">
         {skillDemand.map((skill) => (
@@ -328,7 +328,7 @@ export function StudentDashboard() {
         <LuminaInsightsCard />
       </div>
 
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,3fr)]">
+      <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,3fr)]">
         <RecommendedJobsCard />
         <SkillDemandCard />
         {/* <MissingSkillsCard /> */}
