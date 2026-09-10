@@ -116,6 +116,30 @@ const studentProfileData = {
   ],
 };
 
+type ProfileChecklistItem = {
+  label: string;
+  status: "done" | "warning";
+};
+
+const profileCompletionChecklist: ProfileChecklistItem[] = [
+  { label: "Personal Details", status: "done" },
+  { label: "Internship Details", status: "warning" },
+  { label: "Academic Details", status: "done" },
+  { label: "Resume", status: "warning" },
+  { label: "Skills", status: "done" },
+  { label: "Projects", status: "done" },
+];
+
+const placementReadinessChecklist: ProfileChecklistItem[] = [
+  { label: "CGPA", status: "done" },
+  { label: "Certificates", status: "done" },
+  { label: "Resume", status: "done" },
+  { label: "Add 1 more project", status: "warning" },
+  { label: "Projects", status: "done" },
+  { label: "Add internship details", status: "warning" },
+  { label: "Skills", status: "done" },
+];
+
 const placementFeedbackByCompany: Record<string, PlacementFeedbackInsight> = {
   TCS: {
     reviewedStudents: 320,
@@ -682,6 +706,91 @@ export function StudentApplications() {
   );
 }
 
+function ProfileProgressRing({ value, label, color = "#06b6d4" }: { value: number; label: string; color?: string }) {
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (value / 100) * circumference;
+
+  return (
+    <div className="relative h-24 w-24 shrink-0 sm:h-28 sm:w-28" role="img" aria-label={`${label}: ${value} percent`}>
+      <svg viewBox="0 0 110 110" className="h-full w-full -rotate-90">
+        <circle cx="55" cy="55" r={radius} fill="none" stroke="#eef2f7" strokeWidth="8" />
+        <circle cx="55" cy="55" r={radius} fill="none" stroke={color} strokeWidth="8" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={offset} />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-2xl font-bold leading-none text-slate-800">{value}%</span>
+        <span className="mt-1 text-[10px] font-medium text-slate-500">complete</span>
+      </div>
+    </div>
+  );
+}
+
+function ProfileChecklist({ items }: { items: ProfileChecklistItem[] }) {
+  return (
+    <div className="grid min-w-0 grid-cols-1 gap-x-4 gap-y-2 text-[10px] sm:grid-cols-2">
+      {items.map((item) => {
+        const Icon = item.status === "done" ? CheckCircle2 : AlertTriangle;
+
+        return <div key={item.label} className="flex min-w-0 items-center gap-2"><Icon size={14} className={item.status === "done" ? "shrink-0 text-emerald-500" : "shrink-0 text-amber-500"} /><span className="truncate text-slate-700">{item.label}</span></div>;
+      })}
+    </div>
+  );
+}
+
+function ProfileCompletionCard({ onComplete }: { onComplete: () => void }) {
+  return (
+    <section className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-bold text-slate-800">Profile Completion</h2>
+          <p className="mt-1 text-[10px] text-slate-500">Complete your profile to improve job matches.</p>
+        </div>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><UserRound size={16} /></span>
+      </div>
+      <div className="mt-5 flex items-center gap-4 sm:gap-5">
+        <ProfileProgressRing value={studentProfileData.profileCompletion} label="Profile Completion" />
+        <p className="min-w-0 text-[10px] leading-4 text-slate-600">Your profile is almost complete. Add a certification to reach 100%.</p>
+      </div>
+      <div className="mt-5 flex-1 border-t border-slate-100 pt-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h3 className="text-xs font-bold text-slate-800">Profile checklist</h3>
+          <span className="text-[10px] font-semibold text-cyan-600">{studentProfileData.profileCompletion}% complete</span>
+        </div>
+        <ProfileChecklist items={profileCompletionChecklist} />
+      </div>
+      <button type="button" onClick={onComplete} className="mt-4 inline-flex h-9 items-center justify-center gap-1.5 self-start rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600">
+        Complete Profile
+        <ChevronRight size={14} />
+      </button>
+    </section>
+  );
+}
+
+function PlacementReadinessCard() {
+  return (
+    <section className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-bold text-slate-800">Placement Readiness</h2>
+          <p className="mt-1 text-[10px] text-slate-500">See how prepared you are for placement drives.</p>
+        </div>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600"><BriefcaseBusiness size={16} /></span>
+      </div>
+      <div className="mt-5 flex items-center gap-4 sm:gap-5">
+        <ProfileProgressRing value={82} label="Placement Readiness" color="#45c484" />
+        <p className="min-w-0 text-[10px] font-semibold leading-4 text-emerald-600">Good — you are doing great!</p>
+      </div>
+      <div className="mt-5 flex-1 border-t border-slate-100 pt-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h3 className="text-xs font-bold text-slate-800">Readiness checklist</h3>
+          <span className="text-[10px] font-semibold text-emerald-600">82 / 100</span>
+        </div>
+        <ProfileChecklist items={placementReadinessChecklist} />
+      </div>
+    </section>
+  );
+}
+
 export function StudentProfile() {
   const [notice, setNotice] = useState("");
 
@@ -703,20 +812,25 @@ export function StudentProfile() {
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-xl font-bold text-cyan-600">{studentProfileData.initials}</div>
             <div className="min-w-0"><h2 className="text-lg font-bold text-slate-900">{studentProfileData.name}</h2><p className="mt-1 text-xs text-slate-600">{studentProfileData.program} · {studentProfileData.batch} Batch</p><div className="mt-2 flex flex-wrap gap-2"><ProfileChip icon={Building2} text={studentProfileData.department} /><ProfileChip icon={FileText} text={`Reg. No. ${studentProfileData.registrationNumber}`} /><ProfileChip icon={Clock3} text={studentProfileData.semester} /></div></div>
           </div>
-          <div className="w-full sm:max-w-[220px]">
+          {/* <div className="w-full sm:max-w-[220px]">
             <div className="flex items-center justify-between text-[10px] font-semibold"><span className="text-slate-500">Profile completion</span><span className="text-cyan-600">{studentProfileData.profileCompletion}%</span></div>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-cyan-500" style={{ width: `${studentProfileData.profileCompletion}%` }} /></div>
             <p className="mt-2 text-[10px] text-slate-500">Add a certification to reach 100%.</p>
-          </div>
+          </div> */}
         </div>
       </section>
+
+      <div className="grid items-stretch gap-4 lg:grid-cols-2">
+        <ProfileCompletionCard onComplete={() => setNotice("Profile editing will be available in the next update.")} />
+        <PlacementReadinessCard />
+      </div>
 
       <ProfileGroup
         title="Basic Information & Academic Performance"
         description="Keep your personal details and academic progress current for placement eligibility."
         icon={GraduationCap}
       >
-        <div className="grid items-start gap-4 xl:grid-cols-2">
+        <div className="grid items-stretch gap-4 xl:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-4">
             <BasicDetailsCard />
             <ResumeCard onNotice={setNotice} />
@@ -730,7 +844,7 @@ export function StudentProfile() {
         description="Build a stronger profile with the skills, experience, and documents recruiters look for."
         icon={BriefcaseBusiness}
       >
-        <div className="grid items-start gap-4 xl:grid-cols-2">
+        <div className="grid items-stretch gap-4 xl:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-4">
             <SkillsCard />
             <InternshipsCard />
@@ -744,7 +858,7 @@ export function StudentProfile() {
         description="Showcase the achievements and involvement that make your profile stand out."
         icon={Trophy}
       >
-        <div className="grid items-start gap-4 xl:grid-cols-3">
+        <div className="grid items-stretch gap-4 xl:grid-cols-3">
           <ExtracurricularsCard />
           <SportsPrizesCard />
           <AwardsCard />
@@ -775,7 +889,7 @@ function BasicDetailsCard() {
 
 function AcademicPerformanceCard() {
   return (
-    <ProfileSection title="Academic Performance" icon={GraduationCap}>
+    <ProfileSection title="Academic Performance" icon={GraduationCap} className="h-full">
       <div className="grid grid-cols-3 gap-2">
         <ProfileMetric label="CGPA" value={`${studentProfileData.cgpa} / 10`} tone="bg-cyan-50 text-cyan-600" />
         <ProfileMetric label="Attendance" value={studentProfileData.attendance} tone="bg-emerald-50 text-emerald-600" />
@@ -789,7 +903,7 @@ function AcademicPerformanceCard() {
           </div>
           <span className="text-[10px] font-medium text-emerald-600">Improving trend</span>
         </div>
-        <div className="mt-3 max-h-72 space-y-2 overflow-y-auto pr-1">
+        <div className="mt-3 max-h-64 space-y-2 overflow-y-auto pr-1">
           {studentProfileData.semesterScores.map((semester) => (
             <div key={semester.label} className="rounded-lg bg-slate-50/80 p-2">
               <div className="flex items-center justify-between text-[10px]">
@@ -821,7 +935,7 @@ function SkillsCard() {
 }
 
 function ProjectsCard() {
-  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><FileText size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Projects</h2><p className="mt-1 text-[10px] text-slate-500">Work that demonstrates your technical experience.</p></div></div><span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-600">{studentProfileData.projects.length} projects</span></div><div className="mt-4 space-y-3">{studentProfileData.projects.map((project) => <article key={project.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><div className="flex flex-wrap items-start justify-between gap-2"><div><h3 className="text-xs font-bold text-slate-800">{project.title}</h3><p className="mt-1 text-[10px] text-slate-500">{project.type}</p></div><span className="text-[10px] font-semibold text-cyan-600">View details <ChevronRight size={12} className="inline" /></span></div><p className="mt-2 text-[11px] leading-4 text-slate-600">{project.description}</p><div className="mt-2 flex flex-wrap gap-1.5">{project.technologies.map((technology) => <span key={technology} className="rounded bg-white px-2 py-1 text-[9px] font-medium text-slate-600">{technology}</span>)}</div></article>)}</div></DetailCard>;
+  return <DetailCard className="h-full"><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><FileText size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Projects</h2><p className="mt-1 text-[10px] text-slate-500">Work that demonstrates your technical experience.</p></div></div><span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-600">{studentProfileData.projects.length} projects</span></div><div className="mt-4 space-y-3">{studentProfileData.projects.map((project) => <article key={project.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><div className="flex flex-wrap items-start justify-between gap-2"><div><h3 className="text-xs font-bold text-slate-800">{project.title}</h3><p className="mt-1 text-[10px] text-slate-500">{project.type}</p></div><span className="text-[10px] font-semibold text-cyan-600">View details <ChevronRight size={12} className="inline" /></span></div><p className="mt-2 text-[11px] leading-4 text-slate-600">{project.description}</p><div className="mt-2 flex flex-wrap gap-1.5">{project.technologies.map((technology) => <span key={technology} className="rounded bg-white px-2 py-1 text-[9px] font-medium text-slate-600">{technology}</span>)}</div></article>)}</div></DetailCard>;
 }
 
 function InternshipsCard() {
@@ -833,19 +947,19 @@ function ResumeCard({ onNotice }: { onNotice: (message: string) => void }) {
 }
 
 function SportsPrizesCard() {
-  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-500"><Trophy size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Sports &amp; Prizes</h2><p className="mt-1 text-[10px] text-slate-500">Participation and achievements outside academics.</p></div></div><span className="rounded-md bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-600">{studentProfileData.sports.length} entries</span></div><div className="mt-4 space-y-3">{studentProfileData.sports.map((sport) => <div key={sport.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-amber-500"><Trophy size={16} /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-2"><p className="text-xs font-bold text-slate-800">{sport.title}</p><span className="text-[9px] font-medium text-slate-500">{sport.period}</span></div><p className="mt-1 text-[10px] leading-4 text-slate-600">{sport.detail}</p></div></div>)}</div></DetailCard>;
+  return <DetailCard className="h-full"><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-500"><Trophy size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Sports &amp; Prizes</h2><p className="mt-1 text-[10px] text-slate-500">Participation and achievements outside academics.</p></div></div><span className="rounded-md bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-600">{studentProfileData.sports.length} entries</span></div><div className="mt-4 space-y-3">{studentProfileData.sports.map((sport) => <div key={sport.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-amber-500"><Trophy size={16} /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-2"><p className="text-xs font-bold text-slate-800">{sport.title}</p><span className="text-[9px] font-medium text-slate-500">{sport.period}</span></div><p className="mt-1 text-[10px] leading-4 text-slate-600">{sport.detail}</p></div></div>)}</div></DetailCard>;
 }
 
 function ExtracurricularsCard() {
-  return <DetailCard><div className="flex items-start gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600"><Megaphone size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Extra-curricular Activities</h2><p className="mt-1 text-[10px] text-slate-500">Leadership, volunteering, and campus involvement.</p></div></div><div className="mt-4 space-y-3">{studentProfileData.extracurriculars.map((activity) => <div key={activity.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-violet-500"><Megaphone size={16} /></span><div><p className="text-xs font-bold text-slate-800">{activity.title}</p><p className="mt-1 text-[10px] leading-4 text-slate-600">{activity.detail}</p></div></div>)}</div></DetailCard>;
+  return <DetailCard className="h-full"><div className="flex items-start gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600"><Megaphone size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Extra-curricular Activities</h2><p className="mt-1 text-[10px] text-slate-500">Leadership, volunteering, and campus involvement.</p></div></div><div className="mt-4 space-y-3">{studentProfileData.extracurriculars.map((activity) => <div key={activity.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-violet-500"><Megaphone size={16} /></span><div><p className="text-xs font-bold text-slate-800">{activity.title}</p><p className="mt-1 text-[10px] leading-4 text-slate-600">{activity.detail}</p></div></div>)}</div></DetailCard>;
 }
 
 function AwardsCard() {
-  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><CheckCircle2 size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Awards &amp; Recognition</h2><p className="mt-1 text-[10px] text-slate-500">Honours that strengthen your placement profile.</p></div></div><span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-600">{studentProfileData.awards.length} awards</span></div><div className="mt-4 space-y-3">{studentProfileData.awards.map((award) => <div key={award.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-cyan-500"><CheckCircle2 size={16} /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-2"><p className="text-xs font-bold text-slate-800">{award.title}</p><span className="text-[9px] font-medium text-slate-500">{award.year}</span></div><p className="mt-1 text-[10px] leading-4 text-slate-600">{award.detail}</p></div></div>)}</div></DetailCard>;
+  return <DetailCard className="h-full"><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><CheckCircle2 size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Awards &amp; Recognition</h2><p className="mt-1 text-[10px] text-slate-500">Honours that strengthen your placement profile.</p></div></div><span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-600">{studentProfileData.awards.length} awards</span></div><div className="mt-4 space-y-3">{studentProfileData.awards.map((award) => <div key={award.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-cyan-500"><CheckCircle2 size={16} /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-2"><p className="text-xs font-bold text-slate-800">{award.title}</p><span className="text-[9px] font-medium text-slate-500">{award.year}</span></div><p className="mt-1 text-[10px] leading-4 text-slate-600">{award.detail}</p></div></div>)}</div></DetailCard>;
 }
 
-function ProfileSection({ title, icon: Icon, action, children }: { title: string; icon: React.ElementType; action?: React.ReactNode; children: React.ReactNode }) {
-  return <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><Icon size={16} /></span><h2 className="text-sm font-bold text-slate-800 sm:text-base">{title}</h2></div>{action}</div><div className="mt-4">{children}</div></section>;
+function ProfileSection({ title, icon: Icon, action, className = "", children }: { title: string; icon: React.ElementType; action?: React.ReactNode; className?: string; children: React.ReactNode }) {
+  return <section className={`rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 ${className}`}><div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><Icon size={16} /></span><h2 className="text-sm font-bold text-slate-800 sm:text-base">{title}</h2></div>{action}</div><div className="mt-4">{children}</div></section>;
 }
 
 function ProfileChip({ icon: Icon, text }: { icon: React.ElementType; text: string }) {

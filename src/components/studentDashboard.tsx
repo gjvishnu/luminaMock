@@ -1,5 +1,4 @@
 import {
-  AlertTriangle,
   ArrowRight,
   BrainCircuit,
   CheckCircle2,
@@ -9,30 +8,6 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-
-type ChecklistItem = {
-  label: string;
-  status: "done" | "warning";
-};
-
-const profileChecklist: ChecklistItem[] = [
-  { label: "Personal Details", status: "done" },
-  { label: "Internship Details", status: "warning" },
-  { label: "Academic Details", status: "done" },
-  { label: "Resume", status: "warning" },
-  { label: "Skills", status: "done" },
-  { label: "Projects", status: "done" },
-];
-
-const readinessChecklist: ChecklistItem[] = [
-  { label: "CGPA", status: "done" },
-  { label: "Certificates", status: "done" },
-  { label: "Resume", status: "done" },
-  { label: "Add 1 more project", status: "warning" },
-  { label: "Projects", status: "done" },
-  { label: "Add internship details", status: "warning" },
-  { label: "Skills", status: "done" },
-];
 
 const recommendedJobs = [
   { company: "TCS", role: "Software Engineer", logo: "tcs", match: "92% Match", package: "₹7.5 LPA", departments: "CSE, IT", deadline: "Sep 05, 2026" },
@@ -113,7 +88,7 @@ function PlacementOverviewCard() {
         <ProgressBar value={78} label="Profile Completion" color="bg-cyan-500" />
         <ProgressBar value={82} label="Placement Readiness" color="bg-emerald-500" />
       </div>
-      <span className="text-cyan-400 border-b text-xs cursor-pointer mt-2">Comple profile</span>
+      <span className="text-cyan-400 border-b text-xs cursor-pointer mt-2">Complete profile</span>
 
       <div className="mt-4">
         <div className="flex items-center justify-between gap-3">
@@ -130,25 +105,6 @@ function PlacementOverviewCard() {
         </div>
       </div>
 
-      <div className="mt-4 border-t border-slate-100 pt-3">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">Quick checklist</p>
-          <span className="text-[10px] font-semibold text-emerald-600">Good progress</span>
-        </div>
-        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1.5">
-          {profileChecklist.slice(0, 4).map((item) => {
-            const Icon = item.status === "done" ? CheckCircle2 : AlertTriangle;
-
-            return <span key={`profile-${item.label}`} className="flex min-w-0 items-center gap-1.5 text-[9px] text-slate-600"><Icon size={12} className={item.status === "done" ? "shrink-0 text-emerald-500" : "shrink-0 text-amber-500"} /> <span className="truncate">{item.label}</span></span>;
-          })}
-          {readinessChecklist.slice(0, 4).map((item) => {
-            const Icon = item.status === "done" ? CheckCircle2 : AlertTriangle;
-
-            return <span key={`readiness-${item.label}`} className="flex min-w-0 items-center gap-1.5 text-[9px] text-slate-600"><Icon size={12} className={item.status === "done" ? "shrink-0 text-emerald-500" : "shrink-0 text-amber-500"} /> <span className="truncate">{item.label}</span></span>;
-          })}
-        </div>
-      </div>
-
       <button type="button" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-500 hover:text-cyan-700">
         View Applications
         <ArrowRight size={14} />
@@ -159,7 +115,7 @@ function PlacementOverviewCard() {
 
 function RecommendedJobsCard() {
   return (
-    <section className={`${cardClass} min-h-[280px] max-h-[360px] overflow-x-hidden overflow-y-auto bg-white xl:col-span-4`}>
+    <section className={`${cardClass} min-h-[280px] max-h-[360px] overflow-x-hidden overflow-y-auto bg-white`}>
       <div className="border-b border-slate-100 p-4 sm:px-5">
         <SectionHeading title="Recommended For You" />
       </div>
@@ -196,7 +152,7 @@ function RecommendedJobsCard() {
 
 function SkillDemandCard() {
   return (
-    <section className={`${cardClass} min-h-[280px] max-h-[360px] p-4 sm:p-5 xl:col-span-4`}>
+    <section className={`${cardClass} min-h-[280px] max-h-[360px] p-4 sm:p-5`}>
       <SectionHeading title="Skills Companies Are Looking For" />
       <div className="mt-5 space-y-3.5">
         {skillDemand.map((skill) => (
@@ -281,18 +237,6 @@ function LuminaInsightsCard() {
           <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-cyan-100 px-2 py-1 text-[9px] font-bold text-cyan-700"><BrainCircuit size={11} /> Personalised</span>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-lg border border-emerald-100 bg-emerald-50/70 p-2.5">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-700"><TrendingUp size={13} /> What&apos;s helping</div>
-            <p className="mt-2 text-[10px] leading-4 text-slate-700">8.72 CGPA and 3 projects give you a strong base.</p>
-          </div>
-          <div className="rounded-lg border border-rose-100 bg-rose-50/70 p-2.5">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-rose-600"><AlertTriangle size={13} /> What&apos;s holding you back</div>
-            <p className="mt-2 text-[10px] leading-4 text-slate-700">AWS, Docker and TypeScript are missing.</p>
-          </div>
-        </div>
-
-       
         <div className="mt-3 grid gap-2 md:grid-cols-3">
           <div className="rounded-lg border border-cyan-100 bg-cyan-50/60 p-3">
             <p className="text-[10px] font-bold uppercase tracking-wide text-cyan-700">Eligibility</p>
@@ -333,6 +277,11 @@ function LuminaInsightsCard() {
             </div>
           </div>
           <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3 text-[10px] font-semibold text-slate-700"><CheckCircle2 size={14} className="text-emerald-500" />Keep your CGPA at 8.7+ to stay in the top 30% of opportunities.</div>
+        </div>
+
+        <div className="mt-3 space-y-1.5 text-[10px] leading-4 text-slate-700">
+          <p><span className="font-bold text-emerald-700">What&apos;s helping:</span> 8.72 CGPA and 3 projects give you a strong base.</p>
+          <p><span className="font-bold text-rose-600">What&apos;s holding you back:</span> AWS, Docker and TypeScript are missing.</p>
         </div>
 
         <div className="mt-3 flex items-start gap-2 rounded-lg border border-cyan-100 bg-cyan-50/60 px-3 py-2.5 text-[10px] leading-4 text-cyan-800">
@@ -379,7 +328,7 @@ export function StudentDashboard() {
         <LuminaInsightsCard />
       </div>
 
-      <div className="grid items-start gap-4 xl:grid-cols-12">
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,3fr)]">
         <RecommendedJobsCard />
         <SkillDemandCard />
         {/* <MissingSkillsCard /> */}
