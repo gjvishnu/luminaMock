@@ -297,7 +297,7 @@ function AnnouncementsCard() {
   return (
     <section className={`${cardClass} h-full min-w-0 overflow-hidden bg-white`}>
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5">
-        <h2 className="text-sm font-bold text-slate-800">Announcements</h2>
+        <h2 className="text font-bold text-slate-800">Announcements</h2>
         <button type="button" className="inline-flex items-center gap-1 text-[10px] font-semibold text-cyan-500">View All <ArrowRight size={13} /></button>
       </div>
       <div className="divide-y divide-slate-100 px-4 sm:px-5">
