@@ -1,6 +1,7 @@
-import {
+﻿import {
   AlertTriangle,
   ArrowLeft,
+  ArrowRight,
   Bookmark,
   BrainCircuit,
   BriefcaseBusiness,
@@ -11,6 +12,7 @@ import {
   ChevronRight,
   CircleMinus,
   Clock3,
+  Download,
   Eye,
   FileText,
   Filter,
@@ -58,7 +60,7 @@ const jobListings: JobListing[] = [
     role: "Software Engineer",
     skills: ["C, C++, Java", "SQL", "OOPs", "+2"],
     location: "Bangalore",
-    ctc: "₹7.5 LPA",
+    ctc: "â‚¹7.5 LPA",
     applyBy: "05 Sep 2026",
     daysLeft: 5,
     match: 92,
@@ -72,7 +74,7 @@ const jobListings: JobListing[] = [
     role: "System Engineer",
     skills: ["Python", "SQL", "Linux", "+1"],
     location: "Pune",
-    ctc: "₹6.5 LPA",
+    ctc: "â‚¹6.5 LPA",
     applyBy: "08 Sep 2026",
     daysLeft: 8,
     match: 87,
@@ -86,7 +88,7 @@ const jobListings: JobListing[] = [
     role: "Software Developer",
     skills: ["JavaScript", "React", "Node.js", "+1"],
     location: "Chennai",
-    ctc: "₹8.0 LPA",
+    ctc: "â‚¹8.0 LPA",
     applyBy: "12 Sep 2026",
     daysLeft: 12,
     match: 82,
@@ -100,7 +102,7 @@ const jobListings: JobListing[] = [
     role: "Project Engineer",
     skills: ["Java", "SQL", "DSA", "+1"],
     location: "Hyderabad",
-    ctc: "₹6.0 LPA",
+    ctc: "â‚¹6.0 LPA",
     applyBy: "18 Sep 2026",
     daysLeft: 18,
     match: 78,
@@ -114,7 +116,7 @@ const jobListings: JobListing[] = [
     role: "Associate Software Engineer",
     skills: ["Python", "SQL", "OOPs", "+2"],
     location: "Bangalore",
-    ctc: "₹7.0 LPA",
+    ctc: "â‚¹7.0 LPA",
     applyBy: "20 Sep 2026",
     daysLeft: 20,
     match: 74,
@@ -128,7 +130,7 @@ const jobListings: JobListing[] = [
     role: "Graduate Engineer Trainee",
     skills: ["C#", ".NET", "SQL", "+1"],
     location: "Kolkata",
-    ctc: "₹6.5 LPA",
+    ctc: "â‚¹6.5 LPA",
     applyBy: "22 Sep 2026",
     daysLeft: 22,
     match: 72,
@@ -142,7 +144,7 @@ const jobListings: JobListing[] = [
     role: "Software Engineer",
     skills: ["Java", "Spring", "SQL", "+1"],
     location: "Mumbai",
-    ctc: "₹6.8 LPA",
+    ctc: "â‚¹6.8 LPA",
     applyBy: "25 Sep 2026",
     daysLeft: 25,
     match: 69,
@@ -156,7 +158,7 @@ const jobListings: JobListing[] = [
     role: "Analyst",
     skills: ["Python", "SQL", "Excel", "+1"],
     location: "Bangalore",
-    ctc: "₹5.5 LPA",
+    ctc: "â‚¹5.5 LPA",
     applyBy: "28 Sep 2026",
     daysLeft: 28,
     match: 65,
@@ -304,14 +306,14 @@ const studentProfileData = {
     {
       role: "Frontend Developer Intern",
       company: "BlueOrbit Technologies",
-      duration: "May 2025 – Jul 2025",
+      duration: "May 2025 - Jul 2025",
       description:
         "Built responsive dashboard screens and reusable React components.",
     },
     {
       role: "Software Engineering Intern",
       company: "Lumina Labs",
-      duration: "Jan 2025 – Mar 2025",
+      duration: "Jan 2025 - Mar 2025",
       description:
         "Worked on REST APIs, database queries, and automated testing.",
     },
@@ -324,12 +326,12 @@ const studentProfileData = {
   sports: [
     {
       title: "University Cricket Team",
-      detail: "Vice Captain · Inter-college runner-up",
-      period: "2024 – 2026",
+      detail: "Vice Captain  -  Inter-college runner-up",
+      period: "2024 - 2026",
     },
     {
       title: "100m Athletics",
-      detail: "Department sports meet · Gold medal",
+      detail: "Department sports meet  -  Gold medal",
       period: "2025",
     },
   ],
@@ -346,7 +348,7 @@ const studentProfileData = {
   awards: [
     {
       title: "Hackathon Winner",
-      detail: "1st place · Lumina Buildathon 2025",
+      detail: "1st place  -  Lumina Buildathon 2025",
       year: "2025",
     },
     {
@@ -495,7 +497,7 @@ const applicationRows: ApplicationRow[] = [
     logo: "tcs",
     role: "Software Engineer",
     location: "Bangalore",
-    ctc: "₹7.5 LPA",
+    ctc: "â‚¹7.5 LPA",
     appliedOn: "05 Sep 2026",
     status: "Shortlisted",
     updated: "Updated on 10 Sep 2026",
@@ -509,7 +511,7 @@ const applicationRows: ApplicationRow[] = [
     logo: "Infosys",
     role: "System Engineer",
     location: "Pune",
-    ctc: "₹6.5 LPA",
+    ctc: "â‚¹6.5 LPA",
     appliedOn: "08 Sep 2026",
     status: "In Process",
     updated: "Updated on 12 Sep 2026",
@@ -523,7 +525,7 @@ const applicationRows: ApplicationRow[] = [
     logo: "ZOHO",
     role: "Software Developer",
     location: "Chennai",
-    ctc: "₹8.0 LPA",
+    ctc: "â‚¹8.0 LPA",
     appliedOn: "12 Sep 2026",
     status: "In Process",
     updated: "Updated on 14 Sep 2026",
@@ -537,7 +539,7 @@ const applicationRows: ApplicationRow[] = [
     logo: "wipro",
     role: "Project Engineer",
     location: "Hyderabad",
-    ctc: "₹6.0 LPA",
+    ctc: "â‚¹6.0 LPA",
     appliedOn: "18 Sep 2026",
     status: "Rejected",
     updated: "Updated on 21 Sep 2026",
@@ -551,7 +553,7 @@ const applicationRows: ApplicationRow[] = [
     logo: "accenture",
     role: "Associate Software Engineer",
     location: "Bangalore",
-    ctc: "₹7.0 LPA",
+    ctc: "â‚¹7.0 LPA",
     appliedOn: "20 Sep 2026",
     status: "Offer",
     updated: "Updated on 22 Sep 2026",
@@ -565,7 +567,7 @@ const applicationRows: ApplicationRow[] = [
     logo: "cognizant",
     role: "Graduate Engineer Trainee",
     location: "Kolkata",
-    ctc: "₹6.5 LPA",
+    ctc: "â‚¹6.5 LPA",
     appliedOn: "22 Sep 2026",
     status: "Withdrawn",
     updated: "Updated on 23 Sep 2026",
@@ -587,13 +589,248 @@ const applicationTabs: {
   { label: "Withdrawn", status: "Withdrawn", count: 1 },
 ];
 
-function PageHeader({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+type WorkflowStepStatus = "done" | "current" | "pending" | "rejected" | "withdrawn";
+
+type WorkflowStep = {
+  label: string;
+  date: string;
+  status: WorkflowStepStatus;
+};
+
+type ApplicationDocument = {
+  name: string;
+  size: string;
+};
+
+type ApplicationDetailInfo = {
+  jobDescription: string;
+  responsibilities: string[];
+  eligibility: string[];
+  workflow: WorkflowStep[];
+  documents: ApplicationDocument[];
+};
+
+const applicationDetails: Record<string, ApplicationDetailInfo> = {
+  tcs: {
+    jobDescription: "TCS is hiring Software Engineers for its Bangalore delivery center to work on enterprise application development and modernization projects for global clients, as part of the Ninja / Digital hiring track.",
+    responsibilities: ["Design, develop and unit-test application modules", "Participate in code reviews and daily stand-ups", "Debug and resolve production support issues"],
+    eligibility: ["B.E. / B.Tech, CGPA 6.5+, no active backlogs", "Core Java, SQL and OOP fundamentals", "Good communication and problem-solving skills"],
+    workflow: [
+      { label: "Applied", date: "05 Sep", status: "done" },
+      { label: "Shortlisted", date: "10 Sep", status: "done" },
+      { label: "Technical Interview", date: "18 Sep", status: "current" },
+      { label: "HR Interview", date: "Pending", status: "pending" },
+      { label: "Offer", date: "Pending", status: "pending" },
+    ],
+    documents: [{ name: "Job_Description_TCS_SE.pdf", size: "180 KB" }],
+  },
+  infosys: {
+    jobDescription: "Infosys is hiring System Engineers for application development, testing and support projects across global client accounts as part of the campus hiring track.",
+    responsibilities: ["Support design, coding and testing of software modules", "Assist in requirement analysis and documentation", "Coordinate with senior engineers on delivery timelines"],
+    eligibility: ["B.E. / B.Tech, CGPA 6.0+, no active backlogs", "Python, SQL and Linux fundamentals", "Strong analytical and communication skills"],
+    workflow: [
+      { label: "Applied", date: "08 Sep", status: "done" },
+      { label: "Shortlisted", date: "12 Sep", status: "done" },
+      { label: "Technical Interview", date: "15 Sep", status: "done" },
+      { label: "HR Interview", date: "20 Sep", status: "current" },
+      { label: "Offer", date: "Pending", status: "pending" },
+    ],
+    documents: [{ name: "Job_Description_Infosys_SE.pdf", size: "165 KB" }],
+  },
+  zoho: {
+    jobDescription: "Zoho Corporation is hiring Software Developers to build and maintain features across its suite of SaaS products used by businesses worldwide.",
+    responsibilities: ["Build and maintain product features end-to-end", "Write clean, tested and maintainable code", "Collaborate closely with product and QA teams"],
+    eligibility: ["B.E. / B.Tech, CGPA 7.0+, no active backlogs", "JavaScript, React and Node.js fundamentals", "Strong problem-solving ability"],
+    workflow: [
+      { label: "Applied", date: "12 Sep", status: "done" },
+      { label: "Shortlisted", date: "14 Sep", status: "done" },
+      { label: "Group Discussion", date: "16 Sep", status: "current" },
+      { label: "Technical Interview", date: "Pending", status: "pending" },
+      { label: "Offer", date: "Pending", status: "pending" },
+    ],
+    documents: [{ name: "Job_Description_Zoho_Developer.pdf", size: "150 KB" }],
+  },
+  wipro: {
+    jobDescription: "Wipro is hiring Project Engineers to support delivery of client projects across infrastructure and application services.",
+    responsibilities: ["Assist project leads with planning and execution", "Prepare status reports and documentation", "Support testing and deployment activities"],
+    eligibility: ["B.E. / B.Tech, CGPA 6.0+, no active backlogs", "Java, SQL and DSA fundamentals", "Good communication skills"],
+    workflow: [
+      { label: "Applied", date: "18 Sep", status: "done" },
+      { label: "Shortlisted", date: "19 Sep", status: "done" },
+      { label: "Technical Interview", date: "21 Sep", status: "done" },
+      { label: "HR Interview", date: "Not Selected", status: "rejected" },
+      { label: "Offer", date: "-", status: "pending" },
+    ],
+    documents: [{ name: "Job_Description_Wipro_PE.pdf", size: "140 KB" }],
+  },
+  accenture: {
+    jobDescription: "Accenture is hiring Associate Software Engineers to work on application development and modernization engagements for global clients.",
+    responsibilities: ["Develop and test application components", "Participate in agile ceremonies and sprint planning", "Document technical designs and decisions"],
+    eligibility: ["B.E. / B.Tech, CGPA 6.5+, no active backlogs", "Python, SQL and OOP fundamentals", "Adaptability and teamwork"],
+    workflow: [
+      { label: "Applied", date: "20 Sep", status: "done" },
+      { label: "Shortlisted", date: "20 Sep", status: "done" },
+      { label: "Technical Interview", date: "21 Sep", status: "done" },
+      { label: "HR Interview", date: "22 Sep", status: "done" },
+      { label: "Offer", date: "22 Sep", status: "done" },
+    ],
+    documents: [{ name: "Job_Description_Accenture_ASE.pdf", size: "155 KB" }],
+  },
+  cognizant: {
+    jobDescription: "Cognizant is hiring Graduate Engineer Trainees for its technology services and consulting teams working with global clients.",
+    responsibilities: ["Support development and testing of client applications", "Learn and apply engineering best practices", "Participate in structured training programs"],
+    eligibility: ["B.E. / B.Tech, CGPA 6.0+, no active backlogs", "C#, .NET and SQL fundamentals", "Willingness to learn and relocate"],
+    workflow: [
+      { label: "Applied", date: "22 Sep", status: "done" },
+      { label: "Shortlisted", date: "Withdrawn", status: "withdrawn" },
+      { label: "Technical Interview", date: "Pending", status: "pending" },
+      { label: "HR Interview", date: "Pending", status: "pending" },
+      { label: "Offer", date: "Pending", status: "pending" },
+    ],
+    documents: [{ name: "Job_Description_Cognizant_GET.pdf", size: "145 KB" }],
+  },
+};
+
+const workflowStepStyles: Record<WorkflowStepStatus, { ring: string; icon: string; label: string }> = {
+  done: { ring: "border-emerald-500 text-emerald-600", icon: "text-emerald-600", label: "text-slate-800" },
+  current: { ring: "border-cyan-500 text-cyan-600", icon: "text-cyan-600", label: "text-slate-800" },
+  pending: { ring: "border-slate-200 text-slate-300", icon: "text-slate-300", label: "text-slate-400" },
+  rejected: { ring: "border-rose-500 text-rose-500", icon: "text-rose-500", label: "text-slate-800" },
+  withdrawn: { ring: "border-slate-300 text-slate-400", icon: "text-slate-400", label: "text-slate-400" },
+};
+
+function WorkflowStepIndicator({ step, isLast }: { step: WorkflowStep; isLast: boolean }) {
+  const style = workflowStepStyles[step.status];
+  const Icon = step.status === "done" ? CheckCircle2 : step.status === "rejected" ? AlertTriangle : step.status === "withdrawn" ? CircleMinus : Clock3;
+
+  return (
+    <div className="flex min-w-0 flex-1 items-start">
+      <div className="flex min-w-[92px] flex-1 flex-col items-center text-center">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white ${style.ring}`}>
+          <Icon size={18} />
+        </div>
+        <p className={`mt-2 text-[11px] font-bold ${style.label}`}>{step.label}</p>
+        <p className="mt-0.5 text-[10px] font-medium text-slate-500">{step.date}</p>
+      </div>
+      {!isLast && <ArrowRight size={18} className="mt-4 shrink-0 text-slate-300" />}
+    </div>
+  );
+}
+
+function ApplicationDetailsView({ application, onBack }: { application: ApplicationRow; onBack: () => void }) {
+  const detail = applicationDetails[application.id] ?? applicationDetails.tcs;
+  const [notes, setNotes] = useState<{ text: string; date: string }[]>([]);
+  const [noteDraft, setNoteDraft] = useState("");
+
+  const saveNote = () => {
+    if (!noteDraft.trim()) {
+      return;
+    }
+
+    setNotes((current) => [{ text: noteDraft.trim(), date: "Just now" }, ...current]);
+    setNoteDraft("");
+  };
+
+  return (
+    <div className="space-y-3 pb-5 text-slate-800">
+      <button type="button" onClick={onBack} className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-cyan-500">
+        <ArrowLeft size={15} />
+        Back to Applications
+      </button>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 items-start gap-4">
+            <ApplicationLogo application={application} />
+            <div className="min-w-0">
+              <h1 className="text-lg font-bold text-slate-900 sm:text-xl">{application.companyName}</h1>
+              <p className="mt-1 text-sm text-slate-600">{application.role}</p>
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] font-medium text-slate-600 sm:text-xs">
+                <span className="inline-flex items-center gap-1.5"><MapPin size={14} className="text-slate-400" />{application.location}</span>
+                <span className="inline-flex items-center gap-1.5"><BriefcaseBusiness size={14} className="text-slate-400" />Full Time</span>
+                <span className="inline-flex items-center gap-1.5"><FileText size={14} className="text-slate-400" />{application.ctc}</span>
+              </div>
+            </div>
+          </div>
+          <ApplicationStatus status={application.status} />
+        </div>
+        <p className="mt-4 border-t border-slate-100 pt-3 text-[11px] text-slate-500">Applied on {application.appliedOn}  -  Last {application.updated.toLowerCase()}</p>
+      </section>
+
+      <section className="rounded-lg border border-cyan-100 bg-cyan-50/60 px-4 py-3 text-xs text-cyan-800 sm:px-5">
+        <p className="font-semibold">Next step: {application.nextStep}</p>
+        <p className="mt-1 text-cyan-700">{application.nextDate}</p>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <h2 className="text-sm font-bold text-slate-800 sm:text-base">Job Description</h2>
+        <p className="mt-3 text-xs leading-5 text-slate-600">{detail.jobDescription}</p>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <div>
+            <h3 className="text-xs font-bold text-cyan-600">Responsibilities</h3>
+            <ul className="mt-2 space-y-1.5 text-[11px] leading-5 text-slate-600">
+              {detail.responsibilities.map((item) => <li key={item} className="flex items-start gap-2"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400" />{item}</li>)}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-xs font-bold text-cyan-600">Eligibility &amp; Skills</h3>
+            <ul className="mt-2 space-y-1.5 text-[11px] leading-5 text-slate-600">
+              {detail.eligibility.map((item) => <li key={item} className="flex items-start gap-2"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400" />{item}</li>)}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <h2 className="text-sm font-bold text-slate-800 sm:text-base">Hiring Workflow</h2>
+        <div className="mt-5 overflow-x-auto pb-1">
+          <div className="flex min-w-[560px] items-start justify-between gap-1 px-1">
+            {detail.workflow.map((step, index) => <WorkflowStepIndicator key={step.label} step={step} isLast={index === detail.workflow.length - 1} />)}
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-3 lg:grid-cols-2">
+        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <h2 className="text-sm font-bold text-slate-800 sm:text-base">Documents</h2>
+          <div className="mt-3 divide-y divide-slate-100">
+            {detail.documents.map((document) => (
+              <div key={document.name} className="flex items-center gap-2.5 py-2.5">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-rose-50 text-rose-500"><FileText size={16} /></span>
+                <span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold text-slate-700">{document.name}</span><span className="block text-[10px] text-slate-500">{document.size}</span></span>
+                <button type="button" aria-label={`Download ${document.name}`} className="text-slate-400 transition hover:text-cyan-600"><Download size={15} /></button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <h2 className="text-sm font-bold text-slate-800 sm:text-base">Notes</h2>
+          <div className="mt-3 space-y-2">
+            {notes.length === 0 && <p className="text-[11px] text-slate-400">No notes added yet.</p>}
+            {notes.map((note, index) => (
+              <div key={`${note.date}-${index}`} className="rounded-md bg-slate-50/80 px-3 py-2 text-[11px] text-slate-600">
+                <p>{note.text}</p>
+                <p className="mt-1 text-[10px] text-slate-400">{note.date}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <input value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} placeholder="Add a personal note..." className="h-9 w-full rounded-md border border-slate-200 px-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100" />
+            <button type="button" onClick={saveNote} className="h-9 shrink-0 rounded-md border border-cyan-300 px-3 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">Save</button>
+          </div>
+        </section>
+      </div>
+
+      <div className="flex justify-end">
+        <button type="button" className="h-9 rounded-md border border-rose-200 px-4 text-xs font-semibold text-rose-500 transition hover:bg-rose-50">Withdraw Application</button>
+      </div>
+    </div>
+  );
+}
+
+function PageHeader({ title, description }: { title: string; description: string }) {
   return (
     <div>
       <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
@@ -1198,7 +1435,7 @@ function MatchCard({ job }: { job: JobListing }) {
           </span>
         </div>
         <div>
-          <p className="text-xs font-bold text-emerald-600">Great Match! 🎉</p>
+          <p className="text-xs font-bold text-emerald-600">Great Match! ðŸŽ‰</p>
           <p className="mt-1 text-[11px] leading-4 text-slate-600">
             Your profile aligns very well with this job.
           </p>
@@ -1333,7 +1570,7 @@ function AiPlacementInsights({ job }: { job: JobListing }) {
                   Personalized recommendation
                 </p>
                 <p className="mt-1.5 text-xs font-semibold leading-5 text-slate-800">
-                  Focus first on {feedback.commonChallenge.toLowerCase()} — it
+                  Focus first on {feedback.commonChallenge.toLowerCase()} - it
                   is the most repeated challenge in the previous drive feedback.
                 </p>
               </div>
@@ -1482,7 +1719,7 @@ function TipsCard() {
             key={tip}
             className="flex items-start gap-2 text-[11px] leading-4 text-slate-700"
           >
-            <span className="mt-0.5 text-cyan-500">✧</span>
+            <span className="mt-0.5 text-cyan-500">âœ§</span>
             {tip}
           </p>
         ))}
@@ -1506,14 +1743,14 @@ function ReviewsCard() {
       <div className="mt-3 flex items-center gap-2">
         <span className="text-2xl font-bold text-slate-800">4.2</span>
         <span className="text-sm tracking-wide text-orange-400">
-          ★★★★<span className="text-slate-200">★</span>
+          â˜…â˜…â˜…â˜…<span className="text-slate-200">â˜…</span>
         </span>
         <span className="text-[10px] text-slate-500">(320 Reviews)</span>
       </div>
       <p className="mt-3 text-xs leading-5 text-slate-600">
         The interview process is smooth and the work culture is great.
       </p>
-      <p className="mt-2 text-[10px] font-medium text-slate-500">– Anonymous</p>
+      <p className="mt-2 text-[10px] font-medium text-slate-500">- Anonymous</p>
     </DetailCard>
   );
 }
@@ -1566,7 +1803,7 @@ export function StudentJobDetails() {
           <CompanyLogo job={job} large />
           <div className="min-w-0">
             <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-              {job.company} – {job.role}
+              {job.company} - {job.role}
             </h1>
             <p className="mt-1 text-sm text-slate-600">{job.companyName}</p>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
@@ -1722,151 +1959,30 @@ function ApplicationStatus({ status }: { status: ApplicationStatus }) {
   );
 }
 
-function ApplicationTableRow({ application }: { application: ApplicationRow }) {
-  const NextIcon =
-    application.status === "Rejected"
-      ? AlertTriangle
-      : application.status === "Withdrawn"
-        ? CircleMinus
-        : application.status === "Offer"
-          ? CheckCircle2
-          : CalendarDays;
-  const nextTone =
-    application.status === "Rejected"
-      ? "text-rose-500"
-      : application.status === "Withdrawn"
-        ? "text-slate-400"
-        : application.status === "Offer"
-          ? "text-emerald-500"
-          : "text-blue-500";
+function ApplicationTableRow({ application, onView }: { application: ApplicationRow; onView: (id: string) => void }) {
+  const NextIcon = application.status === "Rejected" ? AlertTriangle : application.status === "Withdrawn" ? CircleMinus : application.status === "Offer" ? CheckCircle2 : CalendarDays;
+  const nextTone = application.status === "Rejected" ? "text-rose-500" : application.status === "Withdrawn" ? "text-slate-400" : application.status === "Offer" ? "text-emerald-500" : "text-blue-500";
 
   return (
-    <div
-      role="row"
-      className="grid min-w-[1020px] grid-cols-[2.1fr_1fr_1.15fr_1.65fr_.75fr] items-center gap-4 border-t border-slate-100 px-4 py-4 text-xs sm:px-5"
-    >
-      <div role="cell" className="flex min-w-0 items-center gap-4">
-        <ApplicationLogo application={application} />
-        <div className="min-w-0">
-          <p className="truncate font-bold text-slate-800">
-            {application.companyName}
-          </p>
-          <p className="mt-1 text-xs font-medium text-slate-700">
-            {application.role}
-          </p>
-          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-600">
-            <span className="inline-flex items-center gap-1">
-              <MapPin size={12} />
-              {application.location}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <BriefcaseBusiness size={12} />
-              Full Time
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <FileText size={12} />
-              {application.ctc}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div role="cell" className="font-semibold text-slate-700">
-        {application.appliedOn}
-      </div>
-      <div role="cell">
-        <ApplicationStatus status={application.status} />
-        <p className="mt-2 text-[10px] text-slate-500">{application.updated}</p>
-      </div>
-      <div role="cell">
-        <p className={`flex items-center gap-2 font-semibold ${nextTone}`}>
-          <NextIcon size={15} />
-          {application.nextStep}
-        </p>
-        <p className="mt-1 text-[11px] text-slate-700">
-          {application.nextDate}
-        </p>
-      </div>
-      <button
-        type="button"
-        className="h-8 rounded-md border border-cyan-300 px-2 text-[10px] font-semibold text-cyan-600 transition hover:bg-cyan-50"
-      >
-        {application.status === "Offer" ? "View Offer" : "View Details"}
-      </button>
+    <div role="row" className="grid min-w-[1020px] grid-cols-[2.1fr_1fr_1.15fr_1.65fr_.75fr] items-center gap-4 border-t border-slate-100 px-4 py-4 text-xs sm:px-5">
+      <div role="cell" className="flex min-w-0 items-center gap-4"><ApplicationLogo application={application} /><div className="min-w-0"><p className="truncate font-bold text-slate-800">{application.companyName}</p><p className="mt-1 text-xs font-medium text-slate-700">{application.role}</p><div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-600"><span className="inline-flex items-center gap-1"><MapPin size={12} />{application.location}</span><span className="inline-flex items-center gap-1"><BriefcaseBusiness size={12} />Full Time</span><span className="inline-flex items-center gap-1"><FileText size={12} />{application.ctc}</span></div></div></div>
+      <div role="cell" className="font-semibold text-slate-700">{application.appliedOn}</div>
+      <div role="cell"><ApplicationStatus status={application.status} /><p className="mt-2 text-[10px] text-slate-500">{application.updated}</p></div>
+      <div role="cell"><p className={`flex items-center gap-2 font-semibold ${nextTone}`}><NextIcon size={15} />{application.nextStep}</p><p className="mt-1 text-[11px] text-slate-700">{application.nextDate}</p></div>
+      <button type="button" onClick={() => onView(application.id)} className="h-8 rounded-md border border-cyan-300 px-2 text-[10px] font-semibold text-cyan-600 transition hover:bg-cyan-50">{application.status === "Offer" ? "View Offer" : "View Details"}</button>
     </div>
   );
 }
 
-function ApplicationMobileCard({
-  application,
-}: {
-  application: ApplicationRow;
-}) {
-  const NextIcon =
-    application.status === "Rejected"
-      ? AlertTriangle
-      : application.status === "Withdrawn"
-        ? CircleMinus
-        : application.status === "Offer"
-          ? CheckCircle2
-          : CalendarDays;
-  const nextTone =
-    application.status === "Rejected"
-      ? "text-rose-500"
-      : application.status === "Withdrawn"
-        ? "text-slate-400"
-        : application.status === "Offer"
-          ? "text-emerald-500"
-          : "text-blue-500";
+function ApplicationMobileCard({ application, onView }: { application: ApplicationRow; onView: (id: string) => void }) {
+  const NextIcon = application.status === "Rejected" ? AlertTriangle : application.status === "Withdrawn" ? CircleMinus : application.status === "Offer" ? CheckCircle2 : CalendarDays;
+  const nextTone = application.status === "Rejected" ? "text-rose-500" : application.status === "Withdrawn" ? "text-slate-400" : application.status === "Offer" ? "text-emerald-500" : "text-blue-500";
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex items-start gap-3">
-        <ApplicationLogo application={application} />
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-bold text-slate-800">
-            {application.companyName}
-          </p>
-          <p className="mt-1 text-xs text-slate-600">{application.role}</p>
-          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500">
-            <span className="inline-flex items-center gap-1">
-              <MapPin size={12} />
-              {application.location}
-            </span>
-            <span>{application.ctc}</span>
-          </div>
-        </div>
-        <ApplicationStatus status={application.status} />
-      </div>
-      <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-3 text-[11px]">
-        <div>
-          <p className="text-[10px] text-slate-500">Applied On</p>
-          <p className="mt-1 font-semibold text-slate-700">
-            {application.appliedOn}
-          </p>
-        </div>
-        <div>
-          <p className="text-[10px] text-slate-500">Updated</p>
-          <p className="mt-1 font-semibold text-slate-700">
-            {application.updated.replace("Updated on ", "")}
-          </p>
-        </div>
-        <div className="col-span-2">
-          <p className="text-[10px] text-slate-500">Next Step / Update</p>
-          <p
-            className={`mt-1 flex items-center gap-1.5 font-semibold ${nextTone}`}
-          >
-            <NextIcon size={14} />
-            {application.nextStep}
-          </p>
-          <p className="mt-1 text-slate-600">{application.nextDate}</p>
-        </div>
-      </div>
-      <button
-        type="button"
-        className="mt-4 h-9 w-full rounded-md border border-cyan-300 text-xs font-semibold text-cyan-600 hover:bg-cyan-50"
-      >
-        {application.status === "Offer" ? "View Offer" : "View Details"}
-      </button>
+      <div className="flex items-start gap-3"><ApplicationLogo application={application} /><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold text-slate-800">{application.companyName}</p><p className="mt-1 text-xs text-slate-600">{application.role}</p><div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500"><span className="inline-flex items-center gap-1"><MapPin size={12} />{application.location}</span><span>{application.ctc}</span></div></div><ApplicationStatus status={application.status} /></div>
+      <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-3 text-[11px]"><div><p className="text-[10px] text-slate-500">Applied On</p><p className="mt-1 font-semibold text-slate-700">{application.appliedOn}</p></div><div><p className="text-[10px] text-slate-500">Updated</p><p className="mt-1 font-semibold text-slate-700">{application.updated.replace("Updated on ", "")}</p></div><div className="col-span-2"><p className="text-[10px] text-slate-500">Next Step / Update</p><p className={`mt-1 flex items-center gap-1.5 font-semibold ${nextTone}`}><NextIcon size={14} />{application.nextStep}</p><p className="mt-1 text-slate-600">{application.nextDate}</p></div></div>
+      <button type="button" onClick={() => onView(application.id)} className="mt-4 h-9 w-full rounded-md border border-cyan-300 text-xs font-semibold text-cyan-600 hover:bg-cyan-50">{application.status === "Offer" ? "View Offer" : "View Details"}</button>
     </section>
   );
 }
@@ -1875,9 +1991,8 @@ export function StudentApplications() {
   const [activeTab, setActiveTab] = useState<ApplicationStatus | "All">("All");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const activeTabDetails = applicationTabs.find((tab) =>
-    activeTab === "All" ? !tab.status : tab.status === activeTab,
-  );
+  const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
+  const activeTabDetails = applicationTabs.find((tab) => (activeTab === "All" ? !tab.status : tab.status === activeTab));
   const filteredApplications = applicationRows.filter((application) => {
     const matchesTab = activeTab === "All" || application.status === activeTab;
     const searchText =
@@ -1885,6 +2000,11 @@ export function StudentApplications() {
     return matchesTab && searchText.includes(search.toLowerCase());
   });
   const totalForTab = activeTabDetails?.count ?? filteredApplications.length;
+  const selectedApplication = applicationRows.find((application) => application.id === selectedApplicationId);
+
+  if (selectedApplication) {
+    return <ApplicationDetailsView application={selectedApplication} onBack={() => setSelectedApplicationId(null)} />;
+  }
 
   return (
     <div className="space-y-4 pb-5 text-slate-800">
@@ -1968,38 +2088,13 @@ export function StudentApplications() {
         </div>
 
         <div className="hidden overflow-x-auto lg:block">
-          <div
-            role="table"
-            aria-label="My applications"
-            className="min-w-[1020px]"
-          >
-            <div
-              role="row"
-              className="grid grid-cols-[2.1fr_1fr_1.15fr_1.65fr_.75fr] gap-4 bg-slate-50/80 px-4 py-4 text-xs font-semibold text-slate-600 sm:px-5"
-            >
-              <span>Company &amp; Role</span>
-              <span>Applied On</span>
-              <span>Current Status</span>
-              <span>Next Step / Update</span>
-              <span>Action</span>
-            </div>
-            {filteredApplications.map((application) => (
-              <ApplicationTableRow
-                key={application.id}
-                application={application}
-              />
-            ))}
+          <div role="table" aria-label="My applications" className="min-w-[1020px]">
+            <div role="row" className="grid grid-cols-[2.1fr_1fr_1.15fr_1.65fr_.75fr] gap-4 bg-slate-50/80 px-4 py-4 text-xs font-semibold text-slate-600 sm:px-5"><span>Company &amp; Role</span><span>Applied On</span><span>Current Status</span><span>Next Step / Update</span><span>Action</span></div>
+            {filteredApplications.map((application) => <ApplicationTableRow key={application.id} application={application} onView={setSelectedApplicationId} />)}
           </div>
         </div>
 
-        <div className="space-y-3 p-3 lg:hidden">
-          {filteredApplications.map((application) => (
-            <ApplicationMobileCard
-              key={application.id}
-              application={application}
-            />
-          ))}
-        </div>
+        <div className="space-y-3 p-3 lg:hidden">{filteredApplications.map((application) => <ApplicationMobileCard key={application.id} application={application} onView={setSelectedApplicationId} />)}</div>
 
         {filteredApplications.length === 0 && (
           <p className="px-4 py-10 text-center text-xs text-slate-500">
@@ -2193,7 +2288,7 @@ function PlacementReadinessCard() {
           color="#45c484"
         />
         <p className="min-w-0 text-[10px] font-semibold leading-4 text-emerald-600">
-          Good — you are doing great!
+          Good - you are doing great!
         </p>
       </div>
       <div className="mt-5 flex-1 border-t border-slate-100 pt-4">
@@ -2258,7 +2353,7 @@ export function StudentProfile() {
                 {studentProfileData.name}
               </h2>
               <p className="mt-1 text-xs text-slate-600">
-                {studentProfileData.program} · {studentProfileData.batch} Batch
+                {studentProfileData.program} - {studentProfileData.batch} Batch
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <ProfileChip
@@ -2386,7 +2481,7 @@ function BasicDetailsCard() {
         <InfoItem
           icon={CalendarDays}
           label="Batch / Semester"
-          value={`${studentProfileData.batch} · ${studentProfileData.semester}`}
+          value={`${studentProfileData.batch}  -  ${studentProfileData.semester}`}
         />
         <InfoItem icon={Mail} label="Email" value={studentProfileData.email} />
         <InfoItem icon={Phone} label="Phone" value={studentProfileData.phone} />
@@ -2680,7 +2775,7 @@ function ResumeCard({
             {studentProfileData.resume.name}
           </p>
           <p className="mt-1 text-[10px] text-slate-500">
-            PDF · {studentProfileData.resume.size} · Updated{" "}
+            PDF  -  {studentProfileData.resume.size}  -  Updated{" "}
             {studentProfileData.resume.updated}
           </p>
         </div>
@@ -2984,11 +3079,6 @@ export function StudentDetails() {
             description="View student profile and placement information."
           />
         </div>
-
-        <span className="inline-flex items-center gap-1.5 rounded-md bg-cyan-50 px-2.5 py-2 text-[10px] font-bold text-cyan-600">
-          <Eye size={14} />
-          Read-only View
-        </span>
       </div>
 
       {/* Student Header */}
@@ -3004,7 +3094,7 @@ export function StudentDetails() {
             </h2>
 
             <p className="mt-1 text-xs text-slate-600">
-              {studentProfileData.program} · {studentProfileData.batch} Batch
+              {studentProfileData.program} - {studentProfileData.batch} Batch
             </p>
 
             <div className="mt-2 flex flex-wrap gap-2">
@@ -3148,7 +3238,7 @@ export function StudentResume() {
               Resume_2026.pdf
             </h2>
             <p className="mt-1 text-[11px] text-slate-500">
-              PDF · Last updated Aug 28, 2026
+              PDF  -  Last updated Aug 28, 2026
             </p>
           </div>
         </div>
@@ -3393,3 +3483,6 @@ export function StudentApplicationDetails() {
     </div>
   );
 }
+
+
+
