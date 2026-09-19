@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, Bookmark, BrainCircuit, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronRight, CircleMinus, Clock3, FileText, Filter, GraduationCap, Lightbulb, Mail, MapPin, Megaphone, Pencil, Phone, RefreshCw, Search, Share2, Sparkles, Target, Trophy, TrendingUp, Upload, UserRound } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, Bookmark, BrainCircuit, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronRight, CircleMinus, Clock3, Download, FileText, Filter, GraduationCap, Lightbulb, Mail, MapPin, Megaphone, Pencil, Phone, RefreshCw, Search, Share2, Sparkles, Target, Trophy, TrendingUp, Upload, UserRound } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -222,6 +222,247 @@ const applicationTabs: { label: string; status?: ApplicationStatus; count: numbe
   { label: "Rejected", status: "Rejected", count: 3 },
   { label: "Withdrawn", status: "Withdrawn", count: 1 },
 ];
+
+type WorkflowStepStatus = "done" | "current" | "pending" | "rejected" | "withdrawn";
+
+type WorkflowStep = {
+  label: string;
+  date: string;
+  status: WorkflowStepStatus;
+};
+
+type ApplicationDocument = {
+  name: string;
+  size: string;
+};
+
+type ApplicationDetailInfo = {
+  jobDescription: string;
+  responsibilities: string[];
+  eligibility: string[];
+  workflow: WorkflowStep[];
+  documents: ApplicationDocument[];
+};
+
+const applicationDetails: Record<string, ApplicationDetailInfo> = {
+  tcs: {
+    jobDescription: "TCS is hiring Software Engineers for its Bangalore delivery center to work on enterprise application development and modernization projects for global clients, as part of the Ninja / Digital hiring track.",
+    responsibilities: ["Design, develop and unit-test application modules", "Participate in code reviews and daily stand-ups", "Debug and resolve production support issues"],
+    eligibility: ["B.E. / B.Tech, CGPA 6.5+, no active backlogs", "Core Java, SQL and OOP fundamentals", "Good communication and problem-solving skills"],
+    workflow: [
+      { label: "Applied", date: "05 Sep", status: "done" },
+      { label: "Shortlisted", date: "10 Sep", status: "done" },
+      { label: "Technical Interview", date: "18 Sep", status: "current" },
+      { label: "HR Interview", date: "Pending", status: "pending" },
+      { label: "Offer", date: "Pending", status: "pending" },
+    ],
+    documents: [{ name: "Job_Description_TCS_SE.pdf", size: "180 KB" }],
+  },
+  infosys: {
+    jobDescription: "Infosys is hiring System Engineers for application development, testing and support projects across global client accounts as part of the campus hiring track.",
+    responsibilities: ["Support design, coding and testing of software modules", "Assist in requirement analysis and documentation", "Coordinate with senior engineers on delivery timelines"],
+    eligibility: ["B.E. / B.Tech, CGPA 6.0+, no active backlogs", "Python, SQL and Linux fundamentals", "Strong analytical and communication skills"],
+    workflow: [
+      { label: "Applied", date: "08 Sep", status: "done" },
+      { label: "Shortlisted", date: "12 Sep", status: "done" },
+      { label: "Technical Interview", date: "15 Sep", status: "done" },
+      { label: "HR Interview", date: "20 Sep", status: "current" },
+      { label: "Offer", date: "Pending", status: "pending" },
+    ],
+    documents: [{ name: "Job_Description_Infosys_SE.pdf", size: "165 KB" }],
+  },
+  zoho: {
+    jobDescription: "Zoho Corporation is hiring Software Developers to build and maintain features across its suite of SaaS products used by businesses worldwide.",
+    responsibilities: ["Build and maintain product features end-to-end", "Write clean, tested and maintainable code", "Collaborate closely with product and QA teams"],
+    eligibility: ["B.E. / B.Tech, CGPA 7.0+, no active backlogs", "JavaScript, React and Node.js fundamentals", "Strong problem-solving ability"],
+    workflow: [
+      { label: "Applied", date: "12 Sep", status: "done" },
+      { label: "Shortlisted", date: "14 Sep", status: "done" },
+      { label: "Group Discussion", date: "16 Sep", status: "current" },
+      { label: "Technical Interview", date: "Pending", status: "pending" },
+      { label: "Offer", date: "Pending", status: "pending" },
+    ],
+    documents: [{ name: "Job_Description_Zoho_Developer.pdf", size: "150 KB" }],
+  },
+  wipro: {
+    jobDescription: "Wipro is hiring Project Engineers to support delivery of client projects across infrastructure and application services.",
+    responsibilities: ["Assist project leads with planning and execution", "Prepare status reports and documentation", "Support testing and deployment activities"],
+    eligibility: ["B.E. / B.Tech, CGPA 6.0+, no active backlogs", "Java, SQL and DSA fundamentals", "Good communication skills"],
+    workflow: [
+      { label: "Applied", date: "18 Sep", status: "done" },
+      { label: "Shortlisted", date: "19 Sep", status: "done" },
+      { label: "Technical Interview", date: "21 Sep", status: "done" },
+      { label: "HR Interview", date: "Not Selected", status: "rejected" },
+      { label: "Offer", date: "—", status: "pending" },
+    ],
+    documents: [{ name: "Job_Description_Wipro_PE.pdf", size: "140 KB" }],
+  },
+  accenture: {
+    jobDescription: "Accenture is hiring Associate Software Engineers to work on application development and modernization engagements for global clients.",
+    responsibilities: ["Develop and test application components", "Participate in agile ceremonies and sprint planning", "Document technical designs and decisions"],
+    eligibility: ["B.E. / B.Tech, CGPA 6.5+, no active backlogs", "Python, SQL and OOP fundamentals", "Adaptability and teamwork"],
+    workflow: [
+      { label: "Applied", date: "20 Sep", status: "done" },
+      { label: "Shortlisted", date: "20 Sep", status: "done" },
+      { label: "Technical Interview", date: "21 Sep", status: "done" },
+      { label: "HR Interview", date: "22 Sep", status: "done" },
+      { label: "Offer", date: "22 Sep", status: "done" },
+    ],
+    documents: [{ name: "Job_Description_Accenture_ASE.pdf", size: "155 KB" }],
+  },
+  cognizant: {
+    jobDescription: "Cognizant is hiring Graduate Engineer Trainees for its technology services and consulting teams working with global clients.",
+    responsibilities: ["Support development and testing of client applications", "Learn and apply engineering best practices", "Participate in structured training programs"],
+    eligibility: ["B.E. / B.Tech, CGPA 6.0+, no active backlogs", "C#, .NET and SQL fundamentals", "Willingness to learn and relocate"],
+    workflow: [
+      { label: "Applied", date: "22 Sep", status: "done" },
+      { label: "Shortlisted", date: "Withdrawn", status: "withdrawn" },
+      { label: "Technical Interview", date: "Pending", status: "pending" },
+      { label: "HR Interview", date: "Pending", status: "pending" },
+      { label: "Offer", date: "Pending", status: "pending" },
+    ],
+    documents: [{ name: "Job_Description_Cognizant_GET.pdf", size: "145 KB" }],
+  },
+};
+
+const workflowStepStyles: Record<WorkflowStepStatus, { ring: string; icon: string; label: string }> = {
+  done: { ring: "border-emerald-500 text-emerald-600", icon: "text-emerald-600", label: "text-slate-800" },
+  current: { ring: "border-cyan-500 text-cyan-600", icon: "text-cyan-600", label: "text-slate-800" },
+  pending: { ring: "border-slate-200 text-slate-300", icon: "text-slate-300", label: "text-slate-400" },
+  rejected: { ring: "border-rose-500 text-rose-500", icon: "text-rose-500", label: "text-slate-800" },
+  withdrawn: { ring: "border-slate-300 text-slate-400", icon: "text-slate-400", label: "text-slate-400" },
+};
+
+function WorkflowStepIndicator({ step, isLast }: { step: WorkflowStep; isLast: boolean }) {
+  const style = workflowStepStyles[step.status];
+  const Icon = step.status === "done" ? CheckCircle2 : step.status === "rejected" ? AlertTriangle : step.status === "withdrawn" ? CircleMinus : Clock3;
+
+  return (
+    <div className="flex min-w-0 flex-1 items-start">
+      <div className="flex min-w-[92px] flex-1 flex-col items-center text-center">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 bg-white ${style.ring}`}>
+          <Icon size={18} />
+        </div>
+        <p className={`mt-2 text-[11px] font-bold ${style.label}`}>{step.label}</p>
+        <p className="mt-0.5 text-[10px] font-medium text-slate-500">{step.date}</p>
+      </div>
+      {!isLast && <ArrowRight size={18} className="mt-4 shrink-0 text-slate-300" />}
+    </div>
+  );
+}
+
+function ApplicationDetailsView({ application, onBack }: { application: ApplicationRow; onBack: () => void }) {
+  const detail = applicationDetails[application.id] ?? applicationDetails.tcs;
+  const [notes, setNotes] = useState<{ text: string; date: string }[]>([]);
+  const [noteDraft, setNoteDraft] = useState("");
+
+  const saveNote = () => {
+    if (!noteDraft.trim()) {
+      return;
+    }
+
+    setNotes((current) => [{ text: noteDraft.trim(), date: "Just now" }, ...current]);
+    setNoteDraft("");
+  };
+
+  return (
+    <div className="space-y-3 pb-5 text-slate-800">
+      <button type="button" onClick={onBack} className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-cyan-500">
+        <ArrowLeft size={15} />
+        Back to Applications
+      </button>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 items-start gap-4">
+            <ApplicationLogo application={application} />
+            <div className="min-w-0">
+              <h1 className="text-lg font-bold text-slate-900 sm:text-xl">{application.companyName}</h1>
+              <p className="mt-1 text-sm text-slate-600">{application.role}</p>
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-[11px] font-medium text-slate-600 sm:text-xs">
+                <span className="inline-flex items-center gap-1.5"><MapPin size={14} className="text-slate-400" />{application.location}</span>
+                <span className="inline-flex items-center gap-1.5"><BriefcaseBusiness size={14} className="text-slate-400" />Full Time</span>
+                <span className="inline-flex items-center gap-1.5"><FileText size={14} className="text-slate-400" />{application.ctc}</span>
+              </div>
+            </div>
+          </div>
+          <ApplicationStatus status={application.status} />
+        </div>
+        <p className="mt-4 border-t border-slate-100 pt-3 text-[11px] text-slate-500">Applied on {application.appliedOn} · Last {application.updated.toLowerCase()}</p>
+      </section>
+
+      <section className="rounded-lg border border-cyan-100 bg-cyan-50/60 px-4 py-3 text-xs text-cyan-800 sm:px-5">
+        <p className="font-semibold">Next step: {application.nextStep}</p>
+        <p className="mt-1 text-cyan-700">{application.nextDate}</p>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <h2 className="text-sm font-bold text-slate-800 sm:text-base">Job Description</h2>
+        <p className="mt-3 text-xs leading-5 text-slate-600">{detail.jobDescription}</p>
+
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <div>
+            <h3 className="text-xs font-bold text-cyan-600">Responsibilities</h3>
+            <ul className="mt-2 space-y-1.5 text-[11px] leading-5 text-slate-600">
+              {detail.responsibilities.map((item) => <li key={item} className="flex items-start gap-2"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400" />{item}</li>)}
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-xs font-bold text-cyan-600">Eligibility &amp; Skills</h3>
+            <ul className="mt-2 space-y-1.5 text-[11px] leading-5 text-slate-600">
+              {detail.eligibility.map((item) => <li key={item} className="flex items-start gap-2"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400" />{item}</li>)}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <h2 className="text-sm font-bold text-slate-800 sm:text-base">Hiring Workflow</h2>
+        <div className="mt-5 overflow-x-auto pb-1">
+          <div className="flex min-w-[560px] items-start justify-between gap-1 px-1">
+            {detail.workflow.map((step, index) => <WorkflowStepIndicator key={step.label} step={step} isLast={index === detail.workflow.length - 1} />)}
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-3 lg:grid-cols-2">
+        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <h2 className="text-sm font-bold text-slate-800 sm:text-base">Documents</h2>
+          <div className="mt-3 divide-y divide-slate-100">
+            {detail.documents.map((document) => (
+              <div key={document.name} className="flex items-center gap-2.5 py-2.5">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-rose-50 text-rose-500"><FileText size={16} /></span>
+                <span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold text-slate-700">{document.name}</span><span className="block text-[10px] text-slate-500">{document.size}</span></span>
+                <button type="button" aria-label={`Download ${document.name}`} className="text-slate-400 transition hover:text-cyan-600"><Download size={15} /></button>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          <h2 className="text-sm font-bold text-slate-800 sm:text-base">Notes</h2>
+          <div className="mt-3 space-y-2">
+            {notes.length === 0 && <p className="text-[11px] text-slate-400">No notes added yet.</p>}
+            {notes.map((note, index) => (
+              <div key={`${note.date}-${index}`} className="rounded-md bg-slate-50/80 px-3 py-2 text-[11px] text-slate-600">
+                <p>{note.text}</p>
+                <p className="mt-1 text-[10px] text-slate-400">{note.date}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <input value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} placeholder="Add a personal note..." className="h-9 w-full rounded-md border border-slate-200 px-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100" />
+            <button type="button" onClick={saveNote} className="h-9 shrink-0 rounded-md border border-cyan-300 px-3 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">Save</button>
+          </div>
+        </section>
+      </div>
+
+      <div className="flex justify-end">
+        <button type="button" className="h-9 rounded-md border border-rose-200 px-4 text-xs font-semibold text-rose-500 transition hover:bg-rose-50">Withdraw Application</button>
+      </div>
+    </div>
+  );
+}
 
 function PageHeader({ title, description }: { title: string; description: string }) {
   return (
@@ -626,7 +867,7 @@ function ApplicationStatus({ status }: { status: ApplicationStatus }) {
   return <span className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-semibold ${tone}`}>{status}</span>;
 }
 
-function ApplicationTableRow({ application }: { application: ApplicationRow }) {
+function ApplicationTableRow({ application, onView }: { application: ApplicationRow; onView: (id: string) => void }) {
   const NextIcon = application.status === "Rejected" ? AlertTriangle : application.status === "Withdrawn" ? CircleMinus : application.status === "Offer" ? CheckCircle2 : CalendarDays;
   const nextTone = application.status === "Rejected" ? "text-rose-500" : application.status === "Withdrawn" ? "text-slate-400" : application.status === "Offer" ? "text-emerald-500" : "text-blue-500";
 
@@ -636,12 +877,12 @@ function ApplicationTableRow({ application }: { application: ApplicationRow }) {
       <div role="cell" className="font-semibold text-slate-700">{application.appliedOn}</div>
       <div role="cell"><ApplicationStatus status={application.status} /><p className="mt-2 text-[10px] text-slate-500">{application.updated}</p></div>
       <div role="cell"><p className={`flex items-center gap-2 font-semibold ${nextTone}`}><NextIcon size={15} />{application.nextStep}</p><p className="mt-1 text-[11px] text-slate-700">{application.nextDate}</p></div>
-      <button type="button" className="h-8 rounded-md border border-cyan-300 px-2 text-[10px] font-semibold text-cyan-600 transition hover:bg-cyan-50">{application.status === "Offer" ? "View Offer" : "View Details"}</button>
+      <button type="button" onClick={() => onView(application.id)} className="h-8 rounded-md border border-cyan-300 px-2 text-[10px] font-semibold text-cyan-600 transition hover:bg-cyan-50">{application.status === "Offer" ? "View Offer" : "View Details"}</button>
     </div>
   );
 }
 
-function ApplicationMobileCard({ application }: { application: ApplicationRow }) {
+function ApplicationMobileCard({ application, onView }: { application: ApplicationRow; onView: (id: string) => void }) {
   const NextIcon = application.status === "Rejected" ? AlertTriangle : application.status === "Withdrawn" ? CircleMinus : application.status === "Offer" ? CheckCircle2 : CalendarDays;
   const nextTone = application.status === "Rejected" ? "text-rose-500" : application.status === "Withdrawn" ? "text-slate-400" : application.status === "Offer" ? "text-emerald-500" : "text-blue-500";
 
@@ -649,7 +890,7 @@ function ApplicationMobileCard({ application }: { application: ApplicationRow })
     <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex items-start gap-3"><ApplicationLogo application={application} /><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold text-slate-800">{application.companyName}</p><p className="mt-1 text-xs text-slate-600">{application.role}</p><div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-slate-500"><span className="inline-flex items-center gap-1"><MapPin size={12} />{application.location}</span><span>{application.ctc}</span></div></div><ApplicationStatus status={application.status} /></div>
       <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-100 pt-3 text-[11px]"><div><p className="text-[10px] text-slate-500">Applied On</p><p className="mt-1 font-semibold text-slate-700">{application.appliedOn}</p></div><div><p className="text-[10px] text-slate-500">Updated</p><p className="mt-1 font-semibold text-slate-700">{application.updated.replace("Updated on ", "")}</p></div><div className="col-span-2"><p className="text-[10px] text-slate-500">Next Step / Update</p><p className={`mt-1 flex items-center gap-1.5 font-semibold ${nextTone}`}><NextIcon size={14} />{application.nextStep}</p><p className="mt-1 text-slate-600">{application.nextDate}</p></div></div>
-      <button type="button" className="mt-4 h-9 w-full rounded-md border border-cyan-300 text-xs font-semibold text-cyan-600 hover:bg-cyan-50">{application.status === "Offer" ? "View Offer" : "View Details"}</button>
+      <button type="button" onClick={() => onView(application.id)} className="mt-4 h-9 w-full rounded-md border border-cyan-300 text-xs font-semibold text-cyan-600 hover:bg-cyan-50">{application.status === "Offer" ? "View Offer" : "View Details"}</button>
     </section>
   );
 }
@@ -658,6 +899,7 @@ export function StudentApplications() {
   const [activeTab, setActiveTab] = useState<ApplicationStatus | "All">("All");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const activeTabDetails = applicationTabs.find((tab) => (activeTab === "All" ? !tab.status : tab.status === activeTab));
   const filteredApplications = applicationRows.filter((application) => {
     const matchesTab = activeTab === "All" || application.status === activeTab;
@@ -665,6 +907,11 @@ export function StudentApplications() {
     return matchesTab && searchText.includes(search.toLowerCase());
   });
   const totalForTab = activeTabDetails?.count ?? filteredApplications.length;
+  const selectedApplication = applicationRows.find((application) => application.id === selectedApplicationId);
+
+  if (selectedApplication) {
+    return <ApplicationDetailsView application={selectedApplication} onBack={() => setSelectedApplicationId(null)} />;
+  }
 
   return (
     <div className="space-y-4 pb-5 text-slate-800">
@@ -692,11 +939,11 @@ export function StudentApplications() {
         <div className="hidden overflow-x-auto lg:block">
           <div role="table" aria-label="My applications" className="min-w-[1020px]">
             <div role="row" className="grid grid-cols-[2.1fr_1fr_1.15fr_1.65fr_.75fr] gap-4 bg-slate-50/80 px-4 py-4 text-xs font-semibold text-slate-600 sm:px-5"><span>Company &amp; Role</span><span>Applied On</span><span>Current Status</span><span>Next Step / Update</span><span>Action</span></div>
-            {filteredApplications.map((application) => <ApplicationTableRow key={application.id} application={application} />)}
+            {filteredApplications.map((application) => <ApplicationTableRow key={application.id} application={application} onView={setSelectedApplicationId} />)}
           </div>
         </div>
 
-        <div className="space-y-3 p-3 lg:hidden">{filteredApplications.map((application) => <ApplicationMobileCard key={application.id} application={application} />)}</div>
+        <div className="space-y-3 p-3 lg:hidden">{filteredApplications.map((application) => <ApplicationMobileCard key={application.id} application={application} onView={setSelectedApplicationId} />)}</div>
 
         {filteredApplications.length === 0 && <p className="px-4 py-10 text-center text-xs text-slate-500">No applications match your filters.</p>}
       </section>
