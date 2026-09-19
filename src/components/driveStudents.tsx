@@ -9,8 +9,6 @@ import {
   CircleCheckBig,
   Download,
   Eye,
-  FileText,
-  GraduationCap,
   Home,
   Mail,
   Phone,
@@ -18,7 +16,6 @@ import {
   Search,
   ShieldCheck,
   UserRound,
-  Users,
   X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
