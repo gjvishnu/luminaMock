@@ -7,6 +7,7 @@ import { RouterError } from "./components/routerError";
 import { CampusDrive } from "./components/campusDrive";
 import { DriveDetails } from "./components/driveDetails";
 import { JDRecommendation } from "./components/jdRecommendation";
+import { DriveStudents } from "./components/driveStudents";
 import Login from "./components/login";
 import  { AddDrive } from "./components/addDrive";
 import { AnnouncementsRoute } from "./components/announcementsRoute";
@@ -56,6 +57,14 @@ export const router = createBrowserRouter([
       {
         path: "jdrecommendation",
         element: <JDRecommendation />,
+      },
+      {
+        path: "jdrecommendation/:driveId/students",
+        element: <DriveStudents />,
+      },
+      {
+        path: "jdrecommendation/students",
+        element: <DriveStudents />,
       },
        {
         path: "add_drives",
