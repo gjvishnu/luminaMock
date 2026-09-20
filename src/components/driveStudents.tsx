@@ -548,9 +548,9 @@ export const DriveStudents = () => {
         <button
           type="button"
           onClick={() => navigate("/jdrecommendation")}
-          className="inline-flex items-center gap-2 rounded-lg border border-cyan-500 bg-white px-4 py-2 text-xs font-semibold text-sky-800 shadow-sm transition hover:bg-cyan-50 cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-slate-900 transition cursor-pointer"
         >
-          <ArrowLeft size={16} className="text-sky-800" /> Back to Recommendations
+          <ArrowLeft size={16} /> Back to Jobs
         </button>
       </div>
 
@@ -590,62 +590,65 @@ export const DriveStudents = () => {
             </div>
           </div>
 
-          {/* Metrics Row */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 border-t pt-3 lg:border-t-0 lg:pt-0 border-slate-100">
-            {/* Eligible Students */}
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-500">
-                <UserRound size={22} />
-              </div>
-              <div>
-                <p className="text-xl font-bold leading-tight text-slate-900">{drive.eligible}</p>
-                <p className="text-[11px] text-slate-500 font-medium">Eligible Students</p>
-              </div>
+        </div>
+      </section>
+
+      {/* Match Stats Section */}
+      <section className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="flex flex-wrap items-center gap-6">
+          {/* Eligible Students */}
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-500">
+              <UserRound size={20} />
             </div>
-
-            <div className="hidden sm:block h-8 w-px bg-slate-200" />
-
-            {/* High Match */}
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-500">
-                <ShieldCheck size={22} />
-              </div>
-              <div>
-                <p className="text-xl font-bold leading-tight text-cyan-600">{drive.match.high}</p>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  High Match ({Math.round((drive.match.high / drive.eligible) * 100)}%)
-                </p>
-              </div>
+            <div>
+              <p className="text-xl font-bold leading-tight text-slate-900">{drive.eligible}</p>
+              <p className="text-[11px] text-slate-500 font-medium">Eligible Students</p>
             </div>
+          </div>
 
-            <div className="hidden sm:block h-8 w-px bg-slate-200" />
+          <div className="h-8 w-px bg-slate-200" />
 
-            {/* Medium Match */}
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-500">
-                <CircleCheckBig size={22} />
-              </div>
-              <div>
-                <p className="text-xl font-bold leading-tight text-amber-500">{drive.match.medium}</p>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  Medium Match ({Math.round((drive.match.medium / drive.eligible) * 100)}%)
-                </p>
-              </div>
+          {/* High Match */}
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-500">
+              <ShieldCheck size={20} />
             </div>
+            <div>
+              <p className="text-xl font-bold leading-tight text-cyan-600">{drive.match.high}</p>
+              <p className="text-[11px] text-slate-500 font-medium">
+                High Match ({Math.round((drive.match.high / drive.eligible) * 100)}%)
+              </p>
+            </div>
+          </div>
 
-            <div className="hidden sm:block h-8 w-px bg-slate-200" />
+          <div className="h-8 w-px bg-slate-200" />
 
-            {/* Low Match */}
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-500">
-                <AlertTriangle size={22} />
-              </div>
-              <div>
-                <p className="text-xl font-bold leading-tight text-rose-500">{drive.match.low}</p>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  Low Match ({Math.round((drive.match.low / drive.eligible) * 100)}%)
-                </p>
-              </div>
+          {/* Medium Match */}
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-500">
+              <CircleCheckBig size={20} />
+            </div>
+            <div>
+              <p className="text-xl font-bold leading-tight text-amber-500">{drive.match.medium}</p>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Medium Match ({Math.round((drive.match.medium / drive.eligible) * 100)}%)
+              </p>
+            </div>
+          </div>
+
+          <div className="h-8 w-px bg-slate-200" />
+
+          {/* Low Match */}
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-500">
+              <AlertTriangle size={20} />
+            </div>
+            <div>
+              <p className="text-xl font-bold leading-tight text-rose-500">{drive.match.low}</p>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Low Match ({Math.round((drive.match.low / drive.eligible) * 100)}%)
+              </p>
             </div>
           </div>
         </div>
