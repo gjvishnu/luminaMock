@@ -9,15 +9,18 @@ import { DriveDetails } from "./components/driveDetails";
 import { JDRecommendation } from "./components/jdRecommendation";
 import { DriveStudents } from "./components/driveStudents";
 import Login from "./components/login";
-import  { AddDrive } from "./components/addDrive";
+import { AddDrive } from "./components/addDrive";
 import { AnnouncementsRoute } from "./components/announcementsRoute";
 import { Reports } from "./components/reports";
+
 import {
   StudentApplications,
   StudentJobDetails,
   StudentJobs,
   StudentProfile,
   StudentResume,
+  StudentDetails,
+  StudentApplicationDetails,
 } from "./components/studentPages";
 
 export const router = createBrowserRouter([
@@ -26,13 +29,11 @@ export const router = createBrowserRouter([
     element: <Navigate to="/login" replace />,
     errorElement: <RouterError />,
   },
-
   {
     path: "/login",
     element: <Login />,
     errorElement: <RouterError />,
   },
-
   {
     path: "/",
     element: <Home />,
@@ -45,6 +46,14 @@ export const router = createBrowserRouter([
       {
         path: "students",
         element: <Students />,
+      },
+      {
+        path: "students/:studentId",
+        element: <StudentDetails />,
+      },
+      {
+        path: "students/:studentId/applications",
+        element: <StudentApplicationDetails />,
       },
       {
         path: "campusdrive",
@@ -66,9 +75,9 @@ export const router = createBrowserRouter([
         path: "jdrecommendation/students",
         element: <DriveStudents />,
       },
-       {
+      {
         path: "add_drives",
-        element: <AddDrive/>,
+        element: <AddDrive />,
       },
       {
         path: "announcements",
