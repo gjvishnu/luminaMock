@@ -367,10 +367,13 @@ function ApplicationDetailsView({ application, onBack }: { application: Applicat
 
   return (
     <div className="space-y-3 pb-5 text-slate-800">
-      <button type="button" onClick={onBack} className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-cyan-500">
-        <ArrowLeft size={15} />
-        Back to Applications
-      </button>
+      <div className="flex items-center justify-between gap-3">
+        <button type="button" onClick={onBack} className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-cyan-500">
+          <ArrowLeft size={15} />
+          Back to Applications
+        </button>
+        <button type="button" className="h-9 shrink-0 rounded-md border border-rose-200 px-4 text-xs font-semibold text-rose-500 transition hover:bg-rose-50">Withdraw Application</button>
+      </div>
 
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -455,10 +458,6 @@ function ApplicationDetailsView({ application, onBack }: { application: Applicat
             <button type="button" onClick={saveNote} className="h-9 shrink-0 rounded-md border border-cyan-300 px-3 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">Save</button>
           </div>
         </section>
-      </div>
-
-      <div className="flex justify-end">
-        <button type="button" className="h-9 rounded-md border border-rose-200 px-4 text-xs font-semibold text-rose-500 transition hover:bg-rose-50">Withdraw Application</button>
       </div>
     </div>
   );
