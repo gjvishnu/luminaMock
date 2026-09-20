@@ -848,7 +848,7 @@ export const DriveStudents = () => {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-2 w-32 sm:w-36 rounded-full bg-cyan-100/70 overflow-hidden">
+                        <div className="h-1.5 w-28 sm:w-32 rounded-full bg-cyan-100/70 overflow-hidden">
                           <div
                             className="h-full rounded-full bg-cyan-400"
                             style={{ width: `${student.matchScore}%` }}
@@ -863,7 +863,7 @@ export const DriveStudents = () => {
                       <button
                         type="button"
                         onClick={() => setSelectedStudent(student)}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-md border border-cyan-400 bg-white px-3 py-1.5 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50 shadow-xs cursor-pointer"
+                        className="inline-flex items-center justify-center gap-1 rounded-md border border-cyan-400 bg-white px-2 py-1 text-[10px] font-semibold text-cyan-600 transition hover:bg-cyan-50 shadow-xs cursor-pointer whitespace-nowrap"
                       >
                         <Eye size={13} /> View Details
                       </button>

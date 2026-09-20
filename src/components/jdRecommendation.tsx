@@ -212,8 +212,7 @@ export const JDRecommendation = () => {
 
       <RecommendationTable
         drives={recommendationDrives}
-        onDriveDetails={(slug) => navigate(`/campusdrive/${slug}`)}
-        onViewStudents={(slug) => navigate(`/jdrecommendation/${slug}/students`)}
+        onViewDetail={(slug) => navigate(`/jdrecommendation/${slug}/students`)}
       />
     </div>
   );
@@ -245,12 +244,10 @@ function RecommendationFilter({
 
 function RecommendationTable({
   drives,
-  onDriveDetails,
-  onViewStudents,
+  onViewDetail,
 }: {
   drives: RecommendationDrive[];
-  onDriveDetails: (slug: string) => void;
-  onViewStudents: (slug: string) => void;
+  onViewDetail: (slug: string) => void;
 }) {
   return (
     <section className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -282,7 +279,7 @@ function RecommendationTable({
                   <p className="mt-6 text-xl font-bold text-slate-800">{drive.eligible}</p>
                   <button
                     type="button"
-                    onClick={() => onViewStudents(drive.slug)}
+                    onClick={() => onViewDetail(drive.slug)}
                     className="mt-1 text-[10px] font-semibold text-cyan-500 hover:text-cyan-700 cursor-pointer"
                   >
                     View Eligible
@@ -291,20 +288,13 @@ function RecommendationTable({
                 <td className="px-3 py-3"><MatchDistribution match={drive.match} total={drive.match.high + drive.match.medium + drive.match.low} /></td>
                 <td className="px-3 py-3"><DepartmentEligibility departments={drive.departments} /></td>
                 <td className="px-3 py-3">
-                  <div className="mt-4 flex flex-col items-stretch gap-2">
+                  <div className="mt-6 flex justify-center">
                     <button
                       type="button"
-                      onClick={() => onViewStudents(drive.slug)}
-                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-cyan-500 px-2 text-[10px] font-semibold text-white transition hover:bg-cyan-600 cursor-pointer"
+                      onClick={() => onViewDetail(drive.slug)}
+                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md bg-cyan-500 px-3 text-[10px] font-semibold text-white transition hover:bg-cyan-600 cursor-pointer shadow-xs"
                     >
-                      <Users size={13} /> View Students
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onDriveDetails(drive.slug)}
-                      className="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 text-[10px] font-semibold text-slate-700 transition hover:bg-slate-50 cursor-pointer"
-                    >
-                      <Eye size={13} /> Drive Details
+                      <Eye size={13} /> View Detail
                     </button>
                   </div>
                 </td>
