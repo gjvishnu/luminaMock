@@ -1,5 +1,5 @@
-import { AlertTriangle, ArrowLeft, Bookmark, BrainCircuit, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronRight, CircleMinus, Clock3, FileText, Filter, GraduationCap, Lightbulb, Mail, MapPin, Megaphone, Pencil, Phone, RefreshCw, Search, Share2, Sparkles, Target, Trophy, TrendingUp, Upload, UserRound } from "lucide-react";
-import { useState } from "react";
+import { AlertTriangle, ArrowLeft, Bookmark, BrainCircuit, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, ChevronDown, ChevronRight, CircleMinus, Clock3, Eye, FileText, Filter, GraduationCap, Info, Lightbulb, Link, Mail, MapPin, Megaphone, Pencil, Phone, Plus, RefreshCw, Search, Share2, Sparkles, Target, Trash2, Trophy, TrendingUp, Upload, UserRound, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 type JobListing = {
@@ -78,57 +78,130 @@ const studentProfileData = {
   percentage: "82.4%",
   attendance: "91%",
   backlogs: "0",
-  profileCompletion: 92,
+  profileCompletion: 100,
   semesterScores: [
-    { label: "Sem 1", score: "8.1", percentage: 81, attendance: 88, backlogs: 0 },
-    { label: "Sem 2", score: "8.4", percentage: 84, attendance: 90, backlogs: 0 },
-    { label: "Sem 3", score: "8.6", percentage: 86, attendance: 89, backlogs: 0 },
-    { label: "Sem 4", score: "8.8", percentage: 88, attendance: 92, backlogs: 0 },
-    { label: "Sem 5", score: "8.9", percentage: 89, attendance: 93, backlogs: 0 },
-    { label: "Sem 6", score: "9.1", percentage: 91, attendance: 94, backlogs: 0 },
+    { label: "Sem 1", score: "8.1", percentage: 81, attendance: 88, backlogs: 0, file: "sem1_marksheet.pdf" },
+    { label: "Sem 2", score: "8.4", percentage: 84, attendance: 90, backlogs: 0, file: "sem2_marksheet.pdf" },
+    { label: "Sem 3", score: "8.6", percentage: 86, attendance: 89, backlogs: 0, file: "sem3_marksheet.pdf" },
+    { label: "Sem 4", score: "8.8", percentage: 88, attendance: 92, backlogs: 0, file: "sem4_marksheet.pdf" },
+    { label: "Sem 5", score: "8.9", percentage: 89, attendance: 93, backlogs: 0, file: "sem5_marksheet.pdf" },
+    { label: "Sem 6", score: "9.1", percentage: 91, attendance: 94, backlogs: 0, file: "sem6_marksheet.pdf" },
+    { label: "Sem 7", score: "Pending", percentage: 0, attendance: 0, backlogs: 0, file: "" },
   ],
   skillGroups: [
     { label: "Programming", skills: ["Java", "Python", "C++", "JavaScript"] },
     { label: "Core CS", skills: ["DSA", "OOPs", "DBMS", "Computer Networks"] },
     { label: "Tools & Frameworks", skills: ["React", "Node.js", "Git", "SQL"] },
   ],
+  skillsList: ["Java", "Python", "C++", "JavaScript", "DSA", "DBMS", "Computer Networks", "React", "Node.js", "Git", "SQL"],
   projects: [
-    { title: "Placement Prep AI", type: "Full-stack web application", description: "Personalized placement preparation dashboard with job matching and interview insights.", technologies: ["React", "Node.js", "MongoDB"] },
-    { title: "Smart Attendance System", type: "Academic project", description: "Automated attendance tracking system with reports for students and faculty.", technologies: ["Python", "Flask", "MySQL"] },
-    { title: "Campus Connect Portal", type: "Team project", description: "Student community platform for events, announcements, and peer collaboration.", technologies: ["JavaScript", "Express", "PostgreSQL"] },
+    { id: "1", title: "Placement Prep AI", type: "Full-stack web application", dates: "Jan 2025 – Apr 2025", description: "Personalized placement preparation dashboard with job matching and interview insights.", technologies: ["React", "Node.js", "MongoDB"], githubUrl: "https://github.com/arjun/placement-prep-ai", reportFile: "" },
+    { id: "2", title: "Smart Attendance System", type: "Academic project", dates: "Aug 2024 – Dec 2024", description: "Automated attendance tracking system with reports for students and faculty.", technologies: ["Python", "Flask", "MySQL"], githubUrl: "https://github.com/arjun/smart-attendance", reportFile: "" },
+    { id: "3", title: "Campus Connect Portal", type: "Team project", dates: "Jan 2024 – May 2024", description: "Student community platform for events, announcements, and peer collaboration.", technologies: ["JavaScript", "Express", "PostgreSQL"], githubUrl: "https://github.com/arjun/campus-connect", reportFile: "" },
   ],
   internships: [
-    { role: "Frontend Developer Intern", company: "BlueOrbit Technologies", duration: "May 2025 – Jul 2025", description: "Built responsive dashboard screens and reusable React components." },
-    { role: "Software Engineering Intern", company: "Lumina Labs", duration: "Jan 2025 – Mar 2025", description: "Worked on REST APIs, database queries, and automated testing." },
+    { id: "1", role: "Frontend Developer Intern", company: "BlueOrbit Technologies", duration: "May 2025 – Jul 2025", description: "Built responsive dashboard screens and reusable React components.", certificateFile: "BlueOrbit_Certificate.pdf", certificateSize: "1.2 MB" },
+    { id: "2", role: "Software Engineering Intern", company: "Lumina Labs", duration: "Jan 2025 – Mar 2025", description: "Worked on REST APIs, database queries, and automated testing.", certificateFile: "LuminaLabs_Intern_Certificate.pdf", certificateSize: "1.1 MB" },
   ],
   resume: { name: "Arjun_Mehta_Resume_2026.pdf", size: "1.2 MB", updated: "28 Aug 2026" },
   sports: [
-    { title: "University Cricket Team", detail: "Vice Captain · Inter-college runner-up", period: "2024 – 2026" },
-    { title: "100m Athletics", detail: "Department sports meet · Gold medal", period: "2025" },
+    { id: "1", title: "University Cricket Team", detail: "Vice Captain · Inter-college runner-up", period: "2024 – 2026", certificateFile: "cricket_certificate.jpg" },
+    { id: "2", title: "100m Athletics", detail: "Department sports meet · Gold medal", period: "2025", certificateFile: "athletics_certificate.pdf" },
   ],
   extracurriculars: [
-    { title: "Coding Club Lead", detail: "Organised weekly problem-solving sessions for 60+ students." },
-    { title: "Placement Cell Volunteer", detail: "Supported employer events and student interview coordination." },
+    { id: "1", title: "Coding Club Lead", detail: "Organised weekly problem-solving sessions for 60+ students.", period: "2024 – Present", certificateFile: "coding_club_certificate.pdf" },
+    { id: "2", title: "Placement Cell Volunteer", detail: "Supported employer events and student interview coordination.", period: "2025", certificateFile: "" },
   ],
   awards: [
-    { title: "Hackathon Winner", detail: "1st place · Lumina Buildathon 2025", year: "2025" },
-    { title: "Academic Excellence Award", detail: "Top 10% of the department", year: "2024" },
+    { id: "1", title: "Hackathon Winner", detail: "1st place · Lumina Buildathon 2025", year: "2025", certificateFile: "hackathon_certificate.pdf" },
+    { id: "2", title: "Academic Excellence Award", detail: "Top 10% of the department", year: "2024", certificateFile: "academic_award.pdf" },
   ],
 };
+
+type ProfileData = typeof studentProfileData;
 
 type ProfileChecklistItem = {
   label: string;
   status: "done" | "warning";
 };
 
-const profileCompletionChecklist: ProfileChecklistItem[] = [
-  { label: "Personal Details", status: "done" },
-  { label: "Internship Details", status: "warning" },
-  { label: "Academic Details", status: "done" },
-  { label: "Resume", status: "warning" },
-  { label: "Skills", status: "done" },
-  { label: "Projects", status: "done" },
-];
+export function getProfileCompletion(profile: ProfileData) {
+  // 1. Basic Details (20%)
+  const basicFields = [
+    profile.name,
+    profile.email,
+    profile.phone,
+    profile.dateOfBirth,
+    profile.location,
+  ];
+  const basicFilledCount = basicFields.filter((f) => Boolean(f && f.trim())).length;
+  const basicWeight = (basicFilledCount / basicFields.length) * 20;
+
+  // 2. Academic Performance (20%)
+  const hasCgpa = Boolean(profile.cgpa && profile.cgpa.trim() && profile.cgpa !== "0");
+  const hasPercentage = Boolean(profile.percentage && profile.percentage.trim() && profile.percentage !== "0%");
+  const hasSemScores = Boolean(
+    profile.semesterScores &&
+      profile.semesterScores.length > 0 &&
+      profile.semesterScores.some((s) => s.score && s.score !== "Pending")
+  );
+  const academicFilledCount = [hasCgpa, hasPercentage, hasSemScores].filter(Boolean).length;
+  const academicWeight = (academicFilledCount / 3) * 20;
+
+  // 3. Resume (25%)
+  const hasResume = Boolean(
+    profile.resume?.name &&
+      profile.resume.name.trim() !== "" &&
+      profile.resume.name !== "No resume uploaded"
+  );
+  const resumeWeight = hasResume ? 25 : 0;
+
+  // 4. Placement Profile (25%) - Skills, Internships, Projects
+  const hasSkills = Boolean(profile.skillsList && profile.skillsList.length > 0);
+  const hasProjects = Boolean(profile.projects && profile.projects.length > 0);
+  const hasInternships = Boolean(profile.internships && profile.internships.length > 0);
+  const placementFilledCount = [hasSkills, hasProjects, hasInternships].filter(Boolean).length;
+  const placementWeight = (placementFilledCount / 3) * 25;
+
+  // 5. Activities & Recognition (10%) - Extracurriculars, Sports, Awards
+  const hasExtracurriculars = Boolean(profile.extracurriculars && profile.extracurriculars.length > 0);
+  const hasSports = Boolean(profile.sports && profile.sports.length > 0);
+  const hasAwards = Boolean(profile.awards && profile.awards.length > 0);
+  const activitiesFilledCount = [hasExtracurriculars, hasSports, hasAwards].filter(Boolean).length;
+  const activitiesWeight = (activitiesFilledCount / 3) * 10;
+
+  const rawTotal = basicWeight + academicWeight + resumeWeight + placementWeight + activitiesWeight;
+  const percentage = Math.min(100, Math.round(rawTotal));
+
+  const checklistItems: ProfileChecklistItem[] = [
+    {
+      label: "Personal Details",
+      status: basicFilledCount === basicFields.length ? "done" : "warning",
+    },
+    {
+      label: "Internship Details",
+      status: hasInternships ? "done" : "warning",
+    },
+    {
+      label: "Academic Details",
+      status: academicFilledCount === 3 ? "done" : "warning",
+    },
+    {
+      label: "Resume",
+      status: hasResume ? "done" : "warning",
+    },
+    {
+      label: "Skills",
+      status: hasSkills ? "done" : "warning",
+    },
+    {
+      label: "Projects",
+      status: hasProjects ? "done" : "warning",
+    },
+  ];
+
+  return { percentage, checklistItems };
+}
 
 const placementReadinessChecklist: ProfileChecklistItem[] = [
   { label: "CGPA", status: "done" },
@@ -232,14 +305,89 @@ function PageHeader({ title, description }: { title: string; description: string
   );
 }
 
+function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder = "Select...",
+  className = "",
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+  placeholder?: string;
+  className?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={dropdownRef} className={`relative block min-w-0 ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className={`flex h-10 w-full items-center justify-between rounded-lg border bg-white px-3 text-xs font-semibold text-slate-700 shadow-xs outline-none transition ${
+          isOpen
+            ? "border-cyan-400 ring-2 ring-cyan-100"
+            : "border-slate-200 hover:border-cyan-300"
+        }`}
+      >
+        <span className="truncate">{value || placeholder}</span>
+        <ChevronDown
+          size={15}
+          className={`ml-1 shrink-0 text-slate-400 transition-transform duration-200 ${
+            isOpen ? "rotate-180 text-cyan-500" : ""
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-56 overflow-y-auto rounded-xl border border-slate-100 bg-white p-1 shadow-xl ring-1 ring-black/5 animate-in fade-in-50 zoom-in-95">
+          {options.map((option) => {
+            const isSelected = option === value;
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => {
+                  onChange(option);
+                  setIsOpen(false);
+                }}
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition ${
+                  isSelected
+                    ? "bg-cyan-50/80 font-bold text-cyan-700"
+                    : "font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <span className="truncate">{option}</span>
+                {isSelected && <CheckCircle2 size={13} className="ml-2 shrink-0 text-cyan-500" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function JobFilter({ options, value, onChange, className = "" }: { options: string[]; value: string; onChange: (value: string) => void; className?: string }) {
   return (
-    <label className={`relative block min-w-0 ${className}`}>
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 pr-10 text-xs font-medium text-slate-700 outline-none transition hover:border-cyan-200 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100">
-        {options.map((option) => <option key={option}>{option}</option>)}
-      </select>
-      <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
-    </label>
+    <CustomSelect
+      value={value}
+      onChange={onChange}
+      options={options}
+      className={className}
+    />
   );
 }
 
@@ -737,7 +885,9 @@ function ProfileChecklist({ items }: { items: ProfileChecklistItem[] }) {
   );
 }
 
-function ProfileCompletionCard({ onComplete }: { onComplete: () => void }) {
+function ProfileCompletionCard({ profile, onComplete }: { profile: ProfileData; onComplete: () => void }) {
+  const { percentage, checklistItems } = getProfileCompletion(profile);
+
   return (
     <section className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
@@ -748,15 +898,19 @@ function ProfileCompletionCard({ onComplete }: { onComplete: () => void }) {
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><UserRound size={16} /></span>
       </div>
       <div className="mt-5 flex items-center gap-4 sm:gap-5">
-        <ProfileProgressRing value={studentProfileData.profileCompletion} label="Profile Completion" />
-        <p className="min-w-0 text-[10px] leading-4 text-slate-600">Your profile is almost complete. Add a certification to reach 100%.</p>
+        <ProfileProgressRing value={percentage} label="Profile Completion" />
+        <p className="min-w-0 text-[10px] leading-4 text-slate-600">
+          {percentage === 100
+            ? "Your profile is 100% complete and ready for placement drives."
+            : `Your profile is ${percentage}% complete. Update missing details to improve job matches.`}
+        </p>
       </div>
       <div className="mt-5 flex-1 border-t border-slate-100 pt-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h3 className="text-xs font-bold text-slate-800">Profile checklist</h3>
-          <span className="text-[10px] font-semibold text-cyan-600">{studentProfileData.profileCompletion}% complete</span>
+          <span className="text-[10px] font-semibold text-cyan-600">{percentage}% complete</span>
         </div>
-        <ProfileChecklist items={profileCompletionChecklist} />
+        <ProfileChecklist items={checklistItems} />
       </div>
       <button type="button" onClick={onComplete} className="mt-4 inline-flex h-9 items-center justify-center gap-1.5 self-start rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600">
         Complete Profile
@@ -792,53 +946,172 @@ function PlacementReadinessCard() {
 }
 
 export function StudentProfile() {
+  const [profile, setProfile] = useState<ProfileData>(studentProfileData);
+  const [draftProfile, setDraftProfile] = useState<ProfileData>(studentProfileData);
+  const [isEditing, setIsEditing] = useState(false);
   const [notice, setNotice] = useState("");
+
+  const handleStartEditing = () => {
+    setDraftProfile(profile);
+    setIsEditing(true);
+    setNotice("Editing mode active. Make your changes and click 'Save Changes'.");
+  };
+
+  const handleSaveChanges = () => {
+    setProfile(draftProfile);
+    setIsEditing(false);
+    setNotice("Profile updated successfully!");
+  };
+
+  const handleCancelEdit = () => {
+    setDraftProfile(profile);
+    setIsEditing(false);
+    setNotice("Edit mode closed. Changes were not saved.");
+  };
+
+  const handlePreview = () => {
+    setIsEditing(false);
+    setNotice("Previewing profile.");
+  };
+
+  const activeProfile = isEditing ? draftProfile : profile;
+  const currentCompletion = getProfileCompletion(profile);
 
   return (
     <div className="space-y-4 pb-5 text-slate-800">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <PageHeader title="My Profile" description="Keep your personal, academic, and placement details up to date." />
+      {/* Top Header / Actions */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <PageHeader
+          title={isEditing ? "Placement Profile" : "My Profile"}
+          description={
+            isEditing
+              ? "Build a stronger profile with the skills, experience, and documents recruiters look for."
+              : "Keep your personal, academic, and placement details up to date."
+          }
+        />
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 py-2 text-[10px] font-bold text-emerald-600"><CheckCircle2 size={14} />{studentProfileData.profileCompletion}% complete</span>
-          <button type="button" onClick={() => setNotice("Profile editing will be available in the next update.")} className="inline-flex items-center justify-center gap-1.5 rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"><Pencil size={14} /> Edit Profile</button>
+          {isEditing ? (
+            <>
+              <button
+                type="button"
+                onClick={handlePreview}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-300 bg-white px-3.5 py-2 text-xs font-semibold text-cyan-600 shadow-sm transition hover:bg-cyan-50"
+              >
+                <Eye size={15} /> Preview Profile
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveChanges}
+                className="rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
+              >
+                Save Changes
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <>
+              <span className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-2 text-[10px] font-bold ${
+                currentCompletion.percentage === 100 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-700"
+              }`}>
+                {currentCompletion.percentage === 100 ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}
+                {currentCompletion.percentage}% complete
+              </span>
+              <button
+                type="button"
+                onClick={handleStartEditing}
+                className="inline-flex items-center justify-center gap-1.5 rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
+              >
+                <Pencil size={14} /> Edit Profile
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {notice && <p role="status" className="rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-700">{notice}</p>}
+      {notice && (
+        <p role="status" className="rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-700">
+          {notice}
+        </p>
+      )}
 
-      <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-xl font-bold text-cyan-600">{studentProfileData.initials}</div>
-            <div className="min-w-0"><h2 className="text-lg font-bold text-slate-900">{studentProfileData.name}</h2><p className="mt-1 text-xs text-slate-600">{studentProfileData.program} · {studentProfileData.batch} Batch</p><div className="mt-2 flex flex-wrap gap-2"><ProfileChip icon={Building2} text={studentProfileData.department} /><ProfileChip icon={FileText} text={`Reg. No. ${studentProfileData.registrationNumber}`} /><ProfileChip icon={Clock3} text={studentProfileData.semester} /></div></div>
+      {/* View Mode Only Avatar & Cards */}
+      {!isEditing && (
+        <>
+          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-xl font-bold text-cyan-600">
+                  {profile.initials}
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-lg font-bold text-slate-900">{profile.name}</h2>
+                  <p className="mt-1 text-xs text-slate-600">
+                    {profile.program} · {profile.batch} Batch
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <ProfileChip icon={Building2} text={profile.department} />
+                    <ProfileChip icon={FileText} text={`Reg. No. ${profile.registrationNumber}`} />
+                    <ProfileChip icon={Clock3} text={profile.semester} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="grid items-stretch gap-4 lg:grid-cols-2">
+            <ProfileCompletionCard profile={profile} onComplete={handleStartEditing} />
+            <PlacementReadinessCard />
           </div>
-          {/* <div className="w-full sm:max-w-[220px]">
-            <div className="flex items-center justify-between text-[10px] font-semibold"><span className="text-slate-500">Profile completion</span><span className="text-cyan-600">{studentProfileData.profileCompletion}%</span></div>
-            <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-cyan-500" style={{ width: `${studentProfileData.profileCompletion}%` }} /></div>
-            <p className="mt-2 text-[10px] text-slate-500">Add a certification to reach 100%.</p>
-          </div> */}
+        </>
+      )}
+
+      {/* Edit Mode Notice Banner */}
+      {isEditing && (
+        <div className="flex items-center gap-2 rounded-xl border border-cyan-100 bg-cyan-50/80 px-4 py-3 text-xs font-medium text-cyan-700 shadow-sm">
+          <Info size={16} className="shrink-0 text-cyan-500" />
+          You are in edit mode. Make your changes and save to update your profile.
         </div>
-      </section>
+      )}
 
-      <div className="grid items-stretch gap-4 lg:grid-cols-2">
-        <ProfileCompletionCard onComplete={() => setNotice("Profile editing will be available in the next update.")} />
-        <PlacementReadinessCard />
-      </div>
-
+      {/* Group 1: Basic Information & Academic Performance */}
       <ProfileGroup
         title="Basic Information & Academic Performance"
         description="Keep your personal details and academic progress current for placement eligibility."
         icon={GraduationCap}
+        badge={isEditing ? "Editing enabled" : undefined}
       >
         <div className="grid items-stretch gap-4 xl:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-4">
-            <BasicDetailsCard />
-            <ResumeCard onNotice={setNotice} />
+            <BasicDetailsCard
+              profile={activeProfile}
+              onProfileChange={setDraftProfile}
+              isEditing={isEditing}
+              onSave={handleSaveChanges}
+              onCancel={handleCancelEdit}
+            />
+            <ResumeCard
+              profile={activeProfile}
+              onProfileChange={setDraftProfile}
+              isEditing={isEditing}
+              onNotice={setNotice}
+            />
           </div>
-          <AcademicPerformanceCard />
+          <AcademicPerformanceCard
+            profile={activeProfile}
+            onProfileChange={setDraftProfile}
+            isEditing={isEditing}
+            onNotice={setNotice}
+          />
         </div>
       </ProfileGroup>
 
+      {/* Group 2: Placement Profile */}
       <ProfileGroup
         title="Placement Profile"
         description="Build a stronger profile with the skills, experience, and documents recruiters look for."
@@ -846,54 +1119,348 @@ export function StudentProfile() {
       >
         <div className="grid items-stretch gap-4 xl:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-4">
-            <SkillsCard />
-            <InternshipsCard />
+            <SkillsCard
+              profile={activeProfile}
+              onProfileChange={setDraftProfile}
+              isEditing={isEditing}
+              onNotice={setNotice}
+            />
+            <InternshipsCard
+              profile={activeProfile}
+              onProfileChange={setDraftProfile}
+              isEditing={isEditing}
+              onNotice={setNotice}
+            />
           </div>
-          <ProjectsCard />
+          <ProjectsCard
+            profile={activeProfile}
+            onProfileChange={setDraftProfile}
+            isEditing={isEditing}
+            onNotice={setNotice}
+          />
         </div>
       </ProfileGroup>
 
+      {/* Group 3: Activities & Recognition */}
       <ProfileGroup
         title="Activities & Recognition"
         description="Showcase the achievements and involvement that make your profile stand out."
         icon={Trophy}
       >
         <div className="grid items-stretch gap-4 xl:grid-cols-3">
-          <ExtracurricularsCard />
-          <SportsPrizesCard />
-          <AwardsCard />
+          <ExtracurricularsCard
+            profile={activeProfile}
+            onProfileChange={setDraftProfile}
+            isEditing={isEditing}
+            onNotice={setNotice}
+          />
+          <SportsPrizesCard
+            profile={activeProfile}
+            onProfileChange={setDraftProfile}
+            isEditing={isEditing}
+            onNotice={setNotice}
+          />
+          <AwardsCard
+            profile={activeProfile}
+            onProfileChange={setDraftProfile}
+            isEditing={isEditing}
+            onNotice={setNotice}
+          />
         </div>
       </ProfileGroup>
     </div>
   );
 }
 
-function ProfileGroup({ title, description, icon: Icon, children }: { title: string; description: string; icon: React.ElementType; children: React.ReactNode }) {
-  return (
-    <section className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 shadow-sm sm:p-4">
-      <div className="flex items-start gap-3 px-1 sm:px-2">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-cyan-600 shadow-sm"><Icon size={18} /></span>
-        <div>
-          <h2 className="text-sm font-bold text-slate-800 sm:text-base">{title}</h2>
-          <p className="mt-1 text-[10px] leading-4 text-slate-500 sm:text-xs">{description}</p>
+function BasicDetailsCard({
+  profile,
+  onProfileChange,
+  isEditing,
+  onSave,
+  onCancel,
+}: {
+  profile: ProfileData;
+  onProfileChange: React.Dispatch<React.SetStateAction<ProfileData>>;
+  isEditing?: boolean;
+  onSave: () => void;
+  onCancel: () => void;
+}) {
+  if (isEditing) {
+    return (
+      <ProfileSection
+        title="Basic Details"
+        icon={UserRound}
+        action={
+          <button type="button" className="inline-flex items-center gap-1 rounded-md border border-cyan-300 px-2.5 py-1 text-xs font-semibold text-cyan-600 hover:bg-cyan-50">
+            <Pencil size={13} /> Edit
+          </button>
+        }
+      >
+        <div className="grid gap-x-4 gap-y-3 sm:grid-cols-2 text-xs">
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              REGISTRATION NUMBER <span className="text-rose-500">*</span>
+            </label>
+            <input
+              disabled
+              value={profile.registrationNumber}
+              className="h-10 w-full rounded-lg border border-slate-200 bg-slate-100 px-3 font-medium text-slate-700"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              DEPARTMENT <span className="text-rose-500">*</span>
+            </label>
+            <CustomSelect
+              value={profile.department}
+              onChange={(val) => onProfileChange((prev) => ({ ...prev, department: val }))}
+              options={[
+                "Computer Science & Engineering",
+                "Information Technology",
+                "Electronics & Communication",
+                "Electrical Engineering",
+                "Mechanical Engineering",
+                "Civil Engineering",
+              ]}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              PROGRAM <span className="text-rose-500">*</span>
+            </label>
+            <CustomSelect
+              value={profile.program}
+              onChange={(val) => onProfileChange((prev) => ({ ...prev, program: val }))}
+              options={[
+                "B.E. Computer Science",
+                "B.Tech Information Technology",
+                "B.E. Electronics & Communication",
+                "B.E. Mechanical Engineering",
+                "B.E. Civil Engineering",
+              ]}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              BATCH / SEMESTER <span className="text-rose-500">*</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <CustomSelect
+                value={profile.batch}
+                onChange={(val) => onProfileChange((prev) => ({ ...prev, batch: val }))}
+                options={["2024", "2025", "2026", "2027", "2028"]}
+              />
+              <CustomSelect
+                value={profile.semester}
+                onChange={(val) => onProfileChange((prev) => ({ ...prev, semester: val }))}
+                options={[
+                  "1st Semester",
+                  "2nd Semester",
+                  "3rd Semester",
+                  "4th Semester",
+                  "5th Semester",
+                  "6th Semester",
+                  "7th Semester",
+                  "8th Semester",
+                ]}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              EMAIL <span className="text-rose-500">*</span>
+            </label>
+            <input
+              value={profile.email}
+              onChange={(e) => onProfileChange((prev) => ({ ...prev, email: e.target.value }))}
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 font-medium text-slate-700 outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              PHONE <span className="text-rose-500">*</span>
+            </label>
+            <input
+              value={profile.phone}
+              onChange={(e) => onProfileChange((prev) => ({ ...prev, phone: e.target.value }))}
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 font-medium text-slate-700 outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              DATE OF BIRTH <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative">
+              <input
+                value={profile.dateOfBirth}
+                onChange={(e) => onProfileChange((prev) => ({ ...prev, dateOfBirth: e.target.value }))}
+                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 pr-9 font-medium text-slate-700 outline-none focus:border-cyan-400"
+              />
+              <CalendarDays size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              LOCATION <span className="text-rose-500">*</span>
+            </label>
+            <input
+              value={profile.location}
+              onChange={(e) => onProfileChange((prev) => ({ ...prev, location: e.target.value }))}
+              className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 font-medium text-slate-700 outline-none focus:border-cyan-400"
+            />
+          </div>
         </div>
+
+        <div className="mt-4 flex justify-end gap-2 border-t border-slate-100 pt-3">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="rounded-lg bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onSave}
+            className="rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-600"
+          >
+            Save Changes
+          </button>
+        </div>
+      </ProfileSection>
+    );
+  }
+
+  return (
+    <ProfileSection title="Basic Details" icon={UserRound}>
+      <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
+        <InfoItem icon={FileText} label="Registration Number" value={profile.registrationNumber} />
+        <InfoItem icon={Building2} label="Department" value={profile.department} />
+        <InfoItem icon={GraduationCap} label="Program" value={profile.program} />
+        <InfoItem icon={CalendarDays} label="Batch / Semester" value={`${profile.batch} · ${profile.semester}`} />
+        <InfoItem icon={Mail} label="Email" value={profile.email} />
+        <InfoItem icon={Phone} label="Phone" value={profile.phone} />
+        <InfoItem icon={CalendarDays} label="Date of Birth" value={profile.dateOfBirth} />
+        <InfoItem icon={MapPin} label="Location" value={profile.location} />
       </div>
-      <div className="mt-4">{children}</div>
-    </section>
+    </ProfileSection>
   );
 }
 
-function BasicDetailsCard() {
-  return <ProfileSection title="Basic Details" icon={UserRound}><div className="grid gap-x-5 gap-y-4 sm:grid-cols-2"><InfoItem icon={FileText} label="Registration Number" value={studentProfileData.registrationNumber} /><InfoItem icon={Building2} label="Department" value={studentProfileData.department} /><InfoItem icon={GraduationCap} label="Program" value={studentProfileData.program} /><InfoItem icon={CalendarDays} label="Batch / Semester" value={`${studentProfileData.batch} · ${studentProfileData.semester}`} /><InfoItem icon={Mail} label="Email" value={studentProfileData.email} /><InfoItem icon={Phone} label="Phone" value={studentProfileData.phone} /><InfoItem icon={CalendarDays} label="Date of Birth" value={studentProfileData.dateOfBirth} /><InfoItem icon={MapPin} label="Location" value={studentProfileData.location} /></div></ProfileSection>;
-}
+function AcademicPerformanceCard({
+  profile,
+  onProfileChange,
+  isEditing,
+  onNotice,
+}: {
+  profile: ProfileData;
+  onProfileChange: React.Dispatch<React.SetStateAction<ProfileData>>;
+  isEditing?: boolean;
+  onNotice: (msg: string) => void;
+}) {
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-function AcademicPerformanceCard() {
+  const handleFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onProfileChange((prev) => ({
+        ...prev,
+        semesterScores: prev.semesterScores.map((sem, i) =>
+          i === index
+            ? { ...sem, file: file.name, score: sem.score === "Pending" ? "8.8" : sem.score, percentage: sem.percentage === 0 ? 88 : sem.percentage }
+            : sem
+        ),
+      }));
+      onNotice(`Uploaded markcard: ${file.name}`);
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      semesterScores: prev.semesterScores.map((sem, i) =>
+        i === index ? { ...sem, file: "" } : sem
+      ),
+    }));
+    onNotice(`Removed markcard for ${profile.semesterScores[index]?.label || "semester"}`);
+  };
+
+  if (isEditing) {
+    return (
+      <ProfileSection title="Academic Performance" icon={GraduationCap} className="h-full">
+        <p className="text-[11px] text-slate-500">
+          Upload your semester markcards. Your CGPA, attendance and backlog details will be automatically updated.
+        </p>
+
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-cyan-100 bg-cyan-50/70 p-3 text-xs text-cyan-800">
+          <Info size={16} className="mt-0.5 shrink-0 text-cyan-500" />
+          <span>Only upload official markcards (PDF, JPG or PNG). Marks, CGPA, attendance and backlog details cannot be edited manually.</span>
+        </div>
+
+        <div className="mt-4 space-y-2">
+          {profile.semesterScores.map((sem, idx) => (
+            <div key={sem.label} className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/80 px-3.5 py-2.5 text-xs">
+              <span className="font-bold text-slate-800 w-24">{sem.label}</span>
+              <input
+                type="file"
+                ref={(el) => { fileInputRefs.current[idx] = el; }}
+                className="hidden"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => handleFileChange(idx, e)}
+              />
+
+              {sem.file ? (
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <FileText size={15} className="shrink-0 text-cyan-600" />
+                  <span className="truncate text-xs font-semibold text-slate-700">{sem.file}</span>
+                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">
+                    <CheckCircle2 size={12} /> Uploaded
+                  </span>
+                </div>
+              ) : (
+                <div className="flex min-w-0 flex-1 items-center gap-2">
+                  <span className="text-xs text-slate-400 italic">No markcard uploaded</span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-1.5 ml-2">
+                <button
+                  type="button"
+                  onClick={() => fileInputRefs.current[idx]?.click()}
+                  className="inline-flex items-center gap-1 rounded-md border border-cyan-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-cyan-600 hover:bg-cyan-50"
+                >
+                  <Upload size={12} /> {sem.file ? "Replace" : "Upload"}
+                </button>
+                {sem.file && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveFile(idx)}
+                    className="rounded-md border border-rose-200 bg-white p-1 text-rose-500 hover:bg-rose-50"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </ProfileSection>
+    );
+  }
+
   return (
     <ProfileSection title="Academic Performance" icon={GraduationCap} className="h-full">
       <div className="grid grid-cols-3 gap-2">
-        <ProfileMetric label="CGPA" value={`${studentProfileData.cgpa} / 10`} tone="bg-cyan-50 text-cyan-600" />
-        <ProfileMetric label="Attendance" value={studentProfileData.attendance} tone="bg-emerald-50 text-emerald-600" />
-        <ProfileMetric label="Backlogs" value={studentProfileData.backlogs} tone="bg-amber-50 text-amber-600" />
+        <ProfileMetric label="CGPA" value={`${profile.cgpa} / 10`} tone="bg-cyan-50 text-cyan-600" />
+        <ProfileMetric label="Attendance" value={profile.attendance} tone="bg-emerald-50 text-emerald-600" />
+        <ProfileMetric label="Backlogs" value={profile.backlogs} tone="bg-amber-50 text-amber-600" />
       </div>
       <div className="mt-4 border-t border-slate-100 pt-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -904,20 +1471,25 @@ function AcademicPerformanceCard() {
           <span className="text-[10px] font-medium text-emerald-600">Improving trend</span>
         </div>
         <div className="mt-3 max-h-64 space-y-2 overflow-y-auto pr-1">
-          {studentProfileData.semesterScores.map((semester) => (
+          {profile.semesterScores.map((semester) => (
             <div key={semester.label} className="rounded-lg bg-slate-50/80 p-2">
               <div className="flex items-center justify-between text-[10px]">
                 <span className="font-bold text-slate-700">{semester.label}</span>
-                {/* <span className="text-slate-500">Score <span className="font-bold text-cyan-600">{semester.score}</span></span> */}
               </div>
               <div className="mt-2 grid gap-2 sm:grid-cols-[64px_minmax(0,1fr)_30px] sm:items-center">
                 <span className="text-[9px] font-medium text-slate-500">Academic</span>
-                <div className="h-1.5 overflow-hidden rounded-full bg-white"><div className="h-full rounded-full bg-cyan-400" style={{ width: `${semester.percentage}%` }} /></div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white">
+                  <div className="h-full rounded-full bg-cyan-400" style={{ width: `${semester.percentage}%` }} />
+                </div>
                 <span className="text-right text-[10px] font-bold text-slate-700">{semester.score}</span>
               </div>
               <div className="mt-1.5 grid gap-2 sm:grid-cols-[64px_minmax(0,1fr)_30px] sm:items-center">
                 <span className="text-[9px] font-medium text-slate-500">Backlogs</span>
-                <div className="flex min-w-0 items-center"><span className={`text-[10px] font-semibold ${semester.backlogs === 0 ? "text-emerald-600" : "text-amber-600"}`}>{semester.backlogs === 0 ? "No backlogs" : `${semester.backlogs} backlog${semester.backlogs === 1 ? "" : "s"}`}</span></div>
+                <div className="flex min-w-0 items-center">
+                  <span className={`text-[10px] font-semibold ${semester.backlogs === 0 ? "text-emerald-600" : "text-amber-600"}`}>
+                    {semester.backlogs === 0 ? "No backlogs" : `${semester.backlogs} backlog${semester.backlogs === 1 ? "" : "s"}`}
+                  </span>
+                </div>
                 <span className="text-right text-[10px] font-bold text-amber-600">{semester.backlogs}</span>
               </div>
             </div>
@@ -928,34 +1500,1356 @@ function AcademicPerformanceCard() {
   );
 }
 
-function SkillsCard() {
-  const skillCount = studentProfileData.skillGroups.reduce((total, group) => total + group.skills.length, 0);
+function SkillsCard({
+  profile,
+  onProfileChange,
+  isEditing,
+  onNotice,
+}: {
+  profile: ProfileData;
+  onProfileChange: React.Dispatch<React.SetStateAction<ProfileData>>;
+  isEditing?: boolean;
+  onNotice: (msg: string) => void;
+}) {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [skillInput, setSkillInput] = useState("");
 
-  return <ProfileSection title="Skills" icon={CheckCircle2} action={<span className="text-[10px] font-medium text-slate-500">{skillCount} skills added</span>}><div className="grid gap-4 md:grid-cols-3">{studentProfileData.skillGroups.map((group) => <div key={group.label}><p className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{group.label}</p><div className="mt-2 flex flex-wrap gap-1.5">{group.skills.map((skill) => <span key={skill} className="rounded-md bg-violet-50 px-2.5 py-1.5 text-[10px] font-semibold text-violet-600">{skill}</span>)}</div></div>)}</div></ProfileSection>;
+  const addSkill = (skillToAdd: string) => {
+    const trimmed = skillToAdd.trim();
+    if (trimmed && !profile.skillsList.includes(trimmed)) {
+      onProfileChange((prev) => ({
+        ...prev,
+        skillsList: [...prev.skillsList, trimmed],
+      }));
+      setSkillInput("");
+      onNotice(`Added skill: ${trimmed}`);
+    }
+  };
+
+  const removeSkill = (skillToRemove: string) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      skillsList: prev.skillsList.filter((sk) => sk !== skillToRemove),
+    }));
+    onNotice(`Removed skill: ${skillToRemove}`);
+  };
+
+  const addSuggestedCS = () => {
+    const suggestions = ["Docker", "AWS", "TypeScript", "System Design"];
+    onProfileChange((prev) => ({
+      ...prev,
+      skillsList: Array.from(new Set([...prev.skillsList, ...suggestions])),
+    }));
+    onNotice("Added suggested CS skills!");
+  };
+
+  if (isEditing) {
+    return (
+      <DetailCard className="h-full">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600">
+              <CheckCircle2 size={18} />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 sm:text-base">Skills</h2>
+              <p className="mt-1 text-[10px] text-slate-500">Add and manage your technical and soft skills.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-semibold text-slate-500">{profile.skillsList.length} skills added</span>
+            <button
+              type="button"
+              onClick={() => setShowDropdown((prev) => !prev)}
+              className="inline-flex items-center gap-1 rounded-md border border-cyan-300 px-2 py-1 text-[11px] font-semibold text-cyan-600 hover:bg-cyan-50"
+            >
+              <Plus size={12} /> Add Skill
+            </button>
+          </div>
+        </div>
+
+        {/* Add Skill input & dropdown trigger */}
+        <div className="relative mt-4">
+          <p className="text-[11px] font-bold text-slate-800 mb-1">Add Skill</p>
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                value={skillInput}
+                onChange={(e) => setSkillInput(e.target.value)}
+                onFocus={() => setShowDropdown(true)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addSkill(skillInput);
+                  }
+                }}
+                placeholder="Search or select a skill (e.g. Python, React, AWS...)"
+                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 pr-8 text-xs font-medium text-slate-700 outline-none focus:border-cyan-400"
+              />
+              <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            </div>
+            <button
+              type="button"
+              onClick={() => addSkill(skillInput)}
+              className="h-10 rounded-lg bg-cyan-500 px-4 text-xs font-semibold text-white hover:bg-cyan-600"
+            >
+              Add
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={addSuggestedCS}
+            className="mt-1 text-[10px] font-semibold text-cyan-600 hover:underline"
+          >
+            Show suggested for CS →
+          </button>
+
+          {/* Skill Dropdown Overlay */}
+          {showDropdown && (
+            <div className="absolute left-0 top-full z-20 mt-1 grid w-full grid-cols-[140px_minmax(0,1fr)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+              <div className="border-r border-slate-100 bg-slate-50/70 p-2 text-[11px]">
+                {["Popular", "Programming Languages", "Web Development", "Mobile Development", "Database", "Cloud & DevOps", "AI/ML & Data Science", "Cybersecurity", "Other"].map((cat, idx) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setShowDropdown(false)}
+                    className={`block w-full rounded-md px-2.5 py-1.5 text-left font-medium ${idx === 0 ? "bg-white font-bold text-slate-800 shadow-sm" : "text-slate-600 hover:bg-slate-100"}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              <div className="max-h-60 overflow-y-auto p-2 text-xs">
+                {[
+                  { name: "Python", icon: "🐍" },
+                  { name: "Java", icon: "☕" },
+                  { name: "C++", icon: "⚙️" },
+                  { name: "JavaScript", icon: "🟨" },
+                  { name: "TypeScript", icon: "📘" },
+                  { name: "Go", icon: "🐹" },
+                  { name: "Rust", icon: "🦀" },
+                  { name: "Kotlin", icon: "🅺" },
+                  { name: "Docker", icon: "🐳" },
+                  { name: "AWS", icon: "☁️" },
+                ]
+                  .filter((sk) => !skillInput || sk.name.toLowerCase().includes(skillInput.toLowerCase()))
+                  .map((sk) => (
+                    <button
+                      key={sk.name}
+                      type="button"
+                      onClick={() => {
+                        addSkill(sk.name);
+                        setShowDropdown(false);
+                      }}
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-left font-semibold text-slate-700 hover:bg-cyan-50 hover:text-cyan-700"
+                    >
+                      <span>{sk.icon}</span>
+                      <span>{sk.name}</span>
+                    </button>
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Your Skills Area */}
+        <div className="mt-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-800">Your Skills</h3>
+            <button
+              type="button"
+              onClick={() => {
+                onProfileChange((prev) => ({ ...prev, skillsList: [] }));
+                onNotice("Cleared all skills.");
+              }}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-500 hover:underline"
+            >
+              Clear All
+            </button>
+          </div>
+          <div className="mt-2.5 flex flex-wrap gap-2">
+            {profile.skillsList.map((skill) => (
+              <span key={skill} className="inline-flex items-center gap-1.5 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700">
+                {skill}
+                <button type="button" onClick={() => removeSkill(skill)} className="text-violet-400 hover:text-violet-700">
+                  <X size={13} />
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+      </DetailCard>
+    );
+  }
+
+  return (
+    <ProfileSection title="Skills" icon={CheckCircle2} action={<span className="text-[10px] font-medium text-slate-500">{profile.skillsList.length} skills added</span>}>
+      <div className="flex flex-wrap gap-2">
+        {profile.skillsList.map((skill) => (
+          <span key={skill} className="rounded-md bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-600">
+            {skill}
+          </span>
+        ))}
+      </div>
+    </ProfileSection>
+  );
 }
 
-function ProjectsCard() {
-  return <DetailCard className="h-full"><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><FileText size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Projects</h2><p className="mt-1 text-[10px] text-slate-500">Work that demonstrates your technical experience.</p></div></div><span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-600">{studentProfileData.projects.length} projects</span></div><div className="mt-4 space-y-3">{studentProfileData.projects.map((project) => <article key={project.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><div className="flex flex-wrap items-start justify-between gap-2"><div><h3 className="text-xs font-bold text-slate-800">{project.title}</h3><p className="mt-1 text-[10px] text-slate-500">{project.type}</p></div><span className="text-[10px] font-semibold text-cyan-600">View details <ChevronRight size={12} className="inline" /></span></div><p className="mt-2 text-[11px] leading-4 text-slate-600">{project.description}</p><div className="mt-2 flex flex-wrap gap-1.5">{project.technologies.map((technology) => <span key={technology} className="rounded bg-white px-2 py-1 text-[9px] font-medium text-slate-600">{technology}</span>)}</div></article>)}</div></DetailCard>;
+function ProjectsCard({
+  profile,
+  onProfileChange,
+  isEditing,
+  onNotice,
+}: {
+  profile: ProfileData;
+  onProfileChange: React.Dispatch<React.SetStateAction<ProfileData>>;
+  isEditing?: boolean;
+  onNotice: (msg: string) => void;
+}) {
+  const reportInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleAddProject = () => {
+    const newProj = {
+      id: Date.now().toString(),
+      title: "New Project Title",
+      type: "Personal Project",
+      dates: "2026",
+      description: "Project description and features...",
+      technologies: ["React", "JavaScript"],
+      githubUrl: "https://github.com/arjun/new-project",
+      reportFile: "",
+    };
+    onProfileChange((prev) => ({ ...prev, projects: [newProj, ...prev.projects] }));
+    onNotice("Added new project card.");
+  };
+
+  const handleDeleteProject = (id: string) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      projects: prev.projects.filter((p) => p.id !== id),
+    }));
+    onNotice("Project deleted.");
+  };
+
+  const handleUpdateProject = (id: string, field: string, value: any) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      projects: prev.projects.map((p) => (p.id === id ? { ...p, [field]: value } : p)),
+    }));
+  };
+
+  const handleRemoveTech = (projId: string, tech: string) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      projects: prev.projects.map((p) =>
+        p.id === projId ? { ...p, technologies: p.technologies.filter((t) => t !== tech) } : p
+      ),
+    }));
+  };
+
+  const handleAddTech = (projId: string, tech: string) => {
+    if (!tech) return;
+    onProfileChange((prev) => ({
+      ...prev,
+      projects: prev.projects.map((p) =>
+        p.id === projId && !p.technologies.includes(tech) ? { ...p, technologies: [...p.technologies, tech] } : p
+      ),
+    }));
+  };
+
+  const handleReportUpload = (projId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleUpdateProject(projId, "reportFile", file.name);
+      onNotice(`Uploaded report: ${file.name}`);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <DetailCard className="h-full">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600">
+              <FileText size={18} />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 sm:text-base">Projects</h2>
+              <p className="mt-1 text-[10px] text-slate-500">Work that demonstrates your technical experience.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-semibold text-slate-500">{profile.projects.length} projects</span>
+            <button
+              type="button"
+              onClick={handleAddProject}
+              className="inline-flex items-center gap-1 rounded-md border border-cyan-300 px-2 py-1 text-[11px] font-semibold text-cyan-600 hover:bg-cyan-50"
+            >
+              <Plus size={12} /> Add Project
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {profile.projects.map((project, idx) => (
+            <div key={project.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <input
+                    value={project.title}
+                    onChange={(e) => handleUpdateProject(project.id, "title", e.target.value)}
+                    className="text-xs font-bold text-slate-800 outline-none border-b border-transparent focus:border-cyan-400 w-full"
+                  />
+                  <Pencil size={13} className="shrink-0 text-slate-400" />
+                </div>
+                <div className="flex items-center gap-2 text-[11px] shrink-0">
+                  <div className="relative">
+                    <input
+                      value={project.dates}
+                      onChange={(e) => handleUpdateProject(project.id, "dates", e.target.value)}
+                      className="w-36 rounded border border-slate-200 px-2 py-1 text-[10px] font-medium text-slate-600 outline-none"
+                    />
+                    <CalendarDays size={13} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteProject(project.id)}
+                    className="text-rose-500 hover:text-rose-700"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+              <input
+                value={project.type}
+                onChange={(e) => handleUpdateProject(project.id, "type", e.target.value)}
+                className="mt-1 w-full rounded border border-slate-200 px-2.5 py-1 text-xs text-slate-600 outline-none focus:border-cyan-400"
+              />
+              <textarea
+                value={project.description}
+                onChange={(e) => handleUpdateProject(project.id, "description", e.target.value)}
+                className="mt-2 w-full rounded border border-slate-200 p-2 text-xs text-slate-600 outline-none focus:border-cyan-400"
+                rows={2}
+              />
+
+              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                {project.technologies.map((tech) => (
+                  <span key={tech} className="inline-flex items-center gap-1 rounded-md bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-600">
+                    {tech}
+                    <X size={11} className="cursor-pointer hover:text-rose-500" onClick={() => handleRemoveTech(project.id, tech)} />
+                  </span>
+                ))}
+                <CustomSelect
+                  value=""
+                  onChange={(val) => handleAddTech(project.id, val)}
+                  options={["React", "Node.js", "MongoDB", "Python", "Flask", "MySQL", "JavaScript", "Express", "PostgreSQL", "TypeScript", "Docker", "AWS"]}
+                  placeholder="Add technology..."
+                  className="w-36 text-[10px]"
+                />
+              </div>
+
+              <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_140px]">
+                <div className="relative">
+                  <Link size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    value={project.githubUrl}
+                    onChange={(e) => handleUpdateProject(project.id, "githubUrl", e.target.value)}
+                    placeholder="https://github.com/user/project"
+                    className="h-9 w-full rounded-lg border border-slate-200 pl-8 pr-2 text-[11px] text-slate-600 outline-none focus:border-cyan-400"
+                  />
+                </div>
+                <input
+                  type="file"
+                  ref={(el) => { reportInputRefs.current[idx] = el; }}
+                  className="hidden"
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  onChange={(e) => handleReportUpload(project.id, e)}
+                />
+                <button
+                  type="button"
+                  onClick={() => reportInputRefs.current[idx]?.click()}
+                  className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50/50 p-1.5 text-center hover:border-cyan-400"
+                >
+                  <div className="flex items-center gap-1 text-[10px] font-semibold text-slate-700">
+                    <Upload size={12} className="text-cyan-500" /> {project.reportFile ? project.reportFile : "Add Report / Cert"}
+                  </div>
+                  <span className="text-[8px] text-slate-400">PDF, JPG or PNG (Max 5MB)</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </DetailCard>
+    );
+  }
+
+  return (
+    <DetailCard className="h-full">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600">
+            <FileText size={18} />
+          </span>
+          <div>
+            <h2 className="text-sm font-bold text-slate-800 sm:text-base">Projects</h2>
+            <p className="mt-1 text-[10px] text-slate-500">Work that demonstrates your technical experience.</p>
+          </div>
+        </div>
+        <span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-600">
+          {profile.projects.length} projects
+        </span>
+      </div>
+      <div className="mt-4 space-y-3">
+        {profile.projects.map((project) => (
+          <article key={project.id} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <h3 className="text-xs font-bold text-slate-800">{project.title}</h3>
+                <p className="mt-1 text-[10px] text-slate-500">{project.type}</p>
+              </div>
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[10px] font-semibold text-cyan-600 hover:underline"
+              >
+                View details <ChevronRight size={12} className="inline" />
+              </a>
+            </div>
+            <p className="mt-2 text-[11px] leading-4 text-slate-600">{project.description}</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {project.technologies.map((technology) => (
+                <span key={technology} className="rounded bg-white px-2 py-1 text-[9px] font-medium text-slate-600">
+                  {technology}
+                </span>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+    </DetailCard>
+  );
 }
 
-function InternshipsCard() {
-  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600"><BriefcaseBusiness size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Internships</h2><p className="mt-1 text-[10px] text-slate-500">Your practical industry experience.</p></div></div><span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">{studentProfileData.internships.length} completed</span></div><div className="mt-4 space-y-3">{studentProfileData.internships.map((internship) => <article key={`${internship.company}-${internship.role}`} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><div className="flex items-start justify-between gap-2"><div><h3 className="text-xs font-bold text-slate-800">{internship.role}</h3><p className="mt-1 text-[11px] font-semibold text-emerald-600">{internship.company}</p></div><span className="whitespace-nowrap text-[9px] font-medium text-slate-500">{internship.duration}</span></div><p className="mt-2 text-[11px] leading-4 text-slate-600">{internship.description}</p><span className="mt-3 inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-[9px] font-semibold text-emerald-600"><CheckCircle2 size={11} />Verified experience</span></article>)}</div></DetailCard>;
+function InternshipsCard({
+  profile,
+  onProfileChange,
+  isEditing,
+  onNotice,
+}: {
+  profile: ProfileData;
+  onProfileChange: React.Dispatch<React.SetStateAction<ProfileData>>;
+  isEditing?: boolean;
+  onNotice: (msg: string) => void;
+}) {
+  const certInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleAddInternship = () => {
+    const newIntern = {
+      id: Date.now().toString(),
+      role: "Software Development Intern",
+      company: "InnovateTech",
+      duration: "Jun 2026 – Aug 2026",
+      description: "Assisted development team with UI components and backend integration.",
+      certificateFile: "Internship_Certificate.pdf",
+      certificateSize: "1.0 MB",
+    };
+    onProfileChange((prev) => ({ ...prev, internships: [newIntern, ...prev.internships] }));
+    onNotice("Added new internship.");
+  };
+
+  const handleDeleteInternship = (id: string) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      internships: prev.internships.filter((i) => i.id !== id),
+    }));
+    onNotice("Internship deleted.");
+  };
+
+  const handleUpdateInternship = (id: string, field: string, value: any) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      internships: prev.internships.map((i) => (i.id === id ? { ...i, [field]: value } : i)),
+    }));
+  };
+
+  const handleCertUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onProfileChange((prev) => ({
+        ...prev,
+        internships: prev.internships.map((item) =>
+          item.id === id
+            ? { ...item, certificateFile: file.name, certificateSize: `${(file.size / 1024 / 1024).toFixed(1)} MB` }
+            : item
+        ),
+      }));
+      onNotice(`Uploaded certificate: ${file.name}`);
+    }
+  };
+
+  const handleRemoveCert = (id: string) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      internships: prev.internships.map((item) =>
+        item.id === id ? { ...item, certificateFile: "", certificateSize: "" } : item
+      ),
+    }));
+    onNotice("Removed internship certificate.");
+  };
+
+  if (isEditing) {
+    return (
+      <DetailCard>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+              <BriefcaseBusiness size={18} />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 sm:text-base">Internships</h2>
+              <p className="mt-1 text-[10px] text-slate-500">Add or edit your internship experience.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-semibold text-emerald-600 font-bold">{profile.internships.length} completed</span>
+            <button
+              type="button"
+              onClick={handleAddInternship}
+              className="inline-flex items-center gap-1 rounded-md border border-cyan-300 px-2 py-1 text-[11px] font-semibold text-cyan-600 hover:bg-cyan-50"
+            >
+              <Plus size={12} /> Add Internship
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {profile.internships.map((internship, idx) => (
+            <div key={internship.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <input
+                    value={internship.role}
+                    onChange={(e) => handleUpdateInternship(internship.id, "role", e.target.value)}
+                    className="text-xs font-bold text-slate-800 outline-none border-b border-transparent focus:border-cyan-400 w-full"
+                  />
+                  <Pencil size={13} className="shrink-0 text-slate-400" />
+                </div>
+                <div className="flex items-center gap-2 text-[11px] shrink-0">
+                  <div className="relative">
+                    <input
+                      value={internship.duration}
+                      onChange={(e) => handleUpdateInternship(internship.id, "duration", e.target.value)}
+                      className="w-36 rounded border border-slate-200 px-2 py-1 text-[10px] font-medium text-slate-600 outline-none"
+                    />
+                    <CalendarDays size={13} className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteInternship(internship.id)}
+                    className="text-rose-500 hover:text-rose-700"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+              <input
+                value={internship.company}
+                onChange={(e) => handleUpdateInternship(internship.id, "company", e.target.value)}
+                className="mt-1 text-xs font-semibold text-emerald-600 outline-none border-b border-transparent focus:border-cyan-400 w-full"
+              />
+              <input
+                value={internship.description}
+                onChange={(e) => handleUpdateInternship(internship.id, "description", e.target.value)}
+                className="mt-2 w-full rounded border border-slate-200 p-2 text-xs text-slate-600 outline-none focus:border-cyan-400"
+              />
+
+              <div className="mt-3">
+                <p className="text-[10px] font-bold text-slate-500 mb-1">Internship Certificate</p>
+                <input
+                  type="file"
+                  ref={(el) => { certInputRefs.current[idx] = el; }}
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => handleCertUpload(internship.id, e)}
+                />
+                <div className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 p-2.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText size={18} className="shrink-0 text-rose-500" />
+                    <div className="min-w-0">
+                      <p className="truncate text-xs font-bold text-slate-800">
+                        {internship.certificateFile || "No certificate uploaded"}
+                      </p>
+                      <p className="text-[10px] text-slate-400">
+                        {internship.certificateSize ? `PDF • ${internship.certificateSize}` : "Upload PDF or Image"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => certInputRefs.current[idx]?.click()}
+                      className="rounded p-1 text-slate-500 hover:text-cyan-600"
+                    >
+                      <Upload size={14} />
+                    </button>
+                    {internship.certificateFile && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCert(internship.id)}
+                        className="rounded p-1 text-rose-500 hover:text-rose-700"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                    <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">
+                      <CheckCircle2 size={11} /> Verified
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </DetailCard>
+    );
+  }
+
+  return (
+    <DetailCard>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+            <BriefcaseBusiness size={18} />
+          </span>
+          <div>
+            <h2 className="text-sm font-bold text-slate-800 sm:text-base">Internships</h2>
+            <p className="mt-1 text-[10px] text-slate-500">Your practical industry experience.</p>
+          </div>
+        </div>
+        <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">
+          {profile.internships.length} completed
+        </span>
+      </div>
+      <div className="mt-4 space-y-3">
+        {profile.internships.map((internship) => (
+          <article key={internship.id} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h3 className="text-xs font-bold text-slate-800">{internship.role}</h3>
+                <p className="mt-1 text-[11px] font-semibold text-emerald-600">{internship.company}</p>
+              </div>
+              <span className="whitespace-nowrap text-[9px] font-medium text-slate-500">{internship.duration}</span>
+            </div>
+            <p className="mt-2 text-[11px] leading-4 text-slate-600">{internship.description}</p>
+            <span className="mt-3 inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-[9px] font-semibold text-emerald-600">
+              <CheckCircle2 size={11} /> Verified experience
+            </span>
+          </article>
+        ))}
+      </div>
+    </DetailCard>
+  );
 }
 
-function ResumeCard({ onNotice }: { onNotice: (message: string) => void }) {
-  return <DetailCard><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-500"><FileText size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Resume</h2><p className="mt-1 text-[10px] text-slate-500">Your latest resume shared with recruiters.</p></div></div><span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">Ready to share</span></div><div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50/80 p-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-rose-50 text-rose-500"><FileText size={20} /></span><div className="min-w-0 flex-1"><p className="truncate text-xs font-bold text-slate-800">{studentProfileData.resume.name}</p><p className="mt-1 text-[10px] text-slate-500">PDF · {studentProfileData.resume.size} · Updated {studentProfileData.resume.updated}</p></div><CheckCircle2 size={17} className="shrink-0 text-emerald-500" /></div><div className="mt-4 flex flex-wrap gap-2"><button type="button" onClick={() => onNotice(`Opening ${studentProfileData.resume.name}.`)} className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">View Resume</button><button type="button" onClick={() => onNotice("Resume update flow will be available in the next update.")} className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600"><Upload size={14} /> Update Resume</button><button type="button" onClick={() => onNotice(`Opening ${studentProfileData.resume.name}.`)} className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">Download Resume</button></div></DetailCard>;
+function ResumeCard({
+  profile,
+  onProfileChange,
+  isEditing,
+  onNotice,
+}: {
+  profile: ProfileData;
+  onProfileChange: React.Dispatch<React.SetStateAction<ProfileData>>;
+  isEditing?: boolean;
+  onNotice: (message: string) => void;
+}) {
+  const resumeInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onProfileChange((prev) => ({
+        ...prev,
+        resume: {
+          name: file.name,
+          size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+          updated: "Just now",
+        },
+      }));
+      onNotice(`Uploaded resume: ${file.name}`);
+    }
+  };
+
+  const handleDeleteResume = () => {
+    onProfileChange((prev) => ({
+      ...prev,
+      resume: {
+        name: "No resume uploaded",
+        size: "0 MB",
+        updated: "-",
+      },
+    }));
+    onNotice("Resume deleted.");
+  };
+
+  if (isEditing) {
+    return (
+      <DetailCard>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-500">
+              <FileText size={18} />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 sm:text-base">Resume</h2>
+              <p className="mt-1 text-[10px] text-slate-500">Your latest resume shared with recruiters.</p>
+            </div>
+          </div>
+          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600">
+            Editing enabled
+          </span>
+        </div>
+        <input
+          type="file"
+          ref={resumeInputRef}
+          className="hidden"
+          accept=".pdf,.doc,.docx"
+          onChange={handleResumeUpload}
+        />
+        <div className="mt-4 flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/80 p-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-rose-50 text-rose-500">
+              <FileText size={20} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-bold text-slate-800">{profile.resume.name}</p>
+              <p className="mt-1 text-[10px] text-slate-500">
+                PDF - {profile.resume.size} · Updated {profile.resume.updated}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => resumeInputRef.current?.click()}
+              className="inline-flex items-center gap-1 rounded-md border border-cyan-300 bg-white px-2.5 py-1 text-xs font-semibold text-cyan-600 hover:bg-cyan-50"
+            >
+              <Upload size={13} /> Replace
+            </button>
+            <button
+              type="button"
+              onClick={handleDeleteResume}
+              className="rounded-md border border-rose-200 bg-white p-1.5 text-rose-500 hover:bg-rose-50"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => onNotice(`Opening ${profile.resume.name}.`)}
+            className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
+          >
+            View Resume
+          </button>
+          <button
+            type="button"
+            onClick={() => resumeInputRef.current?.click()}
+            className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600"
+          >
+            <Upload size={14} /> Update Resume
+          </button>
+          <button
+            type="button"
+            onClick={() => onNotice(`Downloading ${profile.resume.name}.`)}
+            className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
+          >
+            Download Resume
+          </button>
+        </div>
+      </DetailCard>
+    );
+  }
+
+  return (
+    <DetailCard>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-500">
+            <FileText size={18} />
+          </span>
+          <div>
+            <h2 className="text-sm font-bold text-slate-800 sm:text-base">Resume</h2>
+            <p className="mt-1 text-[10px] text-slate-500">Your latest resume shared with recruiters.</p>
+          </div>
+        </div>
+        <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">Ready to share</span>
+      </div>
+      <div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50/80 p-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-rose-50 text-rose-500">
+          <FileText size={20} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs font-bold text-slate-800">{profile.resume.name}</p>
+          <p className="mt-1 text-[10px] text-slate-500">
+            PDF · {profile.resume.size} · Updated {profile.resume.updated}
+          </p>
+        </div>
+        <CheckCircle2 size={17} className="shrink-0 text-emerald-500" />
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => onNotice(`Opening ${profile.resume.name}.`)}
+          className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
+        >
+          View Resume
+        </button>
+        <button
+          type="button"
+          onClick={() => onNotice("Switch to edit mode to update resume.")}
+          className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600"
+        >
+          <Upload size={14} /> Update Resume
+        </button>
+        <button
+          type="button"
+          onClick={() => onNotice(`Downloading ${profile.resume.name}.`)}
+          className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
+        >
+          Download Resume
+        </button>
+      </div>
+    </DetailCard>
+  );
 }
 
-function SportsPrizesCard() {
-  return <DetailCard className="h-full"><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-500"><Trophy size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Sports &amp; Prizes</h2><p className="mt-1 text-[10px] text-slate-500">Participation and achievements outside academics.</p></div></div><span className="rounded-md bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-600">{studentProfileData.sports.length} entries</span></div><div className="mt-4 space-y-3">{studentProfileData.sports.map((sport) => <div key={sport.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-amber-500"><Trophy size={16} /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-2"><p className="text-xs font-bold text-slate-800">{sport.title}</p><span className="text-[9px] font-medium text-slate-500">{sport.period}</span></div><p className="mt-1 text-[10px] leading-4 text-slate-600">{sport.detail}</p></div></div>)}</div></DetailCard>;
+function SportsPrizesCard({
+  profile,
+  onProfileChange,
+  isEditing,
+  onNotice,
+}: {
+  profile: ProfileData;
+  onProfileChange: React.Dispatch<React.SetStateAction<ProfileData>>;
+  isEditing?: boolean;
+  onNotice: (msg: string) => void;
+}) {
+  const sportInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleAddSport = () => {
+    const newSport = {
+      id: Date.now().toString(),
+      title: "New Sports Achievement",
+      detail: "Details of achievement or position.",
+      period: "2026",
+      certificateFile: "sports_cert.jpg",
+    };
+    onProfileChange((prev) => ({ ...prev, sports: [...prev.sports, newSport] }));
+    onNotice("Added sports entry.");
+  };
+
+  const handleDeleteSport = (id: string) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      sports: prev.sports.filter((s) => s.id !== id),
+    }));
+    onNotice("Deleted sports entry.");
+  };
+
+  const handleUpdateSport = (id: string, field: string, value: any) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      sports: prev.sports.map((s) => (s.id === id ? { ...s, [field]: value } : s)),
+    }));
+  };
+
+  const handleCertUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleUpdateSport(id, "certificateFile", file.name);
+      onNotice(`Uploaded certificate: ${file.name}`);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <DetailCard className="h-full">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-500">
+              <Trophy size={18} />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 sm:text-base">Sports &amp; Prizes</h2>
+              <p className="mt-1 text-[10px] text-slate-500">Participation and achievements outside academics.</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddSport}
+            className="inline-flex items-center gap-1 rounded-md border border-cyan-300 px-2 py-1 text-[11px] font-semibold text-cyan-600 hover:bg-cyan-50"
+          >
+            <Plus size={12} /> Add Entry
+          </button>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          {profile.sports.map((sport, idx) => (
+            <div key={sport.id} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <input
+                    value={sport.title}
+                    onChange={(e) => handleUpdateSport(sport.id, "title", e.target.value)}
+                    className="text-xs font-bold text-slate-800 outline-none border-b border-transparent focus:border-cyan-400 w-full"
+                  />
+                  <Pencil size={12} className="shrink-0 text-slate-400" />
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="relative">
+                    <input
+                      value={sport.period}
+                      onChange={(e) => handleUpdateSport(sport.id, "period", e.target.value)}
+                      className="w-24 rounded border border-slate-200 px-1.5 py-0.5 text-[9px] text-slate-500 outline-none"
+                    />
+                    <CalendarDays size={11} className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-slate-400" />
+                  </div>
+                  <Trash2 size={13} className="cursor-pointer text-rose-500 hover:text-rose-700" onClick={() => handleDeleteSport(sport.id)} />
+                </div>
+              </div>
+              <input
+                value={sport.detail}
+                onChange={(e) => handleUpdateSport(sport.id, "detail", e.target.value)}
+                className="mt-1.5 w-full rounded border border-slate-200 p-1.5 text-[10px] text-slate-600 outline-none"
+              />
+
+              <input
+                type="file"
+                ref={(el) => { sportInputRefs.current[idx] = el; }}
+                className="hidden"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => handleCertUpload(sport.id, e)}
+              />
+              <div className="mt-2.5 flex items-center justify-between rounded border border-slate-200 bg-white p-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <FileText size={15} className="shrink-0 text-rose-500" />
+                  <div className="min-w-0">
+                    <p className="truncate text-[10px] font-bold text-slate-800">{sport.certificateFile || "No certificate"}</p>
+                    <p className="text-[8px] text-slate-400">PDF / Image</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Upload size={12} className="cursor-pointer text-slate-400 hover:text-cyan-600" onClick={() => sportInputRefs.current[idx]?.click()} />
+                  {sport.certificateFile && (
+                    <Trash2 size={12} className="cursor-pointer text-rose-500 hover:text-rose-700" onClick={() => handleUpdateSport(sport.id, "certificateFile", "")} />
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </DetailCard>
+    );
+  }
+
+  return (
+    <DetailCard className="h-full">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-500">
+            <Trophy size={18} />
+          </span>
+          <div>
+            <h2 className="text-sm font-bold text-slate-800 sm:text-base">Sports &amp; Prizes</h2>
+            <p className="mt-1 text-[10px] text-slate-500">Participation and achievements outside academics.</p>
+          </div>
+        </div>
+        <span className="rounded-md bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-600">
+          {profile.sports.length} entries
+        </span>
+      </div>
+      <div className="mt-4 space-y-3">
+        {profile.sports.map((sport) => (
+          <div key={sport.id} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+            <span className="mt-0.5 text-amber-500">
+              <Trophy size={16} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <p className="text-xs font-bold text-slate-800">{sport.title}</p>
+                <span className="text-[9px] font-medium text-slate-500">{sport.period}</span>
+              </div>
+              <p className="mt-1 text-[10px] leading-4 text-slate-600">{sport.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </DetailCard>
+  );
 }
 
-function ExtracurricularsCard() {
-  return <DetailCard className="h-full"><div className="flex items-start gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600"><Megaphone size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Extra-curricular Activities</h2><p className="mt-1 text-[10px] text-slate-500">Leadership, volunteering, and campus involvement.</p></div></div><div className="mt-4 space-y-3">{studentProfileData.extracurriculars.map((activity) => <div key={activity.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-violet-500"><Megaphone size={16} /></span><div><p className="text-xs font-bold text-slate-800">{activity.title}</p><p className="mt-1 text-[10px] leading-4 text-slate-600">{activity.detail}</p></div></div>)}</div></DetailCard>;
+function ExtracurricularsCard({
+  profile,
+  onProfileChange,
+  isEditing,
+  onNotice,
+}: {
+  profile: ProfileData;
+  onProfileChange: React.Dispatch<React.SetStateAction<ProfileData>>;
+  isEditing?: boolean;
+  onNotice: (msg: string) => void;
+}) {
+  const extraInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleAddActivity = () => {
+    const newAct = {
+      id: Date.now().toString(),
+      title: "New Activity",
+      detail: "Details of responsibility and contributions.",
+      period: "2026",
+      certificateFile: "activity_certificate.pdf",
+    };
+    onProfileChange((prev) => ({ ...prev, extracurriculars: [...prev.extracurriculars, newAct] }));
+    onNotice("Added activity.");
+  };
+
+  const handleDeleteActivity = (id: string) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      extracurriculars: prev.extracurriculars.filter((a) => a.id !== id),
+    }));
+    onNotice("Deleted activity.");
+  };
+
+  const handleUpdateActivity = (id: string, field: string, value: any) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      extracurriculars: prev.extracurriculars.map((a) => (a.id === id ? { ...a, [field]: value } : a)),
+    }));
+  };
+
+  const handleCertUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleUpdateActivity(id, "certificateFile", file.name);
+      onNotice(`Uploaded certificate: ${file.name}`);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <DetailCard className="h-full">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+              <Megaphone size={18} />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 sm:text-base">Extra-curricular Activities</h2>
+              <p className="mt-1 text-[10px] text-slate-500">Leadership, volunteering, and campus involvement.</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddActivity}
+            className="inline-flex items-center gap-1 rounded-md border border-cyan-300 px-2 py-1 text-[11px] font-semibold text-cyan-600 hover:bg-cyan-50"
+          >
+            <Plus size={12} /> Add Activity
+          </button>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          {profile.extracurriculars.map((activity, idx) => (
+            <div key={activity.id} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <input
+                    value={activity.title}
+                    onChange={(e) => handleUpdateActivity(activity.id, "title", e.target.value)}
+                    className="text-xs font-bold text-slate-800 outline-none border-b border-transparent focus:border-cyan-400 w-full"
+                  />
+                  <Pencil size={12} className="shrink-0 text-slate-400" />
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="relative">
+                    <input
+                      value={activity.period}
+                      onChange={(e) => handleUpdateActivity(activity.id, "period", e.target.value)}
+                      className="w-24 rounded border border-slate-200 px-1.5 py-0.5 text-[9px] text-slate-500 outline-none"
+                    />
+                    <CalendarDays size={11} className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-slate-400" />
+                  </div>
+                  <Trash2 size={13} className="cursor-pointer text-rose-500 hover:text-rose-700" onClick={() => handleDeleteActivity(activity.id)} />
+                </div>
+              </div>
+              <textarea
+                value={activity.detail}
+                onChange={(e) => handleUpdateActivity(activity.id, "detail", e.target.value)}
+                className="mt-1.5 w-full rounded border border-slate-200 p-1.5 text-[10px] text-slate-600 outline-none"
+                rows={2}
+              />
+
+              <input
+                type="file"
+                ref={(el) => { extraInputRefs.current[idx] = el; }}
+                className="hidden"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => handleCertUpload(activity.id, e)}
+              />
+              <div className="mt-2.5">
+                <p className="text-[9px] font-bold text-slate-500 mb-1">Add Certificate (Optional)</p>
+                <div className="flex items-center justify-between rounded border border-slate-200 bg-white p-2">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <FileText size={15} className="shrink-0 text-rose-500" />
+                    <div className="min-w-0">
+                      <p className="truncate text-[10px] font-bold text-slate-800">{activity.certificateFile || "No certificate uploaded"}</p>
+                      <p className="text-[8px] text-slate-400">PDF / Image</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Upload size={12} className="cursor-pointer text-slate-400 hover:text-cyan-600" onClick={() => extraInputRefs.current[idx]?.click()} />
+                    {activity.certificateFile && (
+                      <Trash2 size={12} className="cursor-pointer text-rose-500 hover:text-rose-700" onClick={() => handleUpdateActivity(activity.id, "certificateFile", "")} />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </DetailCard>
+    );
+  }
+
+  return (
+    <DetailCard className="h-full">
+      <div className="flex items-start gap-2">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
+          <Megaphone size={18} />
+        </span>
+        <div>
+          <h2 className="text-sm font-bold text-slate-800 sm:text-base">Extra-curricular Activities</h2>
+          <p className="mt-1 text-[10px] text-slate-500">Leadership, volunteering, and campus involvement.</p>
+        </div>
+      </div>
+      <div className="mt-4 space-y-3">
+        {profile.extracurriculars.map((activity) => (
+          <div key={activity.id} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+            <span className="mt-0.5 text-violet-500">
+              <Megaphone size={16} />
+            </span>
+            <div>
+              <p className="text-xs font-bold text-slate-800">{activity.title}</p>
+              <p className="mt-1 text-[10px] leading-4 text-slate-600">{activity.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </DetailCard>
+  );
 }
 
-function AwardsCard() {
-  return <DetailCard className="h-full"><div className="flex items-start justify-between gap-3"><div className="flex items-center gap-2"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600"><CheckCircle2 size={18} /></span><div><h2 className="text-sm font-bold text-slate-800 sm:text-base">Awards &amp; Recognition</h2><p className="mt-1 text-[10px] text-slate-500">Honours that strengthen your placement profile.</p></div></div><span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-600">{studentProfileData.awards.length} awards</span></div><div className="mt-4 space-y-3">{studentProfileData.awards.map((award) => <div key={award.title} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3"><span className="mt-0.5 text-cyan-500"><CheckCircle2 size={16} /></span><div className="min-w-0 flex-1"><div className="flex flex-wrap items-start justify-between gap-2"><p className="text-xs font-bold text-slate-800">{award.title}</p><span className="text-[9px] font-medium text-slate-500">{award.year}</span></div><p className="mt-1 text-[10px] leading-4 text-slate-600">{award.detail}</p></div></div>)}</div></DetailCard>;
+function AwardsCard({
+  profile,
+  onProfileChange,
+  isEditing,
+  onNotice,
+}: {
+  profile: ProfileData;
+  onProfileChange: React.Dispatch<React.SetStateAction<ProfileData>>;
+  isEditing?: boolean;
+  onNotice: (msg: string) => void;
+}) {
+  const awardInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleAddAward = () => {
+    const newAward = {
+      id: Date.now().toString(),
+      title: "New Award / Recognition",
+      detail: "Details of award and issuing organization.",
+      year: "2026",
+      certificateFile: "award_certificate.pdf",
+    };
+    onProfileChange((prev) => ({ ...prev, awards: [...prev.awards, newAward] }));
+    onNotice("Added award.");
+  };
+
+  const handleDeleteAward = (id: string) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      awards: prev.awards.filter((a) => a.id !== id),
+    }));
+    onNotice("Deleted award.");
+  };
+
+  const handleUpdateAward = (id: string, field: string, value: any) => {
+    onProfileChange((prev) => ({
+      ...prev,
+      awards: prev.awards.map((a) => (a.id === id ? { ...a, [field]: value } : a)),
+    }));
+  };
+
+  const handleCertUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleUpdateAward(id, "certificateFile", file.name);
+      onNotice(`Uploaded certificate: ${file.name}`);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <DetailCard className="h-full">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600">
+              <CheckCircle2 size={18} />
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 sm:text-base">Awards &amp; Recognition</h2>
+              <p className="mt-1 text-[10px] text-slate-500">Honours that strengthen your placement profile.</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleAddAward}
+            className="inline-flex items-center gap-1 rounded-md border border-cyan-300 px-2 py-1 text-[11px] font-semibold text-cyan-600 hover:bg-cyan-50"
+          >
+            <Plus size={12} /> Add Award
+          </button>
+        </div>
+
+        <div className="mt-4 space-y-3">
+          {profile.awards.map((award, idx) => (
+            <div key={award.id} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                  <input
+                    value={award.title}
+                    onChange={(e) => handleUpdateAward(award.id, "title", e.target.value)}
+                    className="text-xs font-bold text-slate-800 outline-none border-b border-transparent focus:border-cyan-400 w-full"
+                  />
+                  <Pencil size={12} className="shrink-0 text-slate-400" />
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="relative">
+                    <input
+                      value={award.year}
+                      onChange={(e) => handleUpdateAward(award.id, "year", e.target.value)}
+                      className="w-16 rounded border border-slate-200 px-1.5 py-0.5 text-[9px] text-slate-500 outline-none"
+                    />
+                    <CalendarDays size={11} className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-slate-400" />
+                  </div>
+                  <Trash2 size={13} className="cursor-pointer text-rose-500 hover:text-rose-700" onClick={() => handleDeleteAward(award.id)} />
+                </div>
+              </div>
+              <input
+                value={award.detail}
+                onChange={(e) => handleUpdateAward(award.id, "detail", e.target.value)}
+                className="mt-1.5 w-full rounded border border-slate-200 p-1.5 text-[10px] text-slate-600 outline-none"
+              />
+
+              <input
+                type="file"
+                ref={(el) => { awardInputRefs.current[idx] = el; }}
+                className="hidden"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => handleCertUpload(award.id, e)}
+              />
+              <div className="mt-2.5 flex items-center justify-between rounded border border-slate-200 bg-white p-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <FileText size={15} className="shrink-0 text-rose-500" />
+                  <div className="min-w-0">
+                    <p className="truncate text-[10px] font-bold text-slate-800">{award.certificateFile || "No certificate uploaded"}</p>
+                    <p className="text-[8px] text-slate-400">PDF / Image</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Upload size={12} className="cursor-pointer text-slate-400 hover:text-cyan-600" onClick={() => awardInputRefs.current[idx]?.click()} />
+                  {award.certificateFile && (
+                    <Trash2 size={12} className="cursor-pointer text-rose-500 hover:text-rose-700" onClick={() => handleUpdateAward(award.id, "certificateFile", "")} />
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </DetailCard>
+    );
+  }
+
+  return (
+    <DetailCard className="h-full">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-50 text-cyan-600">
+            <CheckCircle2 size={18} />
+          </span>
+          <div>
+            <h2 className="text-sm font-bold text-slate-800 sm:text-base">Awards &amp; Recognition</h2>
+            <p className="mt-1 text-[10px] text-slate-500">Honours that strengthen your placement profile.</p>
+          </div>
+        </div>
+        <span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] font-bold text-cyan-600">
+          {profile.awards.length} awards
+        </span>
+      </div>
+      <div className="mt-4 space-y-3">
+        {profile.awards.map((award) => (
+          <div key={award.id} className="flex items-start gap-3 rounded-lg border border-slate-100 bg-slate-50/70 p-3">
+            <span className="mt-0.5 text-cyan-500">
+              <CheckCircle2 size={16} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <p className="text-xs font-bold text-slate-800">{award.title}</p>
+                <span className="text-[9px] font-medium text-slate-500">{award.year}</span>
+              </div>
+              <p className="mt-1 text-[10px] leading-4 text-slate-600">{award.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </DetailCard>
+  );
+}
+
+function ProfileGroup({
+  title,
+  description,
+  icon: Icon,
+  badge,
+  children,
+}: {
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  badge?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3 shadow-sm sm:p-4">
+      <div className="flex items-start justify-between gap-3 px-1 sm:px-2">
+        <div className="flex items-start gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-cyan-600 shadow-sm">
+            <Icon size={18} />
+          </span>
+          <div>
+            <h2 className="text-sm font-bold text-slate-800 sm:text-base">{title}</h2>
+            <p className="mt-1 text-[10px] leading-4 text-slate-500 sm:text-xs">{description}</p>
+          </div>
+        </div>
+        {badge && (
+          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
+            {badge}
+          </span>
+        )}
+      </div>
+      <div className="mt-4">{children}</div>
+    </section>
+  );
 }
 
 function ProfileSection({ title, icon: Icon, action, className = "", children }: { title: string; icon: React.ElementType; action?: React.ReactNode; className?: string; children: React.ReactNode }) {
