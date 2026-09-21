@@ -12,6 +12,7 @@ import Login from "./components/login";
 import { AddDrive } from "./components/addDrive";
 import { AnnouncementsRoute } from "./components/announcementsRoute";
 import { Reports } from "./components/reports";
+import { StatusTracker } from "./components/statusTracker";
 
 import {
   StudentApplications,
@@ -86,6 +87,14 @@ export const router = createBrowserRouter([
       {
         path: "reports",
         element: <Reports />,
+      },
+      {
+        path: "status-tracker",
+        element: <StatusTracker />,
+      },
+      {
+        path: "status-tracker/:driveId",
+        element: <StatusTracker />,
       },
       {
         path: "jobs",

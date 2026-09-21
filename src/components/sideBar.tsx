@@ -4,6 +4,7 @@ import {
   CalendarDays,
   CirclePlus,
   ClipboardList,
+  ClipboardCheck,
   FileText,
   GraduationCap,
   LayoutDashboard,
@@ -42,6 +43,7 @@ const officerMenuSections: MenuSection[] = [
     items: [
       { label: "Create Announcements", icon: Megaphone, route: "announcements" },
       { label: "Create Drives", icon: CirclePlus, route: "add_drives" },
+      { label: "Track & Update Status", icon: ClipboardCheck, route: "status-tracker" },
     ],
   },
 ];
