@@ -61,7 +61,7 @@ const studentProfileSnapshot: StudentProfileSnapshot = {
   projectCount: 3,
 };
 
-const studentProfileData = {
+export const studentProfileData = {
   name: "Arjun Mehta",
   initials: "AM",
   registrationNumber: "CSE2026-014",

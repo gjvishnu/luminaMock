@@ -8,6 +8,7 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
+import { getProfileCompletion, studentProfileData } from "./studentPages";
 
 const recommendedJobs = [
   { company: "TCS", role: "Software Engineer", logo: "tcs", match: "92% Match", package: "₹7.5 LPA", departments: "CSE, IT", deadline: "Sep 05, 2026" },
@@ -67,6 +68,8 @@ function SectionHeading({ title, action = "View All" }: { title: string; action?
 }
 
 function PlacementOverviewCard() {
+  const profileCompletion = getProfileCompletion(studentProfileData).percentage;
+
   const applicationCounts = [
     ["Applied", "12", "text-blue-500"],
     ["Shortlisted", "6", "text-emerald-500"],
@@ -85,7 +88,7 @@ function PlacementOverviewCard() {
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500"><FileText size={17} /></span>
       </div>
       <div className="mt-4 space-y-3 border-b border-slate-100 pb-4">
-        <ProgressBar value={78} label="Profile Completion" color="bg-cyan-500" />
+        <ProgressBar value={profileCompletion} label="Profile Completion" color="bg-cyan-500" />
         <ProgressBar value={82} label="Placement Readiness" color="bg-emerald-500" />
       </div>
       <span className="text-cyan-400 border-b text-xs cursor-pointer mt-2">Complete profile</span>
