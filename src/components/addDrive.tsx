@@ -267,7 +267,7 @@ export const AddDrive = () => {
                 <div className="xl:col-span-2"><RoleFieldEditor field="openings" value={defaultRole.openings} onChange={updateDefaultField} /></div>
 
                 <div className="xl:col-span-4"><RoleFieldEditor field="location" value={defaultRole.location} onChange={updateDefaultField} /></div>
-                <div className="xl:col-span-4"><RoleFieldEditor field="experience" value={defaultRole.experience} onChange={updateDefaultField} /></div>
+                {/* <div className="xl:col-span-4"><RoleFieldEditor field="experience" value={defaultRole.experience} onChange={updateDefaultField} /></div> */}
                 <div className="xl:col-span-4"><RoleFieldEditor field="skills" value={defaultRole.skills} onChange={updateDefaultField} /></div>
               </div>
 
