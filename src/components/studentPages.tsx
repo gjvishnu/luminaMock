@@ -3694,8 +3694,7 @@ export function StudentAnnouncements() {
         {announcements.map((announcement) => (
           <section
             key={announcement.title}
-            className="flex gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
-          >
+            className="flex gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" >
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-50 text-cyan-500">
               <Megaphone size={18} />
             </span>
