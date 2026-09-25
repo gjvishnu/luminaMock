@@ -7,16 +7,23 @@ import { RouterError } from "./components/routerError";
 import { CampusDrive } from "./components/campusDrive";
 import { DriveDetails } from "./components/driveDetails";
 import { JDRecommendation } from "./components/jdRecommendation";
+import { DriveStudents } from "./components/driveStudents";
 import Login from "./components/login";
-import  { AddDrive } from "./components/addDrive";
+import { AddDrive } from "./components/addDrive";
 import { AnnouncementsRoute } from "./components/announcementsRoute";
 import { Reports } from "./components/reports";
+import { StatusTracker } from "./components/statusTracker";
+
 import {
+  ApplicationDetailRoute,
   StudentApplications,
   StudentJobDetails,
   StudentJobs,
   StudentProfile,
   StudentResume,
+  StudentDetails,
+  StudentApplicationDetails,
+  StudentApplicationDetailRoute,
 } from "./components/studentPages";
 
 export const router = createBrowserRouter([
@@ -25,13 +32,11 @@ export const router = createBrowserRouter([
     element: <Navigate to="/login" replace />,
     errorElement: <RouterError />,
   },
-
   {
     path: "/login",
     element: <Login />,
     errorElement: <RouterError />,
   },
-
   {
     path: "/",
     element: <Home />,
@@ -46,6 +51,18 @@ export const router = createBrowserRouter([
         element: <Students />,
       },
       {
+        path: "students/:studentId",
+        element: <StudentDetails />,
+      },
+      {
+        path: "students/:studentId/applications",
+        element: <StudentApplicationDetails />,
+      },
+      {
+        path: "students/:studentId/applications/:applicationId",
+        element: <StudentApplicationDetailRoute />,
+      },
+      {
         path: "campusdrive",
         element: <CampusDrive />,
       },
@@ -57,9 +74,17 @@ export const router = createBrowserRouter([
         path: "jdrecommendation",
         element: <JDRecommendation />,
       },
-       {
+      {
+        path: "jdrecommendation/:driveId/students",
+        element: <DriveStudents />,
+      },
+      {
+        path: "jdrecommendation/students",
+        element: <DriveStudents />,
+      },
+      {
         path: "add_drives",
-        element: <AddDrive/>,
+        element: <AddDrive />,
       },
       {
         path: "announcements",
@@ -68,6 +93,14 @@ export const router = createBrowserRouter([
       {
         path: "reports",
         element: <Reports />,
+      },
+      {
+        path: "status-tracker",
+        element: <StatusTracker />,
+      },
+      {
+        path: "status-tracker/:driveId",
+        element: <StatusTracker />,
       },
       {
         path: "jobs",
@@ -80,6 +113,10 @@ export const router = createBrowserRouter([
       {
         path: "applications",
         element: <StudentApplications />,
+      },
+      {
+        path: "applications/:applicationId",
+        element: <ApplicationDetailRoute />,
       },
       {
         path: "profile",
