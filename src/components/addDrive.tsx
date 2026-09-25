@@ -140,14 +140,6 @@ const defaultRoleValues: RoleValues = {
 
 const cloneRoleValue = (value: RoleFieldValue): RoleFieldValue => (Array.isArray(value) ? [...value] : value);
 
-const formatRoleValue = (value: RoleFieldValue) => {
-  if (Array.isArray(value)) {
-    return value.length ? value.join(", ") : "Not specified";
-  }
-
-  return value.trim() || "Not specified";
-};
-
 export const AddDrive = () => {
   const navigate = useNavigate();
   const [uploadedFiles, setUploadedFiles] = useState(startingFiles);
