@@ -14,6 +14,10 @@ dist-ssr
 
 # Personal work notes (local only, never pushed)
 WORK_NOTES.md
+USER_MANUAL.md
+
+# Local tooling artifacts (Playwright MCP session output)
+.playwright-mcp/
 
 # Editor directories and files
 .vscode/*
