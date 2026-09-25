@@ -33,7 +33,12 @@
   UserRound,
 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 
 type JobListing = {
   id: string;
@@ -1046,6 +1051,64 @@ function ApplicationDetailsView({
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Route-level wrapper for a single application. It resolves the application
+ * from the `:applicationId` route param and renders the shared detail view, or
+ * a friendly "not found" panel for an unknown id.
+ *
+ * The back action returns to the list the user came from
+ * (`location.state.from`, set when "View Details" was clicked) and falls back
+ * to `fallbackBackPath` when the route is opened directly or refreshed.
+ */
+function ApplicationDetailScreen({
+  readOnly = false,
+  backLabel = "Back to Applications",
+  fallbackBackPath,
+}: {
+  readOnly?: boolean;
+  backLabel?: string;
+  fallbackBackPath: string;
+}) {
+  const { applicationId } = useParams<{ applicationId: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const previousList = (location.state as { from?: string } | null)?.from;
+  const backTo = previousList ?? fallbackBackPath;
+  const application = applicationRows.find((row) => row.id === applicationId);
+
+  if (!application) {
+    return (
+      <div className="space-y-4 pb-5 text-slate-800">
+        <button
+          type="button"
+          onClick={() => navigate(backTo)}
+          className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-cyan-500"
+        >
+          <ArrowLeft size={15} />
+          {backLabel}
+        </button>
+        <section className="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+          <p className="text-sm font-bold text-slate-800">
+            Application not found
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            This application is not available or may have been removed.
+          </p>
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <ApplicationDetailsView
+      application={application}
+      onBack={() => navigate(backTo)}
+      backLabel={backLabel}
+      readOnly={readOnly}
+    />
   );
 }
 
@@ -2346,18 +2409,28 @@ function ApplicationMobileCard({
 }
 
 /**
- * ApplicationsBoard renders the full applications experience: summary cards,
- * status tabs, search, table/cards and the drill-down detail view. It is
- * shared by the student's own "My Applications" page and the TPO's
- * per-student application view so both stay visually identical.
+ * ApplicationsBoard renders the applications LIST experience: summary cards,
+ * status tabs, search and the table/mobile cards. It is shared by the
+ * student's own "My Applications" page and the TPO's per-student application
+ * view so both stay visually identical.
+ *
+ * The status/search filters live in the URL (`?status=…&search=…`) so that
+ * coming back from the detail route lands on the same filtered list.
+ * "View Details"/"View Offer" navigate to the detail route (see
+ * ApplicationDetailRoute) instead of swapping the view in place.
  */
-function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
-  const [activeTab, setActiveTab] = useState<ApplicationStatus | "All">("All");
-  const [search, setSearch] = useState("");
+function ApplicationsBoard() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedApplicationId, setSelectedApplicationId] = useState<
-    string | null
-  >(null);
+  const statusParam = searchParams.get("status");
+  const activeTab: ApplicationStatus | "All" = applicationTabs.some(
+    (tab) => tab.status === statusParam,
+  )
+    ? (statusParam as ApplicationStatus)
+    : "All";
+  const search = searchParams.get("search") ?? "";
   const activeTabDetails = applicationTabs.find((tab) =>
     activeTab === "All" ? !tab.status : tab.status === activeTab,
   );
@@ -2368,19 +2441,35 @@ function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
     return matchesTab && searchText.includes(search.toLowerCase());
   });
   const totalForTab = activeTabDetails?.count ?? filteredApplications.length;
-  const selectedApplication = applicationRows.find(
-    (application) => application.id === selectedApplicationId,
-  );
 
-  if (selectedApplication) {
-    return (
-      <ApplicationDetailsView
-        application={selectedApplication}
-        onBack={() => setSelectedApplicationId(null)}
-        readOnly={readOnly}
-      />
-    );
-  }
+  const applyFilters = (
+    status: ApplicationStatus | "All",
+    nextSearch: string,
+  ) => {
+    const params = new URLSearchParams(searchParams);
+    if (status === "All") {
+      params.delete("status");
+    } else {
+      params.set("status", status);
+    }
+    if (nextSearch) {
+      params.set("search", nextSearch);
+    } else {
+      params.delete("search");
+    }
+    setSearchParams(params, { replace: true });
+    setCurrentPage(1);
+  };
+
+  // Navigates from the list to the detail route. Building the path from the
+  // current pathname serves both audiences: "/applications" -> "/applications/:id"
+  // and "/students/:id/applications" -> "/students/:id/applications/:id".
+  // `state.from` lets the detail route send the user back to this exact
+  // filtered list (filters live in the query string).
+  const openApplication = (applicationId: string) =>
+    navigate(`${location.pathname}/${applicationId}`, {
+      state: { from: `${location.pathname}${location.search}` },
+    });
 
   return (
     <div className="space-y-4 pb-5 text-slate-800">
@@ -2422,10 +2511,7 @@ function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
                 <button
                   key={tab.label}
                   type="button"
-                  onClick={() => {
-                    setActiveTab(tabKey);
-                    setCurrentPage(1);
-                  }}
+                  onClick={() => applyFilters(tabKey, search)}
                   className={`shrink-0 border-b-2 px-3 py-3 text-xs font-semibold transition sm:px-4 ${active ? "border-cyan-500 text-cyan-600" : "border-transparent text-slate-600 hover:text-cyan-600"}`}
                 >
                   {tab.label} ({tab.count})
@@ -2441,21 +2527,16 @@ function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
               />
               <input
                 value={search}
-                onChange={(event) => {
-                  setSearch(event.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={(event) =>
+                  applyFilters(activeTab, event.target.value)
+                }
                 placeholder="Search by company or role..."
                 className="h-10 w-full rounded-md border border-slate-200 pl-9 pr-3 text-xs text-slate-700 outline-none placeholder:text-slate-400 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100"
               />
             </label>
             <button
               type="button"
-              onClick={() => {
-                setSearch("");
-                setActiveTab("All");
-                setCurrentPage(1);
-              }}
+              onClick={() => applyFilters("All", "")}
               className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-cyan-300 px-3 text-xs font-semibold text-cyan-600 hover:bg-cyan-50"
             >
               <Filter size={15} /> Filters
@@ -2483,7 +2564,7 @@ function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
               <ApplicationTableRow
                 key={application.id}
                 application={application}
-                onView={setSelectedApplicationId}
+                onView={openApplication}
               />
             ))}
           </div>
@@ -2494,7 +2575,7 @@ function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
             <ApplicationMobileCard
               key={application.id}
               application={application}
-              onView={setSelectedApplicationId}
+              onView={openApplication}
             />
           ))}
         </div>
@@ -2546,6 +2627,34 @@ function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
 
 export function StudentApplications() {
   return <ApplicationsBoard />;
+}
+
+/**
+ * Student route `/applications/:applicationId` — the single-application detail
+ * screen loaded on its own route, so it can be linked to, refreshed and opened
+ * directly instead of being swapped into the list view.
+ */
+export function ApplicationDetailRoute() {
+  return <ApplicationDetailScreen fallbackBackPath="/applications" />;
+}
+
+/**
+ * Placement-officer route `/students/:studentId/applications/:applicationId` —
+ * the same screen in read-only mode, so the student-only actions (Withdraw
+ * Application, personal Notes) stay hidden and the Placement Cell notes block
+ * is shown instead.
+ */
+export function StudentApplicationDetailRoute() {
+  const { studentId } = useParams<{ studentId?: string }>();
+
+  return (
+    <ApplicationDetailScreen
+      readOnly
+      fallbackBackPath={
+        studentId ? `/students/${studentId}/applications` : "/students"
+      }
+    />
+  );
 }
 
 function ProfileProgressRing({
@@ -3719,10 +3828,12 @@ export function StudentAnnouncements() {
 
 /* =========================================================
    TPO / PLACEMENT OFFICER - STUDENT APPLICATION DETAILS
-   Reuses the exact same ApplicationsBoard UI as the student's
-   own "My Applications" page, in read-only mode. The top-level
-   back action returns to the students LIST (not the student's
-   detail screen).
+   Reuses the exact same ApplicationsBoard list UI as the
+   student's own "My Applications" page. Its "View Details"
+   action opens the read-only detail route
+   (/students/:studentId/applications/:applicationId). The
+   top-level back action returns to the students LIST (not the
+   student's detail screen).
 ========================================================= */
 export function StudentApplicationDetails() {
   const navigate = useNavigate();
@@ -3776,7 +3887,7 @@ export function StudentApplicationDetails() {
         </div>
       </section>
 
-      <ApplicationsBoard readOnly />
+      <ApplicationsBoard />
     </div>
   );
 }

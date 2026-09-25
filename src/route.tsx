@@ -15,6 +15,7 @@ import { Reports } from "./components/reports";
 import { StatusTracker } from "./components/statusTracker";
 
 import {
+  ApplicationDetailRoute,
   StudentApplications,
   StudentJobDetails,
   StudentJobs,
@@ -22,6 +23,7 @@ import {
   StudentResume,
   StudentDetails,
   StudentApplicationDetails,
+  StudentApplicationDetailRoute,
 } from "./components/studentPages";
 
 export const router = createBrowserRouter([
@@ -55,6 +57,10 @@ export const router = createBrowserRouter([
       {
         path: "students/:studentId/applications",
         element: <StudentApplicationDetails />,
+      },
+      {
+        path: "students/:studentId/applications/:applicationId",
+        element: <StudentApplicationDetailRoute />,
       },
       {
         path: "campusdrive",
@@ -107,6 +113,10 @@ export const router = createBrowserRouter([
       {
         path: "applications",
         element: <StudentApplications />,
+      },
+      {
+        path: "applications/:applicationId",
+        element: <ApplicationDetailRoute />,
       },
       {
         path: "profile",
