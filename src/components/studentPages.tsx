@@ -2352,7 +2352,19 @@ function ApplicationMobileCard({
  * shared by the student's own "My Applications" page and the TPO's
  * per-student application view so both stay visually identical.
  */
-function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
+function ApplicationsBoard({
+  readOnly = false,
+  onDetailViewChange,
+}: {
+  readOnly?: boolean;
+  /**
+   * Lets the parent react when a company's application detail opens/closes.
+   * Used to hide page-level actions (for example "Back to Students") while
+   * the detail screen - which carries its own "Back to Applications"
+   * action - is displayed.
+   */
+  onDetailViewChange?: (isDetailOpen: boolean) => void;
+}) {
   const [activeTab, setActiveTab] = useState<ApplicationStatus | "All">("All");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -2373,11 +2385,21 @@ function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
     (application) => application.id === selectedApplicationId,
   );
 
+  const openApplication = (applicationId: string) => {
+    setSelectedApplicationId(applicationId);
+    onDetailViewChange?.(true);
+  };
+
+  const closeApplication = () => {
+    setSelectedApplicationId(null);
+    onDetailViewChange?.(false);
+  };
+
   if (selectedApplication) {
     return (
       <ApplicationDetailsView
         application={selectedApplication}
-        onBack={() => setSelectedApplicationId(null)}
+        onBack={closeApplication}
         readOnly={readOnly}
       />
     );
@@ -2484,7 +2506,7 @@ function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
               <ApplicationTableRow
                 key={application.id}
                 application={application}
-                onView={setSelectedApplicationId}
+                onView={openApplication}
               />
             ))}
           </div>
@@ -2495,7 +2517,7 @@ function ApplicationsBoard({ readOnly = false }: { readOnly?: boolean }) {
             <ApplicationMobileCard
               key={application.id}
               application={application}
-              onView={setSelectedApplicationId}
+              onView={openApplication}
             />
           ))}
         </div>
@@ -3722,26 +3744,33 @@ export function StudentAnnouncements() {
 /* =========================================================
    TPO / PLACEMENT OFFICER - STUDENT APPLICATION DETAILS
    Reuses the exact same ApplicationsBoard UI as the student's
-   own "My Applications" page, in read-only mode. The top-level
-   back action returns to the students LIST (not the student's
-   detail screen).
+   own "My Applications" page, in read-only mode.
+   "Back to Students" sits at the top of this page (same
+   placement as the student role's application detail back
+   link) and returns to the students LIST. It is hidden while a
+   single company's application is open, because that detail
+   screen already provides "Back to Applications" - so only one
+   back action is ever visible.
 ========================================================= */
 export function StudentApplicationDetails() {
   const navigate = useNavigate();
+  const [isApplicationOpen, setIsApplicationOpen] = useState(false);
 
   return (
     <div className="space-y-4 pb-5 text-slate-800">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <button
-            type="button"
-            onClick={() => navigate("/students")}
-            title="Back to students list"
-            className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-600 transition hover:text-cyan-700"
-          >
-            <ArrowLeft size={15} />
-            Back to Students
-          </button>
+          {!isApplicationOpen && (
+            <button
+              type="button"
+              onClick={() => navigate("/students")}
+              title="Back to students list"
+              className="mb-3 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-600 transition hover:text-cyan-700"
+            >
+              <ArrowLeft size={15} />
+              Back to Students
+            </button>
+          )}
 
           <PageHeader
             title="Application Details"
@@ -3778,7 +3807,7 @@ export function StudentApplicationDetails() {
         </div>
       </section>
 
-      <ApplicationsBoard readOnly />
+      <ApplicationsBoard readOnly onDetailViewChange={setIsApplicationOpen} />
     </div>
   );
 }
