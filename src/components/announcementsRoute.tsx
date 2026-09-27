@@ -1,5 +1,5 @@
 import { Announcements } from "./announcements";
-import { StudentAnnouncements } from "./studentPages";
+import { StudentAnnouncements } from "./student/misc/StudentAnnouncements";
 import { useUserRole } from "../context/useUserRole";
 
 export function AnnouncementsRoute() {

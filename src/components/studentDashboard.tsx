@@ -8,7 +8,8 @@ import {
   Target,
   TrendingUp,
 } from "lucide-react";
-import { getProfileCompletion, studentProfileData } from "./studentPages";
+import { getProfileCompletion } from "./student/shared/helpers";
+import { studentProfileData } from "./student/shared/data";
 
 const recommendedJobs = [
   { company: "TCS", role: "Software Engineer", logo: "tcs", match: "92% Match", package: "₹7.5 LPA", departments: "CSE, IT", deadline: "Sep 05, 2026" },
