@@ -147,7 +147,7 @@ const filterOptions = {
   department: ["All Departments", "CSE", "ECE", "EEE", "IT", "MECH"],
   batch: ["2026", "2025", "2024"],
   jobRole: ["All Roles", "Software Engineer", "System Engineer", "Developer"],
- 
+
 };
 
 const recommendationStats = [
@@ -171,7 +171,7 @@ export const JDRecommendation = () => {
   return (
     <div className="min-h-full space-y-3 pb-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
-         
+
         <div className="flex items-center gap-2">
           <button type="button" className="inline-flex h-9 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
             <Download size={14} /> Export Report
@@ -188,7 +188,7 @@ export const JDRecommendation = () => {
           <RecommendationFilter label="Department" value={filters.department} options={filterOptions.department} onChange={(value) => updateFilter("department", value)} />
           <RecommendationFilter label="Batch" value={filters.batch} options={filterOptions.batch} onChange={(value) => updateFilter("batch", value)} />
           <RecommendationFilter label="Job Role" value={filters.jobRole} options={filterOptions.jobRole} onChange={(value) => updateFilter("jobRole", value)} />
-         
+
         </div>
       </section>
 
@@ -273,7 +273,7 @@ function RecommendationTable({
                 </td>
                 <td className="px-3 py-3">
                   <p className="flex items-center gap-2 font-semibold text-slate-700"><CalendarDays size={14} />{drive.date}</p>
-                   <p className="mt-3 flex items-center gap-2 font-medium text-slate-600"><Building2 size={14} />{drive.venue}</p>
+                  <p className="mt-3 flex items-center gap-2 font-medium text-slate-600"><Building2 size={14} />{drive.venue}</p>
                 </td>
                 <td className="px-3 py-3 text-center">
                   <p className="mt-6 text-xl font-bold text-slate-800">{drive.eligible}</p>
