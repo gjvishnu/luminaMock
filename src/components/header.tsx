@@ -4,6 +4,8 @@ import {
   ChevronDown,
   Menu,
   Search,
+  ShieldCheck,
+  UserCheck,
   UserRound,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -12,6 +14,7 @@ import { type UserRole } from "../context/roleContext";
 import { useUserRole } from "../context/useUserRole";
 
 const roleDetails: Record<UserRole, { name: string; label: string; greeting: string }> = {
+  admin: { name: "Admin", label: "Admin", greeting: "Welcome, Admin" },
   officer: { name: "Vikram", label: "Placement Officer", greeting: "Welcome, Vikram 👋" },
   student: { name: "Arjun Mehta", label: "Student", greeting: "Welcome, Arjun 👋" },
 };
@@ -82,8 +85,17 @@ export const Header = () => {
             </button>
 
             <div className="min-w-0">
-              <h1 className="truncate text-base font-semibold leading-5 text-gray-900 sm:text-xl">{currentUser.greeting}</h1>
-              <p className="mt-1 text-xs leading-4 text-gray-500">{currentUser.label} Dashboard</p>
+              <div className="flex items-center gap-2">
+                <h1 className="truncate text-base font-semibold leading-5 text-gray-900 sm:text-xl">{currentUser.greeting}</h1>
+                {role === "admin" && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-white shadow-sm">
+                    <ShieldCheck size={14} />
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-xs leading-4 text-gray-500">
+                {role === "admin" ? "Manage users, placements, drives and the entire platform." : `${currentUser.label} Dashboard`}
+              </p>
             </div>
           </div>
 
@@ -92,14 +104,14 @@ export const Header = () => {
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder={role === "student" ? "Search jobs, companies..." : "Search students, drives, companies..."}
+                placeholder={role === "admin" ? "Search users, jobs, companies..." : role === "student" ? "Search jobs, companies..." : "Search students, drives, companies..."}
                 className="h-10 w-70 rounded-lg border border-gray-200 bg-white pl-10 pr-4 text-sm text-gray-700 outline-none placeholder:text-gray-400 focus:border-cyan-200 focus:ring-2 focus:ring-cyan-100 lg:w-75"
               />
             </div>
 
             <button type="button" aria-label="Notifications" className="relative rounded-full p-2 text-gray-600 transition hover:bg-gray-100">
               <Bell size={21} strokeWidth={1.8} />
-              <span className="absolute -right-0.5 -top-0.5 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-semibold text-white">{role === "student" ? "4" : "12"}</span>
+              <span className="absolute -right-0.5 -top-0.5 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-semibold text-white">4</span>
             </button>
 
             <div className="relative" ref={profileMenuRef}>
@@ -111,7 +123,7 @@ export const Header = () => {
                 className="flex items-center gap-2 rounded-lg p-1.5 transition hover:bg-gray-50"
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700">
-                  {role === "student" ? "AM" : "VK"}
+                  {role === "admin" ? "AD" : role === "student" ? "AM" : "VK"}
                 </span>
                 <div className="hidden text-left sm:block">
                   <p className="text-xs font-semibold leading-4 text-gray-900">{currentUser.name}</p>
@@ -123,7 +135,7 @@ export const Header = () => {
               {roleMenuOpen && (
                 <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg" role="menu">
                   <div className="px-2.5 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Switch view</div>
-                  {(["student", "officer"] as UserRole[]).map((option) => {
+                  {(["student", "officer", "admin"] as UserRole[]).map((option) => {
                     const details = roleDetails[option];
                     const isActive = option === role;
 
@@ -136,11 +148,13 @@ export const Header = () => {
                         className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition ${isActive ? "bg-cyan-50 text-cyan-700" : "text-slate-700 hover:bg-slate-50"}`}
                       >
                         <span className={`flex h-8 w-8 items-center justify-center rounded-full ${isActive ? "bg-cyan-500 text-white" : "bg-slate-100 text-slate-500"}`}>
-                          {option === "student" ? <UserRound size={15} /> : <BriefcaseBusiness size={15} />}
+                          {option === "admin" ? <ShieldCheck size={15} /> : option === "student" ? <UserRound size={15} /> : <BriefcaseBusiness size={15} />}
                         </span>
                         <span className="flex-1">
                           <span className="block text-xs font-semibold">{details.label}</span>
-                          <span className="block text-[10px] text-slate-500">{option === "student" ? "View jobs and applications" : "Manage campus placements"}</span>
+                          <span className="block text-[10px] text-slate-500">
+                            {option === "admin" ? "Platform administration" : option === "student" ? "View jobs and applications" : "Manage campus placements"}
+                          </span>
                         </span>
                         {isActive && <span className="h-2 w-2 rounded-full bg-cyan-500" />}
                       </button>

@@ -1,6 +1,7 @@
 import {
   BarChart3,
   BriefcaseBusiness,
+  Building2,
   CalendarDays,
   CirclePlus,
   ClipboardList,
@@ -9,6 +10,8 @@ import {
   GraduationCap,
   LayoutDashboard,
   Megaphone,
+  Settings,
+  UserCheck,
   UserRound,
   Users,
   X,
@@ -26,6 +29,28 @@ type MenuSection = {
   title: string;
   items: MenuItem[];
 };
+
+const adminMenuSections: MenuSection[] = [
+  {
+    title: "MAIN",
+    items: [
+      { label: "Dashboard", icon: LayoutDashboard, route: "dashboard" },
+      { label: "Jobs & Drives", icon: BriefcaseBusiness, route: "campusdrive" },
+      { label: "Applications", icon: ClipboardList, route: "applications" },
+      { label: "Students", icon: Users, route: "students" },
+      { label: "Companies", icon: Building2, route: "jdrecommendation" },
+      { label: "Reports", icon: BarChart3, route: "reports" },
+    ],
+  },
+  {
+    title: "MANAGEMENT",
+    items: [
+      { label: "User Management", icon: UserCheck, route: "user-management" },
+      { label: "Announcements", icon: Megaphone, route: "announcements" },
+      { label: "Settings", icon: Settings, route: "reports" },
+    ],
+  },
+];
 
 const officerMenuSections: MenuSection[] = [
   {
@@ -58,7 +83,6 @@ const studentMenuSections: MenuSection[] = [
       { label: "Profile", icon: UserRound, route: "profile" },
     ],
   },
-  
 ];
 
 type SidebarProps = {
@@ -69,7 +93,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { role } = useUserRole();
-  const menuSections = role === "student" ? studentMenuSections : officerMenuSections;
+  const menuSections = role === "admin" ? adminMenuSections : role === "student" ? studentMenuSections : officerMenuSections;
 
   return (
     <div className={`${onClose ? "flex" : "hidden md:flex"} relative h-full w-[280px] shrink-0 flex-col overflow-y-auto border-r border-gray-200 bg-white p-5 scrollbar-hidden md:w-[25%] lg:w-[15%]`}>
