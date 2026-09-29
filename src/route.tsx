@@ -16,17 +16,15 @@ import { Reports } from "./components/reports";
 import { StatusTracker } from "./components/statusTracker";
 import { RoleProvider } from "./context/roleProvider";
 
-import {
-  ApplicationDetailRoute,
-  StudentApplications,
-  StudentJobDetails,
-  StudentJobs,
-  StudentProfile,
-  StudentResume,
-  StudentDetails,
-  StudentApplicationDetails,
-  StudentApplicationDetailRoute,
-} from "./components/studentPages";
+import { ApplicationDetailRoute } from "./components/student/applications/ApplicationDetailRoute";
+import { StudentApplicationDetailRoute } from "./components/student/applications/StudentApplicationDetailRoute";
+import { StudentApplications } from "./components/student/applications/StudentApplications";
+import { StudentJobDetails } from "./components/student/jobs/StudentJobDetails";
+import { StudentJobs } from "./components/student/jobs/StudentJobs";
+import { StudentApplicationDetails } from "./components/student/misc/StudentApplicationDetails";
+import { StudentDetails } from "./components/student/misc/StudentDetails";
+import { StudentResume } from "./components/student/misc/StudentResume";
+import { StudentProfile } from "./components/student/profile/StudentProfile";
 
 function AppLayout() {
   return (

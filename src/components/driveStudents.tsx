@@ -1,6 +1,5 @@
 import {
   AlertTriangle,
-  ArrowLeft,
   Building2,
   CalendarDays,
   Check,
@@ -545,13 +544,6 @@ export const DriveStudents = () => {
           <span className="font-bold text-slate-900">Drive Students</span>
         </div>
 
-        <button
-          type="button"
-          onClick={() => navigate("/jdrecommendation")}
-          className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-slate-900 transition cursor-pointer"
-        >
-          <ArrowLeft size={16} /> Back to Jobs
-        </button>
       </div>
 
       {/* Drive Details Summary Banner Card */}

@@ -1,13 +1,14 @@
 import {
-  ArrowLeft,
   ArrowRight,
   AlertTriangle,
   CalendarDays,
   CheckCircle2,
   ChevronDown,
+  ChevronRight,
   Download,
   Eye,
   FileText,
+  Home,
   Search,
   ShieldCheck,
   Users,
@@ -499,7 +500,26 @@ function DriveStatusDetail({ driveId }: { driveId: string }) {
   return (
     <div className="-m-3 min-h-full bg-slate-50/60 p-3 pb-5 text-slate-800 sm:p-4">
       <div className="mx-auto w-full max-w-[1500px] space-y-3">
-        <button type="button" onClick={() => navigate("/status-tracker")} className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-cyan-600"><ArrowLeft size={15} />Back to Drive Status Tracker</button>
+        <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs">
+          <button
+            type="button"
+            onClick={() => navigate("/dashboard")}
+            className="text-cyan-600 transition hover:text-cyan-700"
+            aria-label="Home"
+          >
+            <Home size={16} />
+          </button>
+          <ChevronRight size={13} className="text-slate-400" />
+          <button
+            type="button"
+            onClick={() => navigate("/status-tracker")}
+            className="font-medium text-slate-500 transition hover:text-cyan-600"
+          >
+            Track &amp; Update Status
+          </button>
+          <ChevronRight size={13} className="text-slate-400" />
+          <span className="font-bold text-slate-900">Drive Status Tracker</span>
+        </nav>
 
         <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
