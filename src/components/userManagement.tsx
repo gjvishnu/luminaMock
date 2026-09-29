@@ -92,7 +92,6 @@ function CustomRoleSelect({
   onChange: (val: "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER") => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const ref = useState<HTMLDivElement | null>(null)[0];
 
   const roleOptions: { key: "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER"; label: string }[] = [
     { key: "STUDENT", label: "Student" },

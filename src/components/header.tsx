@@ -5,7 +5,6 @@ import {
   Menu,
   Search,
   ShieldCheck,
-  UserCheck,
   UserRound,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
