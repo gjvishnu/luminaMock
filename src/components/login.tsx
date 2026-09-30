@@ -1,33 +1,49 @@
 import { useState } from "react";
+import axios from "axios";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import image from "../assets/loginScreenimg.png";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "../context/useUserRole";
+import { login } from "../api/authService";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error] = useState<string | null>(null);
-  const [loading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setUser, setRole } = useUserRole();
+  const { setUser } = useUserRole();
 
-  const handleSubmit = (e?: React.FormEvent | React.MouseEvent) => {
-    if (e) e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    // Attempt backend authentication in background
-    fetch("http://localhost:3000/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email: email || "admin@hifi.com", password: password || "pass123" }),
-    }).catch(() => {});
+    setError(null);
+    setLoading(true);
 
-    // Set logged-in Admin identity and navigate directly to Admin Dashboard
-    setUser({ email: email || "admin@hifi.com", role: "ADMIN" });
-    setRole("admin");
-    navigate("/dashboard");
+    try {
+      // Public login endpoint (see services/userService/API.md). The response
+      // also sets the HttpOnly access_token cookie used by the protected
+      // endpoints, so the token is deliberately not persisted in localStorage.
+      const { user } = await login({ email, password });
+
+      // RoleProvider maps the backend role (ADMIN / STUDENT /
+      // PLACEMENT_OFFICER / RECRUITER) to the app role.
+      setUser(user);
+      navigate("/dashboard");
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const message = (err.response?.data as { message?: string } | undefined)?.message;
+        setError(
+          message ??
+            "Unable to reach the server. Please make sure the backend is running and try again.",
+        );
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -168,7 +184,6 @@ export default function Login() {
                 {/* Login Button */}
                 <button
                   type="submit"
-                  onClick={handleSubmit}
                   disabled={loading}
                   className="h-11 w-full rounded-lg bg-cyan-500 text-sm font-semibold text-white transition hover:bg-cyan-700 active:scale-[0.99] disabled:opacity-50"
                 >
