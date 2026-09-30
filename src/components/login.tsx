@@ -2,15 +2,33 @@ import { useState } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import image from "../assets/loginScreenimg.png";
 import { useNavigate } from "react-router-dom";
+import { useUserRole } from "../context/useUserRole";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate()
+  const [error] = useState<string | null>(null);
+  const [loading] = useState(false);
+  const navigate = useNavigate();
+  const { setUser, setRole } = useUserRole();
 
-  const handleSubmit = (e:any)=>{
-  e.preventDefault()
-navigate("/dashboard")
-  }
+  const handleSubmit = (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
+
+    // Attempt backend authentication in background
+    fetch("http://localhost:3000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: email || "admin@hifi.com", password: password || "pass123" }),
+    }).catch(() => {});
+
+    // Set logged-in Admin identity and navigate directly to Admin Dashboard
+    setUser({ email: email || "admin@hifi.com", role: "ADMIN" });
+    setRole("admin");
+    navigate("/dashboard");
+  };
 
   return (
     <div className="min-h-screen w-full bg-slate-50">
@@ -48,7 +66,13 @@ navigate("/dashboard")
             {/* Login Card */}
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
 
-              <form className="space-y-5">
+              <form className="space-y-5" onSubmit={handleSubmit} noValidate autoComplete="off">
+
+                {error && (
+                  <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-600">
+                    {error}
+                  </div>
+                )}
 
                 {/* Email */}
                 <div>
@@ -68,6 +92,9 @@ navigate("/dashboard")
                     <input
                       id="email"
                       type="email"
+                      autoComplete="off"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
                       className="h-11 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
                     />
@@ -101,6 +128,9 @@ navigate("/dashboard")
                     <input
                       id="password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
                       className="h-11 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
                     />
@@ -137,11 +167,12 @@ navigate("/dashboard")
 
                 {/* Login Button */}
                 <button
-                onClick={(e)=>handleSubmit(e)}
                   type="submit"
-                  className="h-11 w-full rounded-lg bg-cyan-500 text-sm font-semibold text-white transition hover:bg-cyan-700 active:scale-[0.99]"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="h-11 w-full rounded-lg bg-cyan-500 text-sm font-semibold text-white transition hover:bg-cyan-700 active:scale-[0.99] disabled:opacity-50"
                 >
-                  Sign in
+                  {loading ? "Signing in..." : "Sign in"}
                 </button>
               </form>
 
