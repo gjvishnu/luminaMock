@@ -3,18 +3,17 @@ import { applicationDetails } from "../shared/data";
 import { ApplicationLogo } from "./ApplicationLogo";
 import { ApplicationStatus } from "./ApplicationStatus";
 import { WorkflowStepIndicator } from "./WorkflowStepIndicator";
-import { ArrowLeft, BriefcaseBusiness, Download, FileText, MapPin } from "lucide-react";
+import { PageBreadcrumb } from "../shared/PageBreadcrumb";
+import { BriefcaseBusiness, Download, FileText, MapPin } from "lucide-react";
 import { useState } from "react";
 
 export function ApplicationDetailsView({
   application,
   onBack,
-  backLabel = "Back to Applications",
   readOnly = false,
 }: {
   application: ApplicationRow;
   onBack: () => void;
-  backLabel?: string;
   readOnly?: boolean;
 }) {
   const detail = applicationDetails[application.id] ?? applicationDetails.tcs;
@@ -36,14 +35,11 @@ export function ApplicationDetailsView({
   return (
     <div className="space-y-3 pb-5 text-slate-800">
       <div className="flex items-center justify-between gap-3">
-        <button
-          type="button"
+        <PageBreadcrumb
+          parentLabel="Applications"
           onClick={onBack}
-          className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-cyan-500"
-        >
-          <ArrowLeft size={15} />
-          {backLabel}
-        </button>
+          currentLabel="Company details"
+        />
         {!readOnly && (
           <button
             type="button"
@@ -82,7 +78,7 @@ export function ApplicationDetailsView({
           <ApplicationStatus status={application.status} />
         </div>
         <p className="mt-4 border-t border-slate-100 pt-3 text-[11px] text-slate-500">
-          Applied on {application.appliedOn} · Last{" "}
+          Applied on {application.appliedOn} &middot; Last{" "}
           {application.updated.toLowerCase()}
         </p>
       </section>

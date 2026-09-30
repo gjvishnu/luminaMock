@@ -1,6 +1,6 @@
+import { PageBreadcrumb } from "../shared/PageBreadcrumb";
 import { applicationRows } from "../shared/data";
 import { ApplicationDetailsView } from "./ApplicationDetailsView";
-import { ArrowLeft } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 /**
@@ -14,11 +14,9 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
  */
 export function ApplicationDetailScreen({
   readOnly = false,
-  backLabel = "Back to Applications",
   fallbackBackPath,
 }: {
   readOnly?: boolean;
-  backLabel?: string;
   fallbackBackPath: string;
 }) {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -31,14 +29,7 @@ export function ApplicationDetailScreen({
   if (!application) {
     return (
       <div className="space-y-4 pb-5 text-slate-800">
-        <button
-          type="button"
-          onClick={() => navigate(backTo)}
-          className="inline-flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-slate-500 transition hover:text-cyan-500"
-        >
-          <ArrowLeft size={15} />
-          {backLabel}
-        </button>
+        <PageBreadcrumb parentLabel="Applications" onClick={() => navigate(backTo)} currentLabel="Company details" />
         <section className="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm">
           <p className="text-sm font-bold text-slate-800">
             Application not found
@@ -55,7 +46,6 @@ export function ApplicationDetailScreen({
     <ApplicationDetailsView
       application={application}
       onBack={() => navigate(backTo)}
-      backLabel={backLabel}
       readOnly={readOnly}
     />
   );

@@ -9,13 +9,13 @@ import { MatchCard } from "./MatchCard";
 import { ReviewsCard } from "./ReviewsCard";
 import { SelectionProcess } from "./SelectionProcess";
 import { TipsCard } from "./TipsCard";
-import { ArrowLeft, Bookmark, BriefcaseBusiness, CalendarDays, Clock3, FileText, MapPin, Share2 } from "lucide-react";
+import { PageBreadcrumb } from "../shared/PageBreadcrumb";
+import { Bookmark, BriefcaseBusiness, CalendarDays, Clock3, FileText, MapPin, Share2 } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export function StudentJobDetails() {
   const { jobId } = useParams();
-  const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("Overview");
   const job = jobListings.find((item) => item.id === jobId) ?? jobListings[0];
@@ -30,13 +30,11 @@ export function StudentJobDetails() {
   return (
     <div className="space-y-3 pb-5 text-slate-800">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => navigate("/jobs")}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-cyan-600"
-        >
-          <ArrowLeft size={15} /> Back to Jobs
-        </button>
+        <PageBreadcrumb
+          parentLabel="Jobs"
+          to="/jobs"
+          currentLabel="Company"
+        />
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -62,7 +60,7 @@ export function StudentJobDetails() {
           <CompanyLogo job={job} large />
           <div className="min-w-0">
             <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-              {job.company} – {job.role}
+              {job.company} {"–"} {job.role}
             </h1>
             <p className="mt-1 text-sm text-slate-600">{job.companyName}</p>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
