@@ -10,7 +10,6 @@ import {
   GraduationCap,
   LayoutDashboard,
   Megaphone,
-  Settings,
   UserCheck,
   UserRound,
   Users,
@@ -47,7 +46,6 @@ const adminMenuSections: MenuSection[] = [
     items: [
       { label: "User Management", icon: UserCheck, route: "user-management" },
       { label: "Announcements", icon: Megaphone, route: "announcements" },
-      { label: "Settings", icon: Settings, route: "reports" },
     ],
   },
 ];

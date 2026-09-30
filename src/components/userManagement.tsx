@@ -236,7 +236,7 @@ export function UserManagement() {
         password,
         role: selectedRole,
       };
-      if (regno.trim()) {
+      if (selectedRole === "STUDENT" && regno.trim()) {
         payload.regno = regno.trim();
       }
 
@@ -628,23 +628,25 @@ export function UserManagement() {
                 />
               </div>
 
-              {/* Registration Number */}
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">
-                  Registration Number <span className="text-slate-400 font-normal">(Optional)</span>
-                </label>
-                <div className="relative">
-                  <FileUser size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    autoComplete="off"
-                    value={regno}
-                    onChange={(e) => setRegno(e.target.value)}
-                    placeholder="Enter registration number"
-                    className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                  />
+              {/* Registration Number (Only for Student role) */}
+              {selectedRole === "STUDENT" && (
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-700">
+                    Registration Number <span className="text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <div className="relative">
+                    <FileUser size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      autoComplete="off"
+                      value={regno}
+                      onChange={(e) => setRegno(e.target.value)}
+                      placeholder="Enter registration number"
+                      className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Modal Buttons */}
               <div className="mt-6 flex items-center justify-end gap-3 pt-2">
