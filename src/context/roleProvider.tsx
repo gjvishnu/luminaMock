@@ -49,11 +49,6 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   const setRole = (nextRole: UserRole) => {
     setRoleState(nextRole);
     localStorage.setItem("lumina_role", nextRole);
-    if (nextRole === "admin") {
-      navigate("/user-management");
-    } else {
-      navigate("/dashboard");
-    }
   };
 
   const logout = () => {

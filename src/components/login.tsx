@@ -13,8 +13,8 @@ export default function Login() {
   const navigate = useNavigate();
   const { setUser, setRole } = useUserRole();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
 
     // Attempt backend authentication in background
     fetch("http://localhost:3000/login", {
@@ -24,10 +24,10 @@ export default function Login() {
       body: JSON.stringify({ email: email || "admin@hifi.com", password: password || "pass123" }),
     }).catch(() => {});
 
-    // Set logged-in Admin identity and navigate directly to User Management
+    // Set logged-in Admin identity and navigate directly to Admin Dashboard
     setUser({ email: email || "admin@hifi.com", role: "ADMIN" });
     setRole("admin");
-    navigate("/user-management");
+    navigate("/dashboard");
   };
 
   return (
@@ -66,7 +66,7 @@ export default function Login() {
             {/* Login Card */}
             <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-7">
 
-              <form className="space-y-5" onSubmit={handleSubmit} autoComplete="off">
+              <form className="space-y-5" onSubmit={handleSubmit} noValidate autoComplete="off">
 
                 {error && (
                   <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-600">
@@ -168,6 +168,7 @@ export default function Login() {
                 {/* Login Button */}
                 <button
                   type="submit"
+                  onClick={handleSubmit}
                   disabled={loading}
                   className="h-11 w-full rounded-lg bg-cyan-500 text-sm font-semibold text-white transition hover:bg-cyan-700 active:scale-[0.99] disabled:opacity-50"
                 >
