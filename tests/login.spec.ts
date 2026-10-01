@@ -91,15 +91,18 @@ test('toast message appears on failed login', async ({ page }) => {
   await page.fill('input[type="password"]', 'wrongpass');
   await page.click('button[type="submit"]');
   
-  // Wait for error - toast or inline
-  await page.waitForTimeout(5000);
+  // Wait for error response and toast (toast autoClose is 5000ms)
+  await page.waitForTimeout(2000);
   
-  // Check for error toast (flexible selector) or inline error
-  const errorToast = page.locator('[class*="Toastify__toast"]').first();
+  // Check for error toast
+  const errorToast = page.locator('[class*="Toastify__toast"][class*="error"]').first();
   const toastVisible = await errorToast.isVisible({ timeout: 3000 }).catch(() => false);
   
-  // The login flow works - inline error may show instead of toast
-  console.log('Error handling works (toast or inline):', toastVisible);
+  // Also check for any toast
+  const anyToast = page.locator('[class*="Toastify__toast"]').first();
+  const anyToastVisible = await anyToast.isVisible({ timeout: 3000 }).catch(() => false);
+  
+  expect(toastVisible || anyToastVisible).toBeTruthy();
 });
 
 test('role switch dropdown works with placementOfficer', async ({ page }) => {
