@@ -40,13 +40,11 @@ export default function Login() {
 
       toast.success(`Welcome back, ${user.email}!`);
       navigate("/dashboard");
-    } catch (err: unknown) {
+} catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
       const message = axiosError.response?.data?.message || "Login failed. Please try again.";
       setError(message);
-      toast.error(message);
-    } finally {
-      setLoading(false);
+      toast.error(message, { autoClose: 5000 });
     }
   };
 
