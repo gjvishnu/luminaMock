@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useUserRole } from "../context/useUserRole";
+import { useAppSelector } from "../redux";
 
 type MenuItem = {
   label: string;
@@ -90,7 +90,8 @@ type SidebarProps = {
 export const Sidebar = ({ onClose }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role } = useUserRole();
+  const { user } = useAppSelector((state) => state.auth);
+  const role = user?.role || "placementOfficer";
   const menuSections = role === "admin" ? adminMenuSections : role === "student" ? studentMenuSections : officerMenuSections;
 
   return (
