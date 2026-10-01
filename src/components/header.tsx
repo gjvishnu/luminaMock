@@ -9,21 +9,24 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Sidebar } from "./sideBar";
-import { type UserRole } from "../context/roleContext";
-import { useUserRole } from "../context/useUserRole";
+import { useAppSelector } from "../redux";
+import { setRole as setReduxRole } from "../redux/slices/authSlice";
+import { useAppDispatch } from "../redux";
 
-const roleDetails: Record<UserRole, { name: string; label: string; greeting: string }> = {
+const roleDetails: Record<"admin" | "placementOfficer" | "student", { name: string; label: string; greeting: string }> = {
   admin: { name: "Admin", label: "Admin", greeting: "Welcome, Admin" },
   placementOfficer: { name: "Vikram", label: "Placement Officer", greeting: "Welcome, Vikram 👋" },
   student: { name: "Arjun Mehta", label: "Student", greeting: "Welcome, Arjun 👋" },
 };
 
 export const Header = () => {
-  const { role, setRole } = useUserRole();
+  const { user } = useAppSelector((state) => state.auth);
+  const role = user?.role || "placementOfficer";
+  const dispatch = useAppDispatch();
   const [sideBar, setSideBar] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
-  const currentUser = roleDetails[role];
+  const currentUser = roleDetails[role as "admin" | "placementOfficer" | "student"] || roleDetails.placementOfficer;
 
   useEffect(() => {
     if (!sideBar) {
@@ -64,8 +67,8 @@ export const Header = () => {
     };
   }, [roleMenuOpen]);
 
-  const handleRoleChange = (nextRole: UserRole) => {
-    setRole(nextRole);
+  const handleRoleChange = (nextRole: "admin" | "placementOfficer" | "student") => {
+    dispatch(setReduxRole(nextRole));
     setRoleMenuOpen(false);
   };
 
@@ -134,7 +137,7 @@ export const Header = () => {
               {roleMenuOpen && (
                 <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg" role="menu">
                   <div className="px-2.5 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Switch view</div>
-                  {(["student", "placementOfficer", "admin"] as UserRole[]).map((option) => {
+                  {(["student", "placementOfficer", "admin"] as const).map((option) => {
                     const details = roleDetails[option];
                     const isActive = option === role;
 

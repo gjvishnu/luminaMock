@@ -15,7 +15,7 @@ import {
   Sparkles,
   
  } from "lucide-react";
-import { useUserRole } from "../context/useUserRole";
+import { useAppSelector } from "../redux";
 import { StudentDashboard } from "./studentDashboard";
 
 type StatCard = {
@@ -521,7 +521,8 @@ function OfficerDashboard() {
 }
 
 export const Dashboard = () => {
-  const { role } = useUserRole();
+  const { user } = useAppSelector((state) => state.auth);
+  const role = user?.role || "placementOfficer";
 
   return role === "student" ? <StudentDashboard /> : <OfficerDashboard />;
 };

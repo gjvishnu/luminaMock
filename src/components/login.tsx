@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail, AlertCircle } from "lucide-react";
 import image from "../assets/loginScreenimg.png";
 import { useNavigate } from "react-router-dom";
-import { useUserRole } from "../context/useUserRole";
+import { useAppDispatch } from "../redux";
+import { login as loginAction, setRole } from "../redux/slices/authSlice";
 import { authApi, type LoginRequest, mapBackendRoleToFrontend } from "../api/authApi";
 import { toast } from "react-toastify";
 
@@ -13,7 +14,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setUser, setRole } = useUserRole();
+  const dispatch = useAppDispatch();
 
 const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +32,12 @@ const handleSubmit = async (e: React.FormEvent) => {
       const userData = {
         id: user.id,
         email: user.email,
-        role: user.role,
+        role: frontendRole,
         regno: user.regno,
       };
 
-      setUser(userData);
-      setRole(frontendRole);
+      dispatch(loginAction(userData));
+      dispatch(setRole(frontendRole));
 
       toast.success(`Welcome back, ${user.email}!`);
       navigate("/dashboard");
@@ -109,7 +110,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                       size={17}
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                     />
-
                     <input
                       id="email"
                       type="email"
@@ -146,7 +146,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                       size={17}
                       className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                     />
-
                     <input
                       id="password"
                       type={showPassword ? "text" : "password"}
