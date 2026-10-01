@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: "/api",
+  withCredentials: true,
 });
 
 api.interceptors.request.use(
@@ -15,6 +16,19 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  },
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("lumina_user");
+      localStorage.removeItem("lumina_role");
+      window.location.href = "/login";
+    }
     return Promise.reject(error);
   },
 );
