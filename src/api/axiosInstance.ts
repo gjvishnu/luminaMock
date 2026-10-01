@@ -18,10 +18,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("lumina_user");
-      localStorage.removeItem("lumina_role");
-      window.location.href = "/login";
+      // Don't redirect on login endpoint - let the component handle it
+      const isLoginRequest = error.config?.url?.includes('/login');
+      if (!isLoginRequest) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("lumina_user");
+        localStorage.removeItem("lumina_role");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

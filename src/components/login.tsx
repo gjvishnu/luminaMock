@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../redux";
 import { login as loginAction, setRole } from "../redux/slices/authSlice";
 import { authApi, type LoginRequest, mapBackendRoleToFrontend } from "../api/authApi";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,7 +16,7 @@ export default function Login() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -38,11 +39,13 @@ export default function Login() {
       dispatch(loginAction(userData));
       dispatch(setRole(frontendRole));
 
+      toast.success(`Welcome back, ${user.email}!`);
       navigate("/dashboard");
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
       const message = axiosError.response?.data?.message || "Login failed. Please try again.";
       setError(message);
+      toast.error(message, { autoClose: 5000 });
     } finally {
       setLoading(false);
     }
