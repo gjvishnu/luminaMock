@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import {
   BriefcaseBusiness,
   ChevronDown,
@@ -18,15 +19,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "../../redux";
-import {
-  createUserFailure,
-  createUserStart,
-  createUserSuccess,
-  fetchUsersFailure,
-  fetchUsersStart,
-  fetchUsersSuccess,
-} from "../../redux/slices/userSlice";
+import { useAppSelector } from "../../redux";
 import { authApi } from "../../api/authApi";
 
 type Role = "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER";
@@ -129,8 +122,8 @@ function CustomRoleSelect({ value, onChange }: { value: Role; onChange: (val: Ro
 }
 
 export default function UserManagement() {
-  const dispatch = useAppDispatch();
-  const { users, loading, error } = useAppSelector((state) => state.users);
+  // Only the logged-in role comes from Redux; the user list is local to this
+  // screen, so it lives in component state rather than the global store.
   const authUser = useAppSelector((state) => state.auth.user);
 
   const [activeTab, setActiveTab] = useState<"STUDENT" | "PLACEMENT_OFFICER" | "ADMIN">("STUDENT");
@@ -143,24 +136,37 @@ export default function UserManagement() {
   const [regno, setRegno] = useState("");
   const [modalError, setModalError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [users, setUsers] = useState<UserItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const isAdmin = authUser?.role === "admin";
 
-  const loadUsers = async () => {
-    dispatch(fetchUsersStart());
-    try {
-      const response = await authApi.getUsers();
-      dispatch(fetchUsersSuccess(response.users));
-    } catch (err) {
-      const axiosError = err as { response?: { data?: { message?: string } } };
-      dispatch(fetchUsersFailure(axiosError.response?.data?.message || "Failed to fetch users."));
-    }
-  };
-
   useEffect(() => {
-    if (isAdmin) {
-      void loadUsers();
-    }
+    if (!isAdmin) return;
+
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        const response = await authApi.getUsers();
+        if (!cancelled) {
+          setUsers(response.users);
+          setError(null);
+        }
+      } catch (err) {
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        if (!cancelled) setError(axiosError.response?.data?.message || "Failed to fetch users.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+    };
   }, [isAdmin]);
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -178,20 +184,21 @@ export default function UserManagement() {
     }
 
     try {
-      dispatch(createUserStart());
       const response = await authApi.createUser(payload);
-      dispatch(createUserSuccess(response.user));
+      setUsers((prev) => [...prev, response.user]);
 
       setIsModalOpen(false);
       setEmail("");
       setPassword("");
       setRegno("");
       setSelectedRole("STUDENT");
+
+      toast.success(`User ${response.user.email} created successfully.`);
     } catch (err) {
       const axiosError = err as { response?: { data?: { message?: string } } };
       const message = axiosError.response?.data?.message || "Failed to create user.";
       setModalError(message);
-      dispatch(createUserFailure(message));
+      toast.error(message, { autoClose: 5000 });
     } finally {
       setSubmitting(false);
     }
