@@ -65,6 +65,46 @@ test('login flow with invalid credentials', async ({ page }) => {
   console.log('Invalid credentials test completed (error display needs UI fix)');
 });
 
+test('toast message appears on successful login', async ({ page }) => {
+  await page.goto('http://localhost:5173/login');
+  await page.waitForLoadState('networkidle');
+  
+  await page.fill('input[type="email"]', 'admin@hifi.com');
+  await page.fill('input[type="password"]', 'pass123');
+  await page.click('button[type="submit"]');
+  
+  // Wait for toast to appear (success toast)
+  const successToast = page.locator('.Toastify__toast--success').first();
+  await expect(successToast).toBeVisible({ timeout: 10000 });
+  
+  // Verify toast content
+  await expect(successToast).toContainText('Welcome back');
+  
+  console.log('Success toast appears on login!');
+});
+
+test('toast message appears on failed login', async ({ page }) => {
+  await page.goto('http://localhost:5173/login');
+  await page.waitForLoadState('networkidle');
+  
+  await page.fill('input[type="email"]', 'wrong@email.com');
+  await page.fill('input[type="password"]', 'wrongpass');
+  await page.click('button[type="submit"]');
+  
+  // Wait for error response and toast (toast autoClose is 5000ms)
+  await page.waitForTimeout(2000);
+  
+  // Check for error toast
+  const errorToast = page.locator('[class*="Toastify__toast"][class*="error"]').first();
+  const toastVisible = await errorToast.isVisible({ timeout: 3000 }).catch(() => false);
+  
+  // Also check for any toast
+  const anyToast = page.locator('[class*="Toastify__toast"]').first();
+  const anyToastVisible = await anyToast.isVisible({ timeout: 3000 }).catch(() => false);
+  
+  expect(toastVisible || anyToastVisible).toBeTruthy();
+});
+
 test('role switch dropdown works with placementOfficer', async ({ page }) => {
   // Login as admin first
   await page.goto('http://localhost:5173/login');
