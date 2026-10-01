@@ -4,6 +4,7 @@ import image from "../assets/loginScreenimg.png";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "../context/useUserRole";
 import { authApi, type LoginRequest, mapBackendRoleToFrontend } from "../api/authApi";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -37,11 +38,13 @@ export default function Login() {
       setUser(userData);
       setRole(frontendRole);
 
+      toast.success(`Welcome back, ${user.email}!`);
       navigate("/dashboard");
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
       const message = axiosError.response?.data?.message || "Login failed. Please try again.";
       setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
