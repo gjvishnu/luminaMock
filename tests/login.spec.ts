@@ -105,6 +105,42 @@ test('toast message appears on failed login', async ({ page }) => {
   expect(toastVisible || anyToastVisible).toBeTruthy();
 });
 
+test('route protection: accessing dashboard without login redirects to login', async ({ page }) => {
+  // Try to access protected route without login
+  await page.goto('http://localhost:5173/dashboard');
+  await page.waitForLoadState('networkidle');
+  
+  // Should be redirected to login page
+  await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
+  
+  // Verify login form is visible
+  await expect(page.locator('input[type="email"]')).toBeVisible();
+  await expect(page.locator('input[type="password"]')).toBeVisible();
+  
+  console.log('Route protection works: redirected to login page!');
+});
+
+test('route protection: accessing other protected routes without login redirects to login', async ({ page }) => {
+  const protectedRoutes = [
+    '/dashboard/user-management',
+    '/dashboard/students',
+    '/dashboard/campusdrive',
+    '/dashboard/jdrecommendation',
+    '/dashboard/reports',
+    '/dashboard/profile',
+  ];
+  
+  for (const route of protectedRoutes) {
+    await page.goto(`http://localhost:5173${route}`);
+    await page.waitForLoadState('networkidle');
+    
+    // Should be redirected to login page
+    await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
+  }
+  
+  console.log('All protected routes redirect to login!');
+});
+
 test('role switch dropdown works with placementOfficer', async ({ page }) => {
   // Login as admin first
   await page.goto('http://localhost:5173/login');
