@@ -9,7 +9,7 @@ import {
   createUserFailure,
 } from "../../redux/slices/userSlice";
 import { authApi } from "../../api/authApi";
-import { Plus, Users, Mail, Lock, Shield, User, X, Loader2 } from "lucide-react";
+import { Plus, Users, Mail, Lock, Shield, User, X, Loader2, Eye, EyeOff } from "lucide-react";
 
 interface User {
   id: number;
@@ -39,6 +39,7 @@ export default function UserManagement() {
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (user?.role === "admin") {
@@ -210,14 +211,22 @@ export default function UserManagement() {
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     placeholder="Enter password"
-                    className="h-10 w-full rounded-lg border border-gray-200 pl-10 pr-3 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                    className="h-10 w-full rounded-lg border border-gray-200 pl-10 pr-10 text-sm outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
                     required
                     disabled={submitting}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    disabled={submitting}
+                  >
+                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
                 </div>
               </div>
 
