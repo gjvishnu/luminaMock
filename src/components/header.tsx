@@ -14,7 +14,7 @@ import { useUserRole } from "../context/useUserRole";
 
 const roleDetails: Record<UserRole, { name: string; label: string; greeting: string }> = {
   admin: { name: "Admin", label: "Admin", greeting: "Welcome, Admin" },
-  officer: { name: "Vikram", label: "Placement Officer", greeting: "Welcome, Vikram 👋" },
+  placementOfficer: { name: "Vikram", label: "Placement Officer", greeting: "Welcome, Vikram 👋" },
   student: { name: "Arjun Mehta", label: "Student", greeting: "Welcome, Arjun 👋" },
 };
 
@@ -134,7 +134,7 @@ export const Header = () => {
               {roleMenuOpen && (
                 <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg" role="menu">
                   <div className="px-2.5 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Switch view</div>
-                  {(["student", "officer", "admin"] as UserRole[]).map((option) => {
+                  {(["student", "placementOfficer", "admin"] as UserRole[]).map((option) => {
                     const details = roleDetails[option];
                     const isActive = option === role;
 

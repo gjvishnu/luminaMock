@@ -5,7 +5,7 @@ interface AuthState {
     id: string;
     name: string;
     email: string;
-    role: 'student' | 'officer';
+    role: 'student' | 'placementOfficer';
   } | null;
   isAuthenticated: boolean;
 }
@@ -27,7 +27,7 @@ const authSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
     },
-    setRole(state, action: PayloadAction<'student' | 'officer'>) {
+    setRole(state, action: PayloadAction<'student' | 'placementOfficer'>) {
       if (state.user) {
         state.user.role = action.payload;
       }
