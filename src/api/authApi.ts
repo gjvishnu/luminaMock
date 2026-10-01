@@ -33,7 +33,7 @@ export const authApi = {
   },
 };
 
-export const mapBackendRoleToFrontend = (backendRole: string): "admin" | "student" | "officer" => {
+export const mapBackendRoleToFrontend = (backendRole: string): "admin" | "student" | "placementOfficer" => {
   switch (backendRole) {
     case "ADMIN":
       return "admin";
@@ -41,8 +41,8 @@ export const mapBackendRoleToFrontend = (backendRole: string): "admin" | "studen
       return "student";
     case "PLACEMENT_OFFICER":
     case "RECRUITER":
-      return "officer";
+      return "placementOfficer";
     default:
-      return "officer";
+      return "placementOfficer";
   }
 };

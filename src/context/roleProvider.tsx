@@ -21,12 +21,12 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         const parsed: UserData = JSON.parse(storedUser);
         if (parsed?.role === "ADMIN") return "admin";
         if (parsed?.role === "STUDENT") return "student";
-        if (parsed?.role === "PLACEMENT_OFFICER" || parsed?.role === "RECRUITER") return "officer";
+        if (parsed?.role === "PLACEMENT_OFFICER" || parsed?.role === "RECRUITER") return "placementOfficer";
       }
       const storedRole = localStorage.getItem("lumina_role") as UserRole;
-      return storedRole || "officer";
+      return storedRole || "placementOfficer";
     } catch {
-      return "officer";
+      return "placementOfficer";
     }
   });
 
@@ -34,10 +34,10 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     setUserState(newUser);
     if (newUser) {
       localStorage.setItem("lumina_user", JSON.stringify(newUser));
-      let mappedRole: UserRole = "officer";
+      let mappedRole: UserRole = "placementOfficer";
       if (newUser.role === "ADMIN") mappedRole = "admin";
       else if (newUser.role === "STUDENT") mappedRole = "student";
-      else if (newUser.role === "PLACEMENT_OFFICER" || newUser.role === "RECRUITER") mappedRole = "officer";
+      else if (newUser.role === "PLACEMENT_OFFICER" || newUser.role === "RECRUITER") mappedRole = "placementOfficer";
       setRoleState(mappedRole);
       localStorage.setItem("lumina_role", mappedRole);
     } else {
