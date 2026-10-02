@@ -1,7 +1,6 @@
 import type { ProfileData } from "../shared/types";
 import { PageHeader } from "../shared/PageHeader";
 import { ProfileChip } from "../shared/ProfileChip";
-import { studentProfileData } from "../shared/data";
 import { getProfileCompletion } from "../shared/helpers";
 import { AcademicPerformanceCard } from "./AcademicPerformanceCard";
 import { AwardsCard } from "./AwardsCard";
@@ -15,29 +14,141 @@ import { ProjectsCard } from "./ProjectsCard";
 import { ResumeCard } from "./ResumeCard";
 import { SkillsCard } from "./SkillsCard";
 import { SportsPrizesCard } from "./SportsPrizesCard";
-import { AlertTriangle, BriefcaseBusiness, Building2, CheckCircle2, Clock3, Eye, FileText, GraduationCap, Info, Pencil, Trophy } from "lucide-react";
-import { useState } from "react";
+import {
+  AlertTriangle,
+  BriefcaseBusiness,
+  Building2,
+  CheckCircle2,
+  Clock3,
+  Eye,
+  FileText,
+  GraduationCap,
+  Info,
+  Loader2,
+  Pencil,
+  Trophy,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { studentApi, parseApiError } from "../../../api/studentApi";
+import { useUserRole } from "../../../context/useUserRole";
+import {
+  applyStudentRecord,
+  emptyProfile,
+  toCreatePayload,
+  toUpdatePayload,
+  validateRequired,
+} from "./profileMapper";
 
 export function StudentProfile() {
-  const [profile, setProfile] = useState<ProfileData>(studentProfileData);
-  const [draftProfile, setDraftProfile] = useState<ProfileData>(studentProfileData);
+  const { user } = useUserRole();
+  const [profile, setProfile] = useState<ProfileData>(emptyProfile);
+  const [draftProfile, setDraftProfile] = useState<ProfileData>(emptyProfile);
+  const [studentId, setStudentId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState("");
+
+  const hasProfile = studentId !== null;
+
+  // GET /students/me when the Profile page opens
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProfile() {
+      setIsLoading(true);
+      setLoadError("");
+      try {
+        const student = await studentApi.getMyProfile();
+        if (cancelled) return;
+
+        if (student) {
+          const loaded = applyStudentRecord(emptyProfile, student);
+          setStudentId(student.id);
+          setProfile(loaded);
+          setDraftProfile(loaded);
+        } else {
+          // Admin only created the login, so the profile is empty.
+          const blank: ProfileData = {
+            ...emptyProfile,
+            email: user?.email ?? "",
+            registrationNumber: user?.regno ?? "",
+          };
+          setStudentId(null);
+          setProfile(blank);
+          setDraftProfile(blank);
+          setNotice(
+            "Your profile is empty. Click 'Edit Profile' to add your details.",
+          );
+        }
+      } catch (error) {
+        if (cancelled) return;
+        setLoadError(parseApiError(error).message);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    loadProfile();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.email, user?.regno]);
 
   const handleStartEditing = () => {
     setDraftProfile(profile);
+    setFieldErrors({});
     setIsEditing(true);
-    setNotice("Editing mode active. Make your changes and click 'Save Changes'.");
+    setNotice(
+      "Editing mode active. Make your changes and click 'Save Changes'.",
+    );
   };
 
-  const handleSaveChanges = () => {
-    setProfile(draftProfile);
-    setIsEditing(false);
-    setNotice("Profile updated successfully!");
+  const handleSaveChanges = async () => {
+    if (isSaving) return;
+
+    const errors = validateRequired(draftProfile);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setNotice("Please fix the highlighted fields before saving.");
+      return;
+    }
+
+    setIsSaving(true);
+    setFieldErrors({});
+    try {
+      const student = studentId
+        ? await studentApi.updateProfile(
+            studentId,
+            toUpdatePayload(draftProfile),
+          )
+        : await studentApi.createProfile(toCreatePayload(draftProfile));
+
+      // Keep local-only sections (internships, projects...) from the draft.
+      const saved = applyStudentRecord(draftProfile, student);
+      setStudentId(student.id);
+      setProfile(saved);
+      setDraftProfile(saved);
+      setIsEditing(false);
+      setNotice(
+        studentId
+          ? "Profile updated successfully!"
+          : "Profile created successfully!",
+      );
+    } catch (error) {
+      const info = parseApiError(error);
+      setFieldErrors(info.fieldErrors);
+      setNotice(info.message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancelEdit = () => {
     setDraftProfile(profile);
+    setFieldErrors({});
     setIsEditing(false);
     setNotice("Edit mode closed. Changes were not saved.");
   };
@@ -46,6 +157,30 @@ export function StudentProfile() {
     setIsEditing(false);
     setNotice("Previewing profile.");
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-24 text-sm text-slate-500">
+        <Loader2 size={18} className="animate-spin" /> Loading your profile...
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="mx-auto mt-16 max-w-md rounded-xl border border-rose-200 bg-rose-50 p-5 text-center text-sm text-rose-700">
+        <p className="font-semibold">Could not load your profile</p>
+        <p className="mt-1 text-xs">{loadError}</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="mt-3 rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   const activeProfile = isEditing ? draftProfile : profile;
   const currentCompletion = getProfileCompletion(profile);
@@ -75,13 +210,16 @@ export function StudentProfile() {
               <button
                 type="button"
                 onClick={handleSaveChanges}
-                className="rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
+                disabled={isSaving}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Save Changes
+                {isSaving && <Loader2 size={14} className="animate-spin" />}
+                {isSaving ? "Saving..." : "Save Changes"}
               </button>
               <button
                 type="button"
                 onClick={handleCancelEdit}
+                disabled={isSaving}
                 className="rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
               >
                 Cancel
@@ -89,10 +227,18 @@ export function StudentProfile() {
             </>
           ) : (
             <>
-              <span className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-2 text-[10px] font-bold ${
-                currentCompletion.percentage === 100 ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-700"
-              }`}>
-                {currentCompletion.percentage === 100 ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-2 text-[10px] font-bold ${
+                  currentCompletion.percentage === 100
+                    ? "bg-emerald-50 text-emerald-600"
+                    : "bg-amber-50 text-amber-700"
+                }`}
+              >
+                {currentCompletion.percentage === 100 ? (
+                  <CheckCircle2 size={14} />
+                ) : (
+                  <AlertTriangle size={14} />
+                )}
                 {currentCompletion.percentage}% complete
               </span>
               <button
@@ -108,7 +254,10 @@ export function StudentProfile() {
       </div>
 
       {notice && (
-        <p role="status" className="rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-700">
+        <p
+          role="status"
+          className="rounded-lg border border-cyan-100 bg-cyan-50 px-3 py-2 text-xs font-medium text-cyan-700"
+        >
           {notice}
         </p>
       )}
@@ -120,16 +269,21 @@ export function StudentProfile() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-xl font-bold text-cyan-600">
-                  {profile.initials}
+                  {profile.initials || "?"}
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-lg font-bold text-slate-900">{profile.name}</h2>
+                  <h2 className="text-lg font-bold text-slate-900">
+                    {profile.name || "Your name"}
+                  </h2>
                   <p className="mt-1 text-xs text-slate-600">
                     {profile.program} · {profile.batch} Batch
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <ProfileChip icon={Building2} text={profile.department} />
-                    <ProfileChip icon={FileText} text={`Reg. No. ${profile.registrationNumber}`} />
+                    <ProfileChip
+                      icon={FileText}
+                      text={`Reg. No. ${profile.registrationNumber}`}
+                    />
                     <ProfileChip icon={Clock3} text={profile.semester} />
                   </div>
                 </div>
@@ -138,7 +292,10 @@ export function StudentProfile() {
           </section>
 
           <div className="grid items-stretch gap-4 lg:grid-cols-2">
-            <ProfileCompletionCard profile={profile} onComplete={handleStartEditing} />
+            <ProfileCompletionCard
+              profile={profile}
+              onComplete={handleStartEditing}
+            />
             <PlacementReadinessCard />
           </div>
         </>
@@ -148,7 +305,8 @@ export function StudentProfile() {
       {isEditing && (
         <div className="flex items-center gap-2 rounded-xl border border-cyan-100 bg-cyan-50/80 px-4 py-3 text-xs font-medium text-cyan-700 shadow-sm">
           <Info size={16} className="shrink-0 text-cyan-500" />
-          You are in edit mode. Make your changes and save to update your profile.
+          You are in edit mode. Make your changes and save to update your
+          profile.
         </div>
       )}
 
@@ -167,6 +325,9 @@ export function StudentProfile() {
               isEditing={isEditing}
               onSave={handleSaveChanges}
               onCancel={handleCancelEdit}
+              isSaving={isSaving}
+              isNewProfile={!hasProfile}
+              fieldErrors={fieldErrors}
             />
             <ResumeCard
               profile={activeProfile}
