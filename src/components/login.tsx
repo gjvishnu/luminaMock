@@ -1,10 +1,10 @@
 import { useState } from "react";
-import axios from "axios";
-import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
+import { Eye, EyeOff, LockKeyhole, Mail, AlertCircle } from "lucide-react";
 import image from "../assets/loginScreenimg.png";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "../context/useUserRole";
-import { login } from "../api/authService";
+import { authApi, type LoginRequest, mapBackendRoleToFrontend } from "../api/authApi";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,34 +13,38 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useUserRole();
+  const { setUser, setRole } = useUserRole();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setError(null);
     setLoading(true);
 
     try {
-      // Public login endpoint (see services/userService/API.md). The response
-      // also sets the HttpOnly access_token cookie used by the protected
-      // endpoints, so the token is deliberately not persisted in localStorage.
-      const { user } = await login({ email, password });
+      const credentials: LoginRequest = { email, password };
+      const response = await authApi.login(credentials);
 
-      // RoleProvider maps the backend role (ADMIN / STUDENT /
-      // PLACEMENT_OFFICER / RECRUITER) to the app role.
-      setUser(user);
+      const { token, user } = response;
+      localStorage.setItem("token", token);
+
+      const frontendRole = mapBackendRoleToFrontend(user.role);
+      const userData = {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        regno: user.regno,
+      };
+
+      setUser(userData);
+      setRole(frontendRole);
+
+      toast.success(`Welcome back, ${user.email}!`);
       navigate("/dashboard");
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const message = (err.response?.data as { message?: string } | undefined)?.message;
-        setError(
-          message ??
-            "Unable to reach the server. Please make sure the backend is running and try again.",
-        );
-      } else {
-        setError("Something went wrong. Please try again.");
-      }
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      const message = axiosError.response?.data?.message || "Login failed. Please try again.";
+      setError(message);
+      toast.error(message, { autoClose: 5000 });
     } finally {
       setLoading(false);
     }
@@ -70,13 +74,13 @@ export default function Login() {
               <div className="mb-4 flex justify-center lg:justify-start">
                 <div className="flex h-11 w-35 items-center justify-center rounded-xl bg-cyan-500 text-lg font-bold text-white">
                   Gloris Digital
-                </div>  
+                </div>
               </div>
 
               <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
                Welcome to Gloris Lumina Placement intelligence
               </h1>
- 
+
             </div>
 
             {/* Login Card */}
@@ -85,7 +89,8 @@ export default function Login() {
               <form className="space-y-5" onSubmit={handleSubmit} noValidate autoComplete="off">
 
                 {error && (
-                  <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-600">
+                  <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-600">
+                    <AlertCircle size={14} />
                     {error}
                   </div>
                 )}
@@ -113,6 +118,7 @@ export default function Login() {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your email"
                       className="h-11 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                      disabled={loading}
                     />
                   </div>
                 </div>
@@ -149,12 +155,14 @@ export default function Login() {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
                       className="h-11 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                      disabled={loading}
                     />
 
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      disabled={loading}
                     >
                       {showPassword ? (
                         <EyeOff size={17} />
@@ -192,12 +200,12 @@ export default function Login() {
               </form>
 
               {/* Footer */}
-              
+
             </div>
 
             {/* Bottom text */}
             <p className="mt-6 text-center text-[11px] text-slate-400">
-              © 2026 Gloris Digital 
+              © 2026 Gloris Digital
             </p>
 
           </div>

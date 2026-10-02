@@ -15,9 +15,14 @@ dist-ssr
 # Personal work notes (local only, never pushed)
 WORK_NOTES.md
 USER_MANUAL.md
+KILO_MEMORY.md
 
 # Local tooling artifacts (Playwright MCP session output)
 .playwright-mcp/
+test-results/
+playwright-report/
+cookies.txt
+login.json
 
 # Editor directories and files
 .vscode/*
@@ -29,3 +34,4 @@ USER_MANUAL.md
 *.njsproj
 *.sln
 *.sw?
+

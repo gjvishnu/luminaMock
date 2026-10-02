@@ -1,10 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
-  // The user service authenticates with an HttpOnly access_token cookie
-  // (see services/userService/API.md), so cookies have to be sent along
-  // with every request.
+  baseURL: "/api",
   withCredentials: true,
 });
 
@@ -19,6 +16,23 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  },
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Don't redirect on login endpoint - let the component handle it
+      const isLoginRequest = error.config?.url?.includes('/login');
+      if (!isLoginRequest) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("lumina_user");
+        localStorage.removeItem("lumina_role");
+        window.location.href = "/login";
+      }
+    }
     return Promise.reject(error);
   },
 );
