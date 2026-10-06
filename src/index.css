@@ -1,1 +1,31 @@
  @import "tailwindcss";
+
+/* Single-scroll app shell: window never scrolls, only the
+   page-content container in Home scrolls. This removes the
+   outer scrollbar (and the empty white space below it) while
+   keeping all inner scrolling/functionality identical. */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+html,
+body {
+  overflow: hidden;
+}
+
+body {
+  background-color: #f8fafd;
+}
+
+/* Utility used by the sidebar (was missing, so browsers fell
+   back to a visible scrollbar). Keep it hidden but scrollable. */
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
