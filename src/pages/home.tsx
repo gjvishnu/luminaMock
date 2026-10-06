@@ -4,19 +4,19 @@ import { Sidebar } from "../components/sideBar";
 
 export const Home = () => {
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafd]">
 
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#f8fafd]">
 
         {/* Header */}
         <Header />
 
         {/* Page Content */}
-        <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-3">
+        <div className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-7">
           <Outlet />
         </div>
 

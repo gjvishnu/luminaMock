@@ -62,7 +62,7 @@ const officerMenuSections: MenuSection[] = [
     ],
   },
   {
-    title: "Actions",
+    title: "ACTIONS",
     items: [
       { label: "Create Announcements", icon: Megaphone, route: "announcements" },
       { label: "Create Drives", icon: CirclePlus, route: "add_drives" },
@@ -107,7 +107,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
       )}
 
       <div className="flex items-center gap-3 border-b border-gray-100 pb-6">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0088ff]">
           <GraduationCap size={25} className="text-white" strokeWidth={2} />
         </div>
         <div className="min-w-0">
@@ -129,7 +129,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
                   <button
                     key={item.label}
                     type="button"
-                    className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition ${active ? "bg-cyan-500 text-white shadow-sm" : "text-gray-700 hover:bg-gray-50"}`}
+                    className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition ${active ? "bg-[#0088ff] text-white shadow-sm" : "text-gray-700 hover:bg-gray-50"}`}
                     onClick={() => {
                       navigate(item.route);
                       onClose?.();
