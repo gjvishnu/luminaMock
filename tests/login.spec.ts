@@ -122,7 +122,7 @@ test('route protection: accessing dashboard without login redirects to login', a
 
 test('route protection: accessing other protected routes without login redirects to login', async ({ page }) => {
   const protectedRoutes = [
-    '/dashboard/user-management',
+    '/dashboard/actions',
     '/dashboard/students',
     '/dashboard/campusdrive',
     '/dashboard/jdrecommendation',

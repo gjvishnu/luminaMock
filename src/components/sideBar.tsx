@@ -44,7 +44,7 @@ const adminMenuSections: MenuSection[] = [
   {
     title: "MANAGEMENT",
     items: [
-      { label: "User Management", icon: UserCheck, route: "user-management" },
+      { label: "Actions", icon: UserCheck, route: "actions" },
       { label: "Announcements", icon: Megaphone, route: "announcements" },
     ],
   },
