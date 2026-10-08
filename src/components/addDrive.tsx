@@ -1,4 +1,5 @@
-﻿import {
+import {
+  ArrowLeft,
   CalendarDays,
   Check,
   ChevronDown,
@@ -7,6 +8,7 @@
   Eye,
   FileText,
   Home,
+  Pencil,
   Plus,
   Trash2,
   Upload,
@@ -79,6 +81,7 @@ const defaultRoleSection = (): RoleSection => ({
 
 export const AddDrive = () => {
   const navigate = useNavigate();
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   // Card 1: Company & Drive Information
   const [companyName, setCompanyName] = useState("");
@@ -137,7 +140,7 @@ export const AddDrive = () => {
         <button
           type="button"
           onClick={() => navigate("/dashboard/campusdrive")}
-          className="flex items-center text-[#0088ff] hover:opacity-80 transition"
+          className="flex items-center text-cyan-500 hover:opacity-80 transition"
           aria-label="Home"
         >
           <Home size={15} />
@@ -151,112 +154,311 @@ export const AddDrive = () => {
           Applications
         </button>
         <ChevronRight size={13} className="text-slate-300" />
-        <span className="font-bold text-slate-800">Company details</span>
+        <span className="font-bold text-slate-800">
+          {isPreviewMode ? "Preview Campus Drive" : "Company details"}
+        </span>
       </div>
 
       {/* Page Title & Action Buttons */}
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
-            Add Campus Drive
-          </h1>
-          <p className="mt-1 text-xs text-slate-500">
-            Set shared drive details once, then add role-specific requirements.
-          </p>
-        </div>
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate("/dashboard/campusdrive")}
-            className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSaveDrive}
-            className="rounded-lg bg-[#0088ff] px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0077e6]"
-          >
-            Save Drive
-          </button>
+          {isPreviewMode && (
+            <button
+              type="button"
+              onClick={() => setIsPreviewMode(false)}
+              className="rounded-lg p-1.5 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+              aria-label="Back to editing"
+              title="Back to editing"
+            >
+              <ArrowLeft size={20} />
+            </button>
+          )}
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
+              {isPreviewMode ? "Preview Campus Drive" : "Add Campus Drive"}
+            </h1>
+            <p className="mt-0.5 text-xs text-slate-500">
+              {isPreviewMode
+                ? "Review the drive details before saving."
+                : "Set shared drive details once, then add role-specific requirements."}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {isPreviewMode ? (
+            <button
+              type="button"
+              onClick={() => setIsPreviewMode(false)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-4 py-2 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50"
+            >
+              <Pencil size={15} />
+              Edit
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setIsPreviewMode(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+              >
+                <Eye size={15} />
+                Preview
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/dashboard/campusdrive")}
+                className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveDrive}
+                className="rounded-lg bg-cyan-500 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
+              >
+                Save Drive
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      <div className="space-y-4">
-        {/* â”€â”€ Card 1: Company & Drive Information â”€â”€ */}
-        <section className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6">
-          <h2 className="text-base font-bold text-[#0088ff] sm:text-[17px]">
-            Company &amp; Drive Information
-          </h2>
+      {/* --- PREVIEW MODE --- */}
+      {isPreviewMode ? (
+        <div className="space-y-4">
+          {/* Section 1: Company & Drive Information Preview */}
+          <section className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6">
+            <h2 className="text-base font-bold text-cyan-500 sm:text-[17px]">
+              1. Company &amp; Drive Information
+            </h2>
+            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
+              <div className="lg:col-span-4">
+                <PreviewField label="Company Name" value={companyName} />
+              </div>
+              <div className="lg:col-span-4">
+                <PreviewField label="Company Website" value={companyWebsite} />
+              </div>
+              <div className="lg:col-span-4 lg:row-span-2">
+                <PreviewField label="About Company" value={aboutCompany} isTextArea />
+              </div>
 
-          {/* Row 1: Company Name | Company Website | About Company (rowspan 2) */}
-          <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
-            <div className="lg:col-span-4">
-              <InputField label="Company Name" required placeholder="Enter company name" value={companyName} onChange={setCompanyName} />
-            </div>
-            <div className="lg:col-span-4">
-              <InputField label="Company Website" placeholder="https://" value={companyWebsite} onChange={setCompanyWebsite} />
-            </div>
-            <div className="lg:col-span-4 lg:row-span-2">
-              <label className="block">
-                <FieldLabel label="About Company" />
-                <textarea
-                  value={aboutCompany}
-                  onChange={(e) => setAboutCompany(e.target.value)}
-                  placeholder="Brief about the company"
-                  className="h-[108px] w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#0088ff] focus:ring-2 focus:ring-sky-100"
-                />
-              </label>
-            </div>
+              <div className="lg:col-span-4">
+                <PreviewField label="Drive Date" value={driveDate} />
+              </div>
+              <div className="lg:col-span-4">
+                <PreviewField label="Drive Time" value={driveTime} />
+              </div>
 
-            {/* Row 2: Drive Date | Drive Time */}
-            <div className="lg:col-span-4">
-              <DateField label="Drive Date" required placeholder="Select date" value={driveDate} onChange={setDriveDate} />
+              <div className="lg:col-span-4">
+                <PreviewField label="Venue" value={venue} />
+              </div>
+              <div className="lg:col-span-4">
+                <PreviewField label="Drive Status" value={driveStatus} />
+              </div>
+              <div className="lg:col-span-4">
+                <PreviewField label="Registration End Date" value={registrationEndDate} />
+              </div>
             </div>
-            <div className="lg:col-span-4">
-              <TimeField label="Drive Time" required placeholder="Select time" value={driveTime} onChange={setDriveTime} />
-            </div>
+          </section>
 
-            {/* Row 3: Venue | Registration End Date | Drive Status (half size = col-span-2) */}
-            <div className="lg:col-span-4">
-              <InputField label="Venue" required placeholder="Enter venue" value={venue} onChange={setVenue} />
-            </div>
-            <div className="lg:col-span-4">
-              <DateField label="Registration End Date" placeholder="Select date" value={registrationEndDate} onChange={setRegistrationEndDate} />
-            </div>
-            {/* Drive Status â€“ half the width of a regular field (col-span-2 out of 12 = ~half of col-span-4) */}
-            <div className="lg:col-span-2">
-              <SelectField
-                label="Drive Status"
-                placeholder="Select an option"
-                options={driveStatusOptions}
-                value={driveStatus}
-                onChange={setDriveStatus}
-              />
-            </div>
+          {/* Role Sections Preview */}
+          {roleSections.map((role, idx) => (
+            <section key={role.id} className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6 space-y-5">
+              {roleSections.length > 1 && (
+                <h2 className="text-base font-bold text-cyan-500 sm:text-[17px]">
+                  Role {idx + 1} Details
+                </h2>
+              )}
+
+              {/* Sub-section 1: Job Role Information */}
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <PreviewField label="Job Role" value={role.jobRole} />
+                </div>
+                <div>
+                  <PreviewField label="Job Type" value={role.jobType} />
+                </div>
+                <div>
+                  <PreviewField label="CTC / Package" value={role.ctc} />
+                </div>
+                <div>
+                  <PreviewField label="Number of Openings" value={role.openings} />
+                </div>
+
+                <div>
+                  <PreviewField label="Job Location" value={role.jobLocation} />
+                </div>
+                <div className="md:col-span-2 lg:col-span-3">
+                  <PreviewField label="Skills Required" value={role.skills.length > 0 ? role.skills.join(", ") : ""} />
+                </div>
+              </div>
+
+              {/* Sub-section 2: Eligibility Criteria */}
+              <div className="border-t border-slate-100 pt-4">
+                <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-cyan-500">
+                  Eligibility Criteria
+                </h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <PreviewField label="Departments" value={role.departments.length > 0 ? role.departments.join(", ") : ""} />
+                  </div>
+                  <div>
+                    <PreviewField label="Batch / Graduation Year" value={role.batch} />
+                  </div>
+                  <div>
+                    <PreviewField label="Minimum CGPA" value={role.minimumCgpa} />
+                  </div>
+                  <div>
+                    <PreviewField label="Maximum Backlogs" value={role.maximumBacklogs} />
+                  </div>
+
+                  <div>
+                    <PreviewField label="Degree" value={role.degree} />
+                  </div>
+                  <div className="md:col-span-2 lg:col-span-3">
+                    <PreviewField label="Other Criteria" value={role.otherCriteria} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Sub-section 3: Role Details & Additional Information */}
+              <div className="border-t border-slate-100 pt-4">
+                <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-cyan-500">
+                  Role Details &amp; Additional Information
+                </h3>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+                  <div className="lg:col-span-8">
+                    <PreviewField
+                      label="Job Description / JD"
+                      value={role.jdFile ? `PDF File: ${role.jdFile.name} (${role.jdFile.size})` : role.jobDescription}
+                      isTextArea
+                    />
+                  </div>
+                  <div className="lg:col-span-4">
+                    <PreviewField
+                      label="Selection Process"
+                      value={role.selectionProcesses.length > 0 ? role.selectionProcesses.join(", ") : ""}
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+          ))}
+
+          {/* Footer Save Button */}
+          <div className="flex justify-end pt-2">
+            <button
+              type="button"
+              onClick={handleSaveDrive}
+              className="rounded-lg bg-cyan-500 px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
+            >
+              Save Drive
+            </button>
           </div>
-        </section>
+        </div>
+      ) : (
+        /* --- EDIT MODE --- */
+        <div className="space-y-4">
+          {/* Card 1: Company & Drive Information */}
+          <section className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6">
+            <h2 className="text-base font-bold text-cyan-500 sm:text-[17px]">
+              1. Company &amp; Drive Information
+            </h2>
 
-        {/* â”€â”€ Repeated Role Sections â”€â”€ */}
-        {roleSections.map((role, index) => (
-          <RoleSectionCard
-            key={role.id}
-            role={role}
-            index={index}
-            totalCount={roleSections.length}
-            onUpdate={(patch) => updateRole(role.id, patch)}
-            onDelete={() => handleDeleteRole(role.id)}
-            onAddAnother={handleAddRole}
-          />
-        ))}
-      </div>
+            {/* Row 1: Company Name | Company Website | About Company (rowspan 2) */}
+            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
+              <div className="lg:col-span-4">
+                <InputField label="Company Name" required placeholder="Enter company name" value={companyName} onChange={setCompanyName} />
+              </div>
+              <div className="lg:col-span-4">
+                <InputField label="Company Website" placeholder="https://" value={companyWebsite} onChange={setCompanyWebsite} />
+              </div>
+              <div className="lg:col-span-4 lg:row-span-2">
+                <label className="block">
+                  <FieldLabel label="About Company" />
+                  <textarea
+                    value={aboutCompany}
+                    onChange={(e) => setAboutCompany(e.target.value)}
+                    placeholder="Brief about the company"
+                    className="h-[108px] w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                  />
+                </label>
+              </div>
+
+              {/* Row 2: Drive Date | Drive Time */}
+              <div className="lg:col-span-4">
+                <DateField label="Drive Date" required placeholder="Select date" value={driveDate} onChange={setDriveDate} />
+              </div>
+              <div className="lg:col-span-4">
+                <TimeField label="Drive Time" required placeholder="Select time" value={driveTime} onChange={setDriveTime} />
+              </div>
+
+              {/* Row 3: Venue | Registration End Date | Drive Status */}
+              <div className="lg:col-span-4">
+                <InputField label="Venue" required placeholder="Enter venue" value={venue} onChange={setVenue} />
+              </div>
+              <div className="lg:col-span-4">
+                <DateField label="Registration End Date" placeholder="Select date" value={registrationEndDate} onChange={setRegistrationEndDate} />
+              </div>
+              <div className="lg:col-span-2">
+                <SelectField
+                  label="Drive Status"
+                  placeholder="Select an option"
+                  options={driveStatusOptions}
+                  value={driveStatus}
+                  onChange={setDriveStatus}
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* Repeated Role Sections */}
+          {roleSections.map((role, index) => (
+            <RoleSectionCard
+              key={role.id}
+              role={role}
+              index={index}
+              totalCount={roleSections.length}
+              onUpdate={(patch) => updateRole(role.id, patch)}
+              onDelete={() => handleDeleteRole(role.id)}
+              onAddAnother={handleAddRole}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-   RoleSectionCard â€” contains Job Role Info + Eligibility Criteria + Role Details
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* --- Helper for Read-Only Preview Display --- */
+function PreviewField({
+  label,
+  value,
+  isTextArea = false,
+}: {
+  label: string;
+  value?: string;
+  isTextArea?: boolean;
+}) {
+  const displayVal = value && value.trim() ? value : "-";
+  return (
+    <div className="w-full">
+      <span className="mb-1.5 block text-xs font-bold text-slate-800">
+        {label}
+      </span>
+      <div
+        className={`w-full rounded-lg border border-slate-200/80 bg-slate-50/80 px-3.5 py-2.5 text-xs text-slate-700 ${
+          isTextArea ? "min-h-[108px] whitespace-pre-wrap" : "min-h-[40px] flex items-center"
+        }`}
+      >
+        {displayVal}
+      </div>
+    </div>
+  );
+}
+
+/* --- RoleSectionCard --- */
 function RoleSectionCard({
   role,
   index,
@@ -297,10 +499,9 @@ function RoleSectionCard({
 
   return (
     <section className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6">
-      {/* â”€â”€ Section header â”€â”€ */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
         <div>
-          <h2 className="text-base font-bold text-[#0088ff] sm:text-[17px]">
+          <h2 className="text-base font-bold text-cyan-500 sm:text-[17px]">
             Role {totalCount > 1 ? `${index + 1}` : ""} Details
           </h2>
           <p className="mt-0.5 text-[10px] text-slate-400">
@@ -321,7 +522,7 @@ function RoleSectionCard({
           <button
             type="button"
             onClick={onAddAnother}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[#0088ff] bg-white px-3 py-1.5 text-xs font-semibold text-[#0088ff] shadow-sm transition hover:bg-sky-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-3 py-1.5 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50"
           >
             <Plus size={14} />
             Add another role
@@ -329,9 +530,9 @@ function RoleSectionCard({
         </div>
       </div>
 
-      {/* â”€â”€ Sub-section A: Job Role Information â”€â”€ */}
+      {/* Sub-section A: Job Role Information */}
       <div className="mt-5">
-        <h3 className="mb-3 text-sm font-bold text-[#0088ff]">Job Role Information</h3>
+        <h3 className="mb-3 text-sm font-bold text-cyan-500">Job Role Information</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div>
             <InputField
@@ -373,11 +574,10 @@ function RoleSectionCard({
         </div>
       </div>
 
-      {/* â”€â”€ Sub-section B: Eligibility Criteria â”€â”€ */}
+      {/* Sub-section B: Eligibility Criteria */}
       <div className="mt-5 border-t border-slate-100 pt-5">
-        <h3 className="mb-3 text-sm font-bold text-[#0088ff]">Eligibility Criteria</h3>
+        <h3 className="mb-3 text-sm font-bold text-cyan-500">Eligibility Criteria</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {/* Departments â€“ pill buttons */}
           <div>
             <FieldLabel label="Departments" required />
             <div className="flex h-10 w-full flex-wrap items-center gap-1 overflow-x-auto rounded-lg border border-slate-200 bg-white px-2 py-1">
@@ -389,7 +589,7 @@ function RoleSectionCard({
                     type="button"
                     onClick={() => toggleDept(dept)}
                     className={`shrink-0 rounded px-2 py-1 text-[11px] font-semibold transition ${
-                      sel ? "bg-[#0088ff] text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      sel ? "bg-cyan-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     {dept}
@@ -432,9 +632,9 @@ function RoleSectionCard({
         </div>
       </div>
 
-      {/* â”€â”€ Sub-section C: Role Details & Additional Information â”€â”€ */}
+      {/* Sub-section C: Role Details & Additional Information */}
       <div className="mt-5 border-t border-slate-100 pt-5">
-        <h3 className="mb-3 text-sm font-bold text-[#0088ff]">Role Details &amp; Additional Information</h3>
+        <h3 className="mb-3 text-sm font-bold text-cyan-500">Role Details &amp; Additional Information</h3>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">
             <FieldLabel label="Job Description / JD" required />
@@ -459,7 +659,7 @@ function RoleSectionCard({
   );
 }
 
-/* â”€â”€â”€ Shared Field Components â”€â”€â”€ */
+/* --- Shared Field Components --- */
 
 function FieldLabel({ label, required }: { label: string; required?: boolean }) {
   return (
@@ -484,7 +684,7 @@ function InputField({
         value={value}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
         placeholder={placeholder}
-        className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#0088ff] focus:ring-2 focus:ring-sky-100"
+        className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
       />
     </label>
   );
@@ -503,7 +703,7 @@ function SelectField({
         <select
           value={value ?? ""}
           onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-          className={`h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-9 text-xs outline-none transition focus:border-[#0088ff] focus:ring-2 focus:ring-sky-100 ${!value ? "text-slate-400" : "font-medium text-slate-700"}`}
+          className={`h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-9 text-xs outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 ${!value ? "text-slate-400" : "font-medium text-slate-700"}`}
         >
           <option value="" disabled hidden>{placeholder}</option>
           {options.map((opt) => (
@@ -534,7 +734,7 @@ function DateField({
           value={value}
           onChange={onChange ? (e) => onChange(e.target.value) : undefined}
           placeholder={placeholder}
-          className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#0088ff] focus:ring-2 focus:ring-sky-100"
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
         />
       </div>
     </label>
@@ -559,7 +759,7 @@ function TimeField({
           value={value}
           onChange={onChange ? (e) => onChange(e.target.value) : undefined}
           placeholder={placeholder}
-          className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#0088ff] focus:ring-2 focus:ring-sky-100"
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
         />
       </div>
     </label>
@@ -590,7 +790,7 @@ function SkillsPicker({ label, value, onChange }: {
         <button
           type="button"
           onClick={() => setIsOpen((p) => !p)}
-          className="flex h-10 w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none transition focus:border-[#0088ff]"
+          className="flex h-10 w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none transition focus:border-cyan-500"
         >
           {value.length === 0
             ? <span className="text-slate-400">Select skills</span>
@@ -603,9 +803,9 @@ function SkillsPicker({ label, value, onChange }: {
               const sel = value.includes(s);
               return (
                 <button key={s} type="button" onClick={() => toggle(s)}
-                  className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:bg-sky-50"
+                  className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:bg-cyan-50"
                 >
-                  <span className={`flex h-4 w-4 items-center justify-center rounded border ${sel ? "border-[#0088ff] bg-[#0088ff] text-white" : "border-slate-300"}`}>
+                  <span className={`flex h-4 w-4 items-center justify-center rounded border ${sel ? "border-cyan-500 bg-cyan-500 text-white" : "border-slate-300"}`}>
                     {sel && <Check size={11} />}
                   </span>
                   {s}
@@ -643,7 +843,7 @@ function SelectionProcessPicker({ label, value, onChange }: {
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
-          className="flex h-10 w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none transition focus:border-[#0088ff]"
+          className="flex h-10 w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none transition focus:border-cyan-500"
         >
           {value.length === 0
             ? <span className="text-slate-400">Select selection processes</span>
@@ -656,9 +856,9 @@ function SelectionProcessPicker({ label, value, onChange }: {
               const sel = value.includes(p);
               return (
                 <button key={p} type="button" onClick={() => toggle(p)}
-                  className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:bg-sky-50"
+                  className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:bg-cyan-50"
                 >
-                  <span className={`flex h-4 w-4 items-center justify-center rounded border ${sel ? "border-[#0088ff] bg-[#0088ff] text-white" : "border-slate-300"}`}>
+                  <span className={`flex h-4 w-4 items-center justify-center rounded border ${sel ? "border-cyan-500 bg-cyan-500 text-white" : "border-slate-300"}`}>
                     {sel && <Check size={11} />}
                   </span>
                   {p}
@@ -692,11 +892,11 @@ function JobDescriptionEditor({
             <FileText size={16} className="shrink-0 text-rose-500" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold text-slate-800">{file.name}</p>
-              <p className="text-[10px] text-slate-500">{file.size} Â· PDF</p>
+              <p className="text-[10px] text-slate-500">{file.size} · PDF</p>
             </div>
             <button type="button"
               onClick={() => setPreviewUrl(showPreview ? null : file.url)}
-              className={`rounded p-1 transition ${showPreview ? "bg-sky-50 text-[#0088ff]" : "text-slate-400 hover:bg-sky-50 hover:text-[#0088ff]"}`}
+              className={`rounded p-1 transition ${showPreview ? "bg-cyan-50 text-cyan-500" : "text-slate-400 hover:bg-cyan-50 hover:text-cyan-500"}`}
             ><Eye size={15} /></button>
             <button type="button" onClick={onRemoveFile}
               className="rounded p-1 text-slate-400 transition hover:bg-rose-50 hover:text-rose-500"
@@ -710,10 +910,10 @@ function JobDescriptionEditor({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Enter job description, responsibilities, skills required, etc."
-            className="h-[92px] w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#0088ff] focus:ring-2 focus:ring-sky-100"
+            className="h-[92px] w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
           />
           <div className="mt-2.5 flex flex-wrap items-center gap-3">
-            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#0088ff] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#0088ff] shadow-sm transition hover:bg-sky-50">
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-3.5 py-1.5 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50">
               <Upload size={14} />
               Upload JD PDF
               <input type="file" accept="application/pdf,.pdf" className="sr-only"
@@ -747,5 +947,3 @@ function JobDescriptionEditor({
     </div>
   );
 }
-
-

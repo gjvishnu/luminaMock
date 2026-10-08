@@ -56,6 +56,94 @@ export const router = createBrowserRouter([
             element: <Dashboard />,
           },
           {
+            path: "dashboard/actions",
+            element: <UserManagement />,
+          },
+          {
+            path: "dashboard/user-management",
+            element: <Navigate to="/dashboard/actions" replace />,
+          },
+          {
+            path: "dashboard/students",
+            element: <Students />,
+          },
+          {
+            path: "dashboard/students/:studentId",
+            element: <StudentDetails />,
+          },
+          {
+            path: "dashboard/students/:studentId/applications",
+            element: <StudentApplicationDetails />,
+          },
+          {
+            path: "dashboard/students/:studentId/applications/:applicationId",
+            element: <StudentApplicationDetailRoute />,
+          },
+          {
+            path: "dashboard/campusdrive",
+            element: <CampusDrive />,
+          },
+          {
+            path: "dashboard/campusdrive/:driveId",
+            element: <DriveDetails />,
+          },
+          {
+            path: "dashboard/jdrecommendation",
+            element: <JDRecommendation />,
+          },
+          {
+            path: "dashboard/jdrecommendation/:driveId/students",
+            element: <DriveStudents />,
+          },
+          {
+            path: "dashboard/jdrecommendation/students",
+            element: <DriveStudents />,
+          },
+          {
+            path: "dashboard/add_drives",
+            element: <AddDrive />,
+          },
+          {
+            path: "dashboard/announcements",
+            element: <AnnouncementsRoute />,
+          },
+          {
+            path: "dashboard/reports",
+            element: <Reports />,
+          },
+          {
+            path: "dashboard/status-tracker",
+            element: <StatusTracker />,
+          },
+          {
+            path: "dashboard/status-tracker/:driveId",
+            element: <StatusTracker />,
+          },
+          {
+            path: "dashboard/jobs",
+            element: <StudentJobs />,
+          },
+          {
+            path: "dashboard/jobs/:jobId",
+            element: <StudentJobDetails />,
+          },
+          {
+            path: "dashboard/applications",
+            element: <StudentApplications />,
+          },
+          {
+            path: "dashboard/applications/:applicationId",
+            element: <ApplicationDetailRoute />,
+          },
+          {
+            path: "dashboard/profile",
+            element: <StudentProfile />,
+          },
+          {
+            path: "dashboard/resume",
+            element: <StudentResume />,
+          },
+          {
             path: "actions",
             element: <UserManagement />,
           },
