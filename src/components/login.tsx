@@ -20,6 +20,14 @@ const handleSubmit = async (e: React.FormEvent) => {
     setError(null);
     setLoading(true);
 
+    if (!email.trim() || !password.trim()) {
+      const message = "Email and password are required";
+      setError(message);
+      toast.error(message, { autoClose: 5000 });
+      setLoading(false);
+      return;
+    }
+
     try {
       const credentials: LoginRequest = { email, password };
       const response = await authApi.login(credentials);

@@ -15,6 +15,7 @@ import { AnnouncementsRoute } from "./components/announcementsRoute";
 import { Reports } from "./components/reports";
 import { StatusTracker } from "./components/statusTracker";
 import { RoleProvider } from "./context/roleProvider";
+import { RequireAuth } from "./components/requireAuth";
 
 import { ApplicationDetailRoute } from "./components/student/applications/ApplicationDetailRoute";
 import { StudentApplicationDetailRoute } from "./components/student/applications/StudentApplicationDetailRoute";
@@ -34,6 +35,10 @@ function AppLayout() {
   );
 }
 
+function ProtectedLayout() {
+  return <RequireAuth />;
+}
+
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
@@ -49,99 +54,105 @@ export const router = createBrowserRouter([
       },
       {
         path: "/",
-        element: <Home />,
+        element: <ProtectedLayout />,
         children: [
           {
             path: "dashboard",
-            element: <Dashboard />,
-          },
-          {
-            path: "actions",
-            element: <UserManagement />,
-          },
-          {
-            path: "user-management",
-            element: <Navigate to="/actions" replace />,
-          },
-          {
-            path: "students",
-            element: <Students />,
-          },
-          {
-            path: "students/:studentId",
-            element: <StudentDetails />,
-          },
-          {
-            path: "students/:studentId/applications",
-            element: <StudentApplicationDetails />,
-          },
-          {
-            path: "students/:studentId/applications/:applicationId",
-            element: <StudentApplicationDetailRoute />,
-          },
-          {
-            path: "campusdrive",
-            element: <CampusDrive />,
-          },
-          {
-            path: "campusdrive/:driveId",
-            element: <DriveDetails />,
-          },
-          {
-            path: "jdrecommendation",
-            element: <JDRecommendation />,
-          },
-          {
-            path: "jdrecommendation/:driveId/students",
-            element: <DriveStudents />,
-          },
-          {
-            path: "jdrecommendation/students",
-            element: <DriveStudents />,
-          },
-          {
-            path: "add_drives",
-            element: <AddDrive />,
-          },
-          {
-            path: "announcements",
-            element: <AnnouncementsRoute />,
-          },
-          {
-            path: "reports",
-            element: <Reports />,
-          },
-          {
-            path: "status-tracker",
-            element: <StatusTracker />,
-          },
-          {
-            path: "status-tracker/:driveId",
-            element: <StatusTracker />,
-          },
-          {
-            path: "jobs",
-            element: <StudentJobs />,
-          },
-          {
-            path: "jobs/:jobId",
-            element: <StudentJobDetails />,
-          },
-          {
-            path: "applications",
-            element: <StudentApplications />,
-          },
-          {
-            path: "applications/:applicationId",
-            element: <ApplicationDetailRoute />,
-          },
-          {
-            path: "profile",
-            element: <StudentProfile />,
-          },
-          {
-            path: "resume",
-            element: <StudentResume />,
+            element: <Home />,
+            children: [
+              {
+                index: true,
+                element: <Dashboard />,
+              },
+              {
+                path: "actions",
+                element: <UserManagement />,
+              },
+              {
+                path: "user-management",
+                element: <Navigate to="/dashboard/actions" replace />,
+              },
+              {
+                path: "students",
+                element: <Students />,
+              },
+              {
+                path: "students/:studentId",
+                element: <StudentDetails />,
+              },
+              {
+                path: "students/:studentId/applications",
+                element: <StudentApplicationDetails />,
+              },
+              {
+                path: "students/:studentId/applications/:applicationId",
+                element: <StudentApplicationDetailRoute />,
+              },
+              {
+                path: "campusdrive",
+                element: <CampusDrive />,
+              },
+              {
+                path: "campusdrive/:driveId",
+                element: <DriveDetails />,
+              },
+              {
+                path: "jdrecommendation",
+                element: <JDRecommendation />,
+              },
+              {
+                path: "jdrecommendation/:driveId/students",
+                element: <DriveStudents />,
+              },
+              {
+                path: "jdrecommendation/students",
+                element: <DriveStudents />,
+              },
+              {
+                path: "add_drives",
+                element: <AddDrive />,
+              },
+              {
+                path: "announcements",
+                element: <AnnouncementsRoute />,
+              },
+              {
+                path: "reports",
+                element: <Reports />,
+              },
+              {
+                path: "status-tracker",
+                element: <StatusTracker />,
+              },
+              {
+                path: "status-tracker/:driveId",
+                element: <StatusTracker />,
+              },
+              {
+                path: "jobs",
+                element: <StudentJobs />,
+              },
+              {
+                path: "jobs/:jobId",
+                element: <StudentJobDetails />,
+              },
+              {
+                path: "applications",
+                element: <StudentApplications />,
+              },
+              {
+                path: "applications/:applicationId",
+                element: <ApplicationDetailRoute />,
+              },
+              {
+                path: "profile",
+                element: <StudentProfile />,
+              },
+              {
+                path: "resume",
+                element: <StudentResume />,
+              },
+            ],
           },
         ],
       },
