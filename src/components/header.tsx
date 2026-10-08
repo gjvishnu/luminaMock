@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { Sidebar } from "./sideBar";
 import { type UserRole } from "../context/roleContext";
 import { useUserRole } from "../context/useUserRole";
+import { useAppSelector } from "../redux";
 
 const roleDetails: Record<UserRole, { name: string; label: string; greeting: string }> = {
   admin: { name: "Admin", label: "Admin", greeting: "Welcome, Admin" },
@@ -19,7 +20,18 @@ const roleDetails: Record<UserRole, { name: string; label: string; greeting: str
 };
 
 export const Header = () => {
-  const { role, setRole } = useUserRole();
+  const { role: contextRole, setRole } = useUserRole();
+  // Prefer the canonical Redux session when present; fall back to the
+  // Context role so the header keeps working before a Redux-backed login.
+  const { user } = useAppSelector((state) => state.auth);
+  const role: UserRole =
+    user?.role === "admin" || user?.role === "recruiter"
+      ? "admin"
+      : user?.role === "student"
+        ? "student"
+        : user?.role === "placementOfficer"
+          ? "placementOfficer"
+          : contextRole;
   const [sideBar, setSideBar] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);

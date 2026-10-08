@@ -16,6 +16,38 @@ export interface LoginResponse {
   };
 }
 
+export interface CreateUserRequest {
+  email: string;
+  password: string;
+  role: "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER";
+  regno?: string;
+}
+
+export interface UserResponse {
+  message: string;
+  user: {
+    id: number;
+    email: string;
+    role: "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER";
+    regno: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface GetUsersResponse {
+  message: string;
+  count: number;
+  users: Array<{
+    id: number;
+    email: string;
+    role: "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER";
+    regno: string | null;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+}
+
 export interface AuthError {
   message: string;
 }
@@ -23,6 +55,16 @@ export interface AuthError {
 export const authApi = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     const response = await api.post<LoginResponse>("/login", credentials);
+    return response.data;
+  },
+
+  createUser: async (userData: CreateUserRequest): Promise<UserResponse> => {
+    const response = await api.post<UserResponse>("/create-user", userData);
+    return response.data;
+  },
+
+  getUsers: async (): Promise<GetUsersResponse> => {
+    const response = await api.get<GetUsersResponse>("/users");
     return response.data;
   },
 

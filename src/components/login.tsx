@@ -3,6 +3,8 @@ import { Eye, EyeOff, LockKeyhole, Mail, AlertCircle } from "lucide-react";
 import image from "../assets/loginScreenimg.png";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "../context/useUserRole";
+import { useAppDispatch } from "../redux";
+import { login as loginAction, setRole as setReduxRole } from "../redux/slices/authSlice";
 import { authApi, type LoginRequest, mapBackendRoleToFrontend } from "../api/authApi";
 import { toast } from "react-toastify";
 
@@ -14,6 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setUser, setRole } = useUserRole();
+  const dispatch = useAppDispatch();
 
 const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +34,14 @@ const handleSubmit = async (e: React.FormEvent) => {
       const userData = {
         id: user.id,
         email: user.email,
-        role: user.role,
+        role: frontendRole,
         regno: user.regno,
       };
 
       setUser(userData);
       setRole(frontendRole);
+      dispatch(loginAction(userData));
+      dispatch(setReduxRole(frontendRole));
 
       toast.success(`Welcome back, ${user.email}!`);
       navigate("/dashboard");
