@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   Search,
@@ -27,7 +26,7 @@ import {
   LayoutGrid,
   Building2,
 } from "lucide-react";
-import { useUserRole } from "../context/useUserRole";
+import { authApi } from "../api/authApi";
 
 type UserItem = {
   id?: number;
@@ -157,8 +156,6 @@ function CustomRoleSelect({
 }
 
 export function UserManagement() {
-  const navigate = useNavigate();
-  const { logout } = useUserRole();
   const [activeTab, setActiveTab] = useState<"STUDENT" | "PLACEMENT_OFFICER" | "ADMIN">("STUDENT");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSkillModalOpen, setIsSkillModalOpen] = useState(false);
@@ -190,34 +187,47 @@ export function UserManagement() {
   const [departmentError, setDepartmentError] = useState<string | null>(null);
   const [departmentSubmitting, setDepartmentSubmitting] = useState(false);
 
-  const fetchUsers = async () => {
-    setLoadingUsers(true);
-    try {
-      const response = await fetch("http://localhost:3000/users", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-
-      if (response.status === 401) {
-        logout();
-        navigate("/login");
-        return;
-      }
-
-      const data = await response.json();
-      if (response.ok && data.users) {
-        setRealUsers(data.users);
-      }
-    } catch {
-      // Keep existing display list if server fails
-    } finally {
-      setLoadingUsers(false);
-    }
-  };
-
   useEffect(() => {
-    fetchUsers();
+    let cancelled = false;
+
+    const run = async () => {
+      setLoadingUsers(true);
+      try {
+        const response = await authApi.getUsers();
+        if (!cancelled) {
+          setRealUsers(
+            response.users.map((u) => ({
+              id: u.id,
+              email: u.email,
+              role: u.role,
+              regno: u.regno,
+              createdAt: u.createdAt,
+            })),
+          );
+        }
+      } catch (err) {
+        // Keep existing display list if server fails; surface API errors as a
+        // toast the same way create-user does. A 401 still kicks to login via
+        // the shared axios interceptor.
+        if (!cancelled) {
+          const axiosError = err as { response?: { data?: { message?: string } } };
+          const message = axiosError.response?.data?.message;
+          if (message) {
+            toast.error(message, { autoClose: 5000 });
+          }
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingUsers(false);
+        }
+      }
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const combinedUsers = [...realUsers];
@@ -253,7 +263,7 @@ export function UserManagement() {
     setSubmitting(true);
 
     try {
-      const payload: { email: string; password: string; role: string; regno?: string } = {
+      const payload: { email: string; password: string; role: "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER"; regno?: string } = {
         email,
         password,
         role: selectedRole,
@@ -262,20 +272,18 @@ export function UserManagement() {
         payload.regno = regno.trim();
       }
 
-      const response = await fetch("http://localhost:3000/create-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
+      const data = await authApi.createUser(payload);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setModalError(data.message || "Failed to create user.");
-        setSubmitting(false);
-        return;
-      }
+      setRealUsers((prev) => [
+        ...prev,
+        {
+          id: data.user.id,
+          email: data.user.email,
+          role: data.user.role,
+          regno: data.user.regno,
+          createdAt: data.user.createdAt,
+        },
+      ]);
 
       setIsModalOpen(false);
       setEmail("");
@@ -283,9 +291,12 @@ export function UserManagement() {
       setRegno("");
       setSelectedRole("STUDENT");
 
-      await fetchUsers();
-    } catch {
-      setModalError("Server connection error. Please try again.");
+      toast.success(`User ${data.user.email} created successfully.`);
+    } catch (err) {
+      const axiosError = err as { response?: { data?: { message?: string } } };
+      const message = axiosError.response?.data?.message || "Failed to create user.";
+      setModalError(message);
+      toast.error(message, { autoClose: 5000 });
     } finally {
       setSubmitting(false);
     }
