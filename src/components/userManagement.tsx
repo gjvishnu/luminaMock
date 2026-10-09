@@ -193,7 +193,7 @@ export function UserManagement() {
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
-      const response = await fetch("http://localhost:3000/users", {
+      const response = await fetch("/api/users", {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -262,7 +262,7 @@ export function UserManagement() {
         payload.regno = regno.trim();
       }
 
-      const response = await fetch("http://localhost:3000/create-user", {
+      const response = await fetch("/api/create-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
