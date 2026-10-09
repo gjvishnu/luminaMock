@@ -44,7 +44,7 @@ const adminMenuSections: MenuSection[] = [
   {
     title: "MANAGEMENT",
     items: [
-      { label: "User Management", icon: UserCheck, route: "user-management" },
+      { label: "Actions", icon: UserCheck, route: "actions" },
       { label: "Announcements", icon: Megaphone, route: "announcements" },
     ],
   },
@@ -62,7 +62,7 @@ const officerMenuSections: MenuSection[] = [
     ],
   },
   {
-    title: "Actions",
+    title: "ACTIONS",
     items: [
       { label: "Create Announcements", icon: Megaphone, route: "announcements" },
       { label: "Create Drives", icon: CirclePlus, route: "add_drives" },
@@ -93,6 +93,26 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
   const { role } = useUserRole();
   const menuSections = role === "admin" ? adminMenuSections : role === "student" ? studentMenuSections : officerMenuSections;
 
+  const isItemActive = (route: string) => {
+    const current = location.pathname.replace(/\/+$/, "");
+    if (route === "dashboard") {
+      return current === "/dashboard" || current === "";
+    }
+    const dashboardRoute = `/dashboard/${route}`;
+    return (
+      current === dashboardRoute ||
+      current.startsWith(`${dashboardRoute}/`) ||
+      current === `/${route}` ||
+      current.startsWith(`/${route}/`)
+    );
+  };
+
+  const handleNavigate = (route: string) => {
+    const target = route === "dashboard" ? "/dashboard" : `/dashboard/${route}`;
+    navigate(target);
+    onClose?.();
+  };
+
   return (
     <div className={`${onClose ? "flex" : "hidden md:flex"} relative h-full w-[280px] shrink-0 flex-col overflow-y-auto border-r border-gray-200 bg-white p-5 scrollbar-hidden md:w-[25%] lg:w-[15%]`}>
       {onClose && (
@@ -107,7 +127,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
       )}
 
       <div className="flex items-center gap-3 border-b border-gray-100 pb-6">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0088ff]">
           <GraduationCap size={25} className="text-white" strokeWidth={2} />
         </div>
         <div className="min-w-0">
@@ -123,17 +143,14 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
             <div className="space-y-1">
               {section.items.map((item) => {
                 const Icon = item.icon;
-                const active = location.pathname === `/${item.route}` || location.pathname.startsWith(`/${item.route}/`);
+                const active = isItemActive(item.route);
 
                 return (
                   <button
                     key={item.label}
                     type="button"
-                    className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition ${active ? "bg-cyan-500 text-white shadow-sm" : "text-gray-700 hover:bg-gray-50"}`}
-                    onClick={() => {
-                      navigate(item.route);
-                      onClose?.();
-                    }}
+                    className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition ${active ? "bg-[#0088ff] text-white shadow-sm font-semibold" : "text-gray-700 hover:bg-gray-50"}`}
+                    onClick={() => handleNavigate(item.route)}
                   >
                     <Icon size={17} strokeWidth={1.8} className="shrink-0" />
                     <span className="truncate text-[11px] font-medium">{item.label}</span>

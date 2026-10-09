@@ -51,8 +51,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-50">
-      <div className="flex min-h-screen w-full">
+    <div className="h-dvh w-full overflow-y-auto bg-slate-50">
+      <div className="flex min-h-full w-full">
 
         {/* Left - Image */}
         <div className="hidden w-1/2 items-center justify-center overflow-hidden bg-cyan-50 lg:flex">

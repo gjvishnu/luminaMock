@@ -56,8 +56,12 @@ export const router = createBrowserRouter([
             element: <Dashboard />,
           },
           {
-            path: "user-management",
+            path: "actions",
             element: <UserManagement />,
+          },
+          {
+            path: "user-management",
+            element: <Navigate to="/actions" replace />,
           },
           {
             path: "students",
