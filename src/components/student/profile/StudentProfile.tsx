@@ -29,7 +29,7 @@ import {
   Trophy,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { studentApi, parseApiError } from "../../../api/studentApi";
+import { studentApi, getApiErrorMessage, parseApiError } from "../../../api/studentApi";
 import { useUserRole } from "../../../context/useUserRole";
 import {
   applyStudentRecord,
@@ -85,7 +85,7 @@ export function StudentProfile() {
         }
       } catch (error) {
         if (cancelled) return;
-        setLoadError(parseApiError(error).message);
+        setLoadError(getApiErrorMessage(error));
       } finally {
         if (!cancelled) setIsLoading(false);
       }

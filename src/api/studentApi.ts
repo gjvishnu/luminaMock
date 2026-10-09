@@ -102,6 +102,11 @@ export function parseApiError(error: unknown): ApiErrorInfo {
   };
 }
 
+/** Returns the message sent by the server, or a fallback if there is none. */
+export function getApiErrorMessage(error: unknown): string {
+  return parseApiError(error).message;
+}
+
 export const studentApi = {
   /** GET /students/me - resolves to null when the student has no profile yet (404). */
   getMyProfile: async (): Promise<StudentRecord | null> => {
