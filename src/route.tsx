@@ -9,13 +9,11 @@ import { CampusDrive } from "./components/campusDrive";
 import { DriveDetails } from "./components/driveDetails";
 import { JDRecommendation } from "./components/jdRecommendation";
 import { DriveStudents } from "./components/driveStudents";
-import Login from "./components/login";
 import { AddDrive } from "./components/addDrive";
 import { AnnouncementsRoute } from "./components/announcementsRoute";
 import { Reports } from "./components/reports";
 import { StatusTracker } from "./components/statusTracker";
 import { RoleProvider } from "./context/roleProvider";
-import { RequireAuth } from "./components/requireAuth";
 
 import { ApplicationDetailRoute } from "./components/student/applications/ApplicationDetailRoute";
 import { StudentApplicationDetailRoute } from "./components/student/applications/StudentApplicationDetailRoute";
@@ -35,10 +33,6 @@ function AppLayout() {
   );
 }
 
-function ProtectedLayout() {
-  return <RequireAuth />;
-}
-
 export const router = createBrowserRouter([
   {
     element: <AppLayout />,
@@ -46,19 +40,14 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Navigate to="/login" replace />,
-      },
-      {
-        path: "/login",
-        element: <Login />,
+        element: <Navigate to="/dashboard" replace />,
       },
       {
         path: "/",
-        element: <ProtectedLayout />,
+        element: <Home />,
         children: [
           {
             path: "dashboard",
-            element: <Home />,
             children: [
               {
                 index: true,
