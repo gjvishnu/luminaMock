@@ -2,20 +2,17 @@ import { createContext } from "react";
 
 export type UserRole = "student" | "placementOfficer" | "admin";
 
-export type UserData = {
-  id?: number;
-  email: string;
-  role: string;
-  regno?: string | null;
-} | null;
-
 export type RoleContextValue = {
   role: UserRole;
   setRole: (role: UserRole) => void;
-  user: UserData;
-  setUser: (user: UserData) => void;
+  /** Kept for component compatibility; always null now that login is removed. */
+  user: null;
+  /** No-op kept for component compatibility. */
+  setUser: (user: null) => void;
+  /** No-op kept for component compatibility. */
   logout: () => void;
 };
 
 export const RoleContext = createContext<RoleContextValue | undefined>(undefined);
+
 
