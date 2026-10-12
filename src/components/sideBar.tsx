@@ -127,7 +127,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
       )}
 
       <div className="flex items-center gap-3 border-b border-gray-100 pb-6">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#0088ff]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500">
           <GraduationCap size={25} className="text-white" strokeWidth={2} />
         </div>
         <div className="min-w-0">
@@ -149,7 +149,7 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
                   <button
                     key={item.label}
                     type="button"
-                    className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition ${active ? "bg-[#0088ff] text-white shadow-sm font-semibold" : "text-gray-700 hover:bg-gray-50"}`}
+                    className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition ${active ? "bg-cyan-500 text-white shadow-sm font-semibold" : "text-gray-700 hover:bg-gray-50"}`}
                     onClick={() => handleNavigate(item.route)}
                   >
                     <Icon size={17} strokeWidth={1.8} className="shrink-0" />
