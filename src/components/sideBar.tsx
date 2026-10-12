@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUserRole } from "../context/useUserRole";
-import { useAppSelector } from "../redux";
 
 type MenuItem = {
   label: string;
@@ -91,18 +90,7 @@ type SidebarProps = {
 export const Sidebar = ({ onClose }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { role: contextRole } = useUserRole();
-  // Prefer the canonical Redux session when present; the Context role keeps
-  // the menu working before a Redux-backed login happens.
-  const { user } = useAppSelector((state) => state.auth);
-  const role =
-    user?.role === "admin" || user?.role === "recruiter"
-      ? "admin"
-      : user?.role === "student"
-        ? "student"
-        : user?.role === "placementOfficer"
-          ? "placementOfficer"
-          : contextRole;
+  const { role } = useUserRole();
   const menuSections = role === "admin" ? adminMenuSections : role === "student" ? studentMenuSections : officerMenuSections;
 
   const isItemActive = (route: string) => {
@@ -120,11 +108,8 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
   };
 
   const handleNavigate = (route: string) => {
-    // The children in src/route.tsx are top-level siblings of `/dashboard`
-    // (e.g. `/actions`, `/students`), so build the URL from the route root.
-    // Prefixing with `/dashboard/` matches no route and falls through to
-    // RouterError's 404 screen.
-    navigate(`/${route}`);
+    const target = route === "dashboard" ? "/dashboard" : `/dashboard/${route}`;
+    navigate(target);
     onClose?.();
   };
 

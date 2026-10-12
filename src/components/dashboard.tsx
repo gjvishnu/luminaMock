@@ -16,7 +16,6 @@ import {
   
  } from "lucide-react";
 import { useUserRole } from "../context/useUserRole";
-import { useAppSelector } from "../redux";
 import { StudentDashboard } from "./studentDashboard";
 
 type StatCard = {
@@ -522,16 +521,7 @@ function OfficerDashboard() {
 }
 
 export const Dashboard = () => {
-  const { role: contextRole } = useUserRole();
-  const { user } = useAppSelector((state) => state.auth);
-  const role =
-    user?.role === "admin" || user?.role === "recruiter"
-      ? "admin"
-      : user?.role === "student"
-        ? "student"
-        : user?.role === "placementOfficer"
-          ? "placementOfficer"
-          : contextRole;
+  const { role } = useUserRole();
 
   return role === "student" ? <StudentDashboard /> : <OfficerDashboard />;
 };
