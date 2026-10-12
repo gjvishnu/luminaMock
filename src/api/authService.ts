@@ -1,4 +1,8 @@
-import api from "./axiosInstance";
+import axios from "axios";
+
+const api = axios.create({
+  withCredentials: true,
+});
 
 /**
  * Login API for the user service.
