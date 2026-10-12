@@ -173,25 +173,6 @@ function SkillDemandCard() {
   );
 }
 
-// function MissingSkillsCard() {
-//   return (
-//     <section className={` rounded-lg min-h-[280px] max-h-[360px] bg-red-50 border border-red-300 p-4 sm:p-5 xl:col-span-4`}>
-//       <h2 className="text-sm text-red-500 font-bold  sm:text-base">Skills You&apos;re Missing</h2>
-//       <div className="mt-5 space-y-4">
-//         {missingSkills.map((skill) => (
-//           <div key={skill} className="flex items-center gap-3 text-xs font-medium text-slate-700">
-//             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-400"><AlertTriangle size={14} /></span>
-//             {skill}
-//           </div>
-//         ))}
-//       </div>
-//       <button type="button" className="mt-7 inline-flex items-center gap-1.5 text-xs font-semibold ">
-//         Explore Skills
-//         <ArrowRight size={14} />
-//       </button>
-//     </section>
-//   );
-// }
 
 function UpcomingOngoingDrivesCard() {
   const ongoingCount = upcomingDrives.filter((drive) => drive.type === "ongoing").length;

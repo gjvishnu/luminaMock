@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import {
   Search,
@@ -27,7 +26,6 @@ import {
   LayoutGrid,
   Building2,
 } from "lucide-react";
-import { useUserRole } from "../context/useUserRole";
 
 type UserItem = {
   id?: number;
@@ -41,7 +39,7 @@ type UserItem = {
   batch?: string;
 };
 
-const initialMockUsers: UserItem[] = [
+const seedUsers: UserItem[] = [
   { id: 1, name: "Arjun Mehta", email: "arjun.mehta@lumina.edu", regno: "CSE2026-014", role: "STUDENT", dept: "CSE", batch: "2026 • 7th Sem", status: "Active", createdAt: "12 Jan 2024" },
   { id: 2, name: "Rahul Kulkarni", email: "rahul.kulkarni@lumina.edu", regno: "CSE2026-032", role: "STUDENT", dept: "CSE", batch: "2026 • 7th Sem", status: "Active", createdAt: "15 Feb 2024" },
   { id: 3, name: "Priya Sharma", email: "priya.sharma@lumina.edu", regno: "ECE2026-011", role: "STUDENT", dept: "ECE", batch: "2026 • 7th Sem", status: "Active", createdAt: "10 Mar 2024" },
@@ -157,8 +155,6 @@ function CustomRoleSelect({
 }
 
 export function UserManagement() {
-  const navigate = useNavigate();
-  const { logout } = useUserRole();
   const [activeTab, setActiveTab] = useState<"STUDENT" | "PLACEMENT_OFFICER" | "ADMIN">("STUDENT");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSkillModalOpen, setIsSkillModalOpen] = useState(false);
@@ -166,7 +162,7 @@ export function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [realUsers, setRealUsers] = useState<UserItem[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(true);
+  const loadingUsers = false;
 
   // Form State
   const [email, setEmail] = useState("");
@@ -190,40 +186,13 @@ export function UserManagement() {
   const [departmentError, setDepartmentError] = useState<string | null>(null);
   const [departmentSubmitting, setDepartmentSubmitting] = useState(false);
 
-  const fetchUsers = async () => {
-    setLoadingUsers(true);
-    try {
-      const response = await fetch("/api/users", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-
-      if (response.status === 401) {
-        logout();
-        navigate("/login");
-        return;
-      }
-
-      const data = await response.json();
-      if (response.ok && data.users) {
-        setRealUsers(data.users);
-      }
-    } catch {
-      // Keep existing display list if server fails
-    } finally {
-      setLoadingUsers(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // Local-only demo data (login API removed): the Actions page works
+  // entirely from the built-in mock list below.
 
   const combinedUsers = [...realUsers];
-  initialMockUsers.forEach((mock) => {
-    if (!combinedUsers.some((u) => u.email === mock.email)) {
-      combinedUsers.push(mock);
+  seedUsers.forEach((seed) => {
+    if (!combinedUsers.some((u) => u.email === seed.email)) {
+      combinedUsers.push(seed);
     }
   });
 
@@ -247,45 +216,53 @@ export function UserManagement() {
     );
   });
 
-  const handleCreateUser = async (e: React.FormEvent) => {
+  const handleCreateUser = (e: React.FormEvent) => {
     e.preventDefault();
     setModalError(null);
+
+    const trimmedEmail = email.trim();
+    const trimmedRegno = regno.trim();
+    if (!trimmedEmail || !password) {
+      setModalError("Email and password are required.");
+      return;
+    }
+    if (password.length < 4) {
+      setModalError("Password must be at least 4 characters.");
+      return;
+    }
+    if (selectedRole === "STUDENT" && !trimmedRegno) {
+      setModalError("Register number is required for students.");
+      return;
+    }
+    if (combinedUsers.some((u) => u.email.toLowerCase() === trimmedEmail.toLowerCase())) {
+      setModalError("A user with this email already exists.");
+      return;
+    }
+
     setSubmitting(true);
-
     try {
-      const payload: { email: string; password: string; role: string; regno?: string } = {
-        email,
-        password,
-        role: selectedRole,
-      };
-      if (selectedRole === "STUDENT" && regno.trim()) {
-        payload.regno = regno.trim();
-      }
-
-      const response = await fetch("/api/create-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setModalError(data.message || "Failed to create user.");
-        setSubmitting(false);
-        return;
-      }
-
+      const nextId = combinedUsers.reduce((max, u) => Math.max(max, u.id ?? 0), 0) + 1;
+      setRealUsers((prev) => [
+        ...prev,
+        {
+          id: nextId,
+          email: trimmedEmail,
+          role: selectedRole,
+          regno: selectedRole === "STUDENT" ? trimmedRegno : null,
+          status: "Active",
+          createdAt: new Date().toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          }),
+        },
+      ]);
+      toast.success("User created successfully.");
       setIsModalOpen(false);
       setEmail("");
       setPassword("");
       setRegno("");
       setSelectedRole("STUDENT");
-
-      await fetchUsers();
-    } catch {
-      setModalError("Server connection error. Please try again.");
     } finally {
       setSubmitting(false);
     }
