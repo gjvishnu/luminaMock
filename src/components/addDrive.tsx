@@ -187,14 +187,23 @@ export const AddDrive = () => {
 
         <div className="flex items-center gap-3">
           {isPreviewMode ? (
-            <button
-              type="button"
-              onClick={() => setIsPreviewMode(false)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-4 py-2 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50"
-            >
-              <Pencil size={15} />
-              Edit
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => setIsPreviewMode(false)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-4 py-2 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50"
+              >
+                <Pencil size={15} />
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveDrive}
+                className="rounded-lg bg-cyan-500 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
+              >
+                Save Drive
+              </button>
+            </>
           ) : (
             <>
               <button
@@ -230,7 +239,7 @@ export const AddDrive = () => {
           {/* Section 1: Company & Drive Information Preview */}
           <section className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-base font-bold text-cyan-500 sm:text-[17px]">
-              1. Company &amp; Drive Information
+              Company &amp; Drive Information
             </h2>
             <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
               <div className="lg:col-span-4">
@@ -346,8 +355,16 @@ export const AddDrive = () => {
             </section>
           ))}
 
-          {/* Footer Save Button */}
-          <div className="flex justify-end pt-2">
+          {/* Footer Action Buttons */}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setIsPreviewMode(false)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-5 py-2.5 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50"
+            >
+              <Pencil size={15} />
+              Edit
+            </button>
             <button
               type="button"
               onClick={handleSaveDrive}
@@ -363,7 +380,7 @@ export const AddDrive = () => {
           {/* Card 1: Company & Drive Information */}
           <section className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="text-base font-bold text-cyan-500 sm:text-[17px]">
-              1. Company &amp; Drive Information
+              Company &amp; Drive Information
             </h2>
 
             {/* Row 1: Company Name | Company Website | About Company (rowspan 2) */}
@@ -696,23 +713,70 @@ function SelectField({
   label: string; options: string[]; required?: boolean;
   value?: string; onChange?: (value: string) => void; placeholder?: string;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <label className="block">
+    <div ref={dropdownRef} className="block">
       <FieldLabel label={label} required={required} />
       <div className="relative">
-        <select
-          value={value ?? ""}
-          onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-          className={`h-10 w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-9 text-xs outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 ${!value ? "text-slate-400" : "font-medium text-slate-700"}`}
+        <button
+          type="button"
+          onClick={() => setIsOpen((prev) => !prev)}
+          className={`flex h-10 w-full items-center justify-between rounded-lg border bg-white px-3 text-xs outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 ${
+            isOpen
+              ? "border-cyan-500 ring-2 ring-cyan-100"
+              : "border-slate-200 hover:border-slate-300"
+          }`}
         >
-          <option value="" disabled hidden>{placeholder}</option>
-          {options.map((opt) => (
-            <option key={opt} value={opt} className="text-slate-700">{opt}</option>
-          ))}
-        </select>
-        <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <span className={`truncate ${!value ? "text-slate-400" : "font-medium text-slate-700"}`}>
+            {value || placeholder}
+          </span>
+          <ChevronDown
+            size={14}
+            className={`pointer-events-none ml-1 shrink-0 text-slate-500 transition-transform duration-200 ${
+              isOpen ? "rotate-180 text-cyan-500" : ""
+            }`}
+          />
+        </button>
+
+        {isOpen && (
+          <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg">
+            {options.map((opt) => {
+              const isSelected = opt === value;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    onChange?.(opt);
+                    setIsOpen(false);
+                  }}
+                  className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition ${
+                    isSelected
+                      ? "bg-cyan-50 font-bold text-cyan-600"
+                      : "font-medium text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <span className="truncate">{opt}</span>
+                  {isSelected && <Check size={13} className="ml-2 shrink-0 text-cyan-500" />}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
-    </label>
+    </div>
   );
 }
 
