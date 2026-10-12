@@ -1,12 +1,9 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-import authReducer from './slices/authSlice';
+import { configureStore } from '@reduxjs/toolkit';
 
-const rootReducer = combineReducers({
-  auth: authReducer,
-});
-
+// Login API removed: no auth state, no backend slices. The store is kept
+// (Provider wiring in main.tsx) so future slices have a home.
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: {},
 });
 
 export type RootState = ReturnType<typeof store.getState>;
