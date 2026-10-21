@@ -14,6 +14,7 @@ import { AnnouncementsRoute } from "./components/announcementsRoute";
 import { Reports } from "./components/reports";
 import { StatusTracker } from "./components/statusTracker";
 import { RoleProvider } from "./context/roleProvider";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 import { ApplicationDetailRoute } from "./components/student/applications/ApplicationDetailRoute";
 import { StudentApplicationDetailRoute } from "./components/student/applications/StudentApplicationDetailRoute";
@@ -27,9 +28,11 @@ import { StudentProfile } from "./components/student/profile/StudentProfile";
 
 function AppLayout() {
   return (
-    <RoleProvider>
-      <Outlet />
-    </RoleProvider>
+    <ErrorBoundary level="app">
+      <RoleProvider>
+        <Outlet />
+      </RoleProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -142,6 +145,14 @@ export const router = createBrowserRouter([
                 element: <StudentResume />,
               },
             ],
+          },
+          {
+            path: "add_drives",
+            element: <Navigate to="/dashboard/add_drives" replace />,
+          },
+          {
+            path: "campusdrive",
+            element: <Navigate to="/dashboard/campusdrive" replace />,
           },
         ],
       },

@@ -179,32 +179,41 @@ export function SkillsCard({
   };
 
   const handleModalConfirm = () => {
-    const skill = modalSkill.trim();
-    const category = modalCategory.trim();
-    const department = modalDepartment.trim();
-    if (!skill || !category || !department) {
-      setModalError("Department, Category and Skill are required.");
-      return;
-    }
-    if (allSkills.some((sk) => sk.name.toLowerCase() === skill.toLowerCase())) {
-      setModalError("Skill already exists in predefined list.");
-      return;
-    }
-    if (
-      profile.skillsList.some((s) => s.toLowerCase() === skill.toLowerCase())
-    ) {
-      setModalError("Skill already in your skills.");
-      return;
-    }
+    try {
+      const skill = modalSkill.trim();
+      const category = modalCategory.trim();
+      const department = modalDepartment.trim();
+      if (!skill || !category || !department) {
+        setModalError("Department, Category and Skill are required.");
+        return;
+      }
+      if (allSkills.some((sk) => sk.name.toLowerCase() === skill.toLowerCase())) {
+        setModalError("Skill already exists in predefined list.");
+        return;
+      }
+      if (
+        profile.skillsList.some((s) => s.toLowerCase() === skill.toLowerCase())
+      ) {
+        setModalError("Skill already in your skills.");
+        return;
+      }
 
-    setCustomSkills((prev) => [...prev, { name: skill, icon: "⭐", category }]);
-    onProfileChange((prev) => ({
-      ...prev,
-      skillsList: [...prev.skillsList, skill],
-    }));
-    onNotice(`Added skill: ${skill}`);
-    setSkillInput("");
-    closeModal();
+      setCustomSkills((prev) => [...prev, { name: skill, icon: "⭐", category }]);
+      onProfileChange((prev) => ({
+        ...prev,
+        skillsList: [...prev.skillsList, skill],
+      }));
+      onNotice(`Added skill: ${skill}`);
+      setSkillInput("");
+      closeModal();
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error("[SkillsCard.handleModalConfirm failed]:", err);
+      }
+      setModalError(
+        err instanceof Error ? err.message : "Failed to add skill. Please try again."
+      );
+    }
   };
 
   const filteredSkills = allSkills.filter((sk) => {

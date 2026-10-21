@@ -129,8 +129,39 @@ export const AddDrive = () => {
   };
 
   const handleSaveDrive = () => {
-    toast.success("Campus Drive saved successfully!");
-    navigate("/dashboard/campusdrive");
+    try {
+      if (!companyName.trim()) {
+        toast.error("Company Name is required.");
+        return;
+      }
+      if (!driveDate) {
+        toast.error("Drive Date is required.");
+        return;
+      }
+      if (!driveTime) {
+        toast.error("Drive Time is required.");
+        return;
+      }
+      if (!venue.trim()) {
+        toast.error("Venue is required.");
+        return;
+      }
+      const missingRole = roleSections.find((r) => !r.jobRole.trim());
+      if (missingRole) {
+        toast.error("Job Role is required for all role sections.");
+        return;
+      }
+
+      toast.success("Campus Drive saved successfully!");
+      navigate("/dashboard/campusdrive");
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error("[addDrive.handleSaveDrive failed]:", err);
+      }
+      toast.error(
+        err instanceof Error ? err.message : "Failed to save drive. Please try again."
+      );
+    }
   };
 
   return (
@@ -492,14 +523,33 @@ function RoleSectionCard({
   onAddAnother: () => void;
 }) {
   const handleJdFileChange = (file: File | undefined) => {
-    const isPdf = file?.type === "application/pdf" || file?.name.toLowerCase().endsWith(".pdf");
-    if (!file || !isPdf) return;
-    const jdFile: JdFile = {
-      name: file.name,
-      size: `${Math.max(file.size / 1024, 1).toFixed(0)} KB`,
-      url: URL.createObjectURL(file),
-    };
-    onUpdate({ jdFile });
+    if (!file) return;
+
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      toast.error("Only PDF files are allowed for Job Description.");
+      return;
+    }
+
+    const maxSizeBytes = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSizeBytes) {
+      toast.error("Job description PDF must be smaller than 10MB.");
+      return;
+    }
+
+    try {
+      const jdFile: JdFile = {
+        name: file.name,
+        size: `${Math.max(file.size / 1024, 1).toFixed(0)} KB`,
+        url: URL.createObjectURL(file),
+      };
+      onUpdate({ jdFile });
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error("[addDrive.handleJdFileChange failed]:", err);
+      }
+      toast.error("Failed to load the selected PDF file. Please try again.");
+    }
   };
 
   const removeJdFile = () => {
@@ -946,6 +996,7 @@ function JobDescriptionEditor({
   onRemoveFile: () => void;
 }) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const showPreview = Boolean(file && previewUrl === file.url);
 
   return (
@@ -977,13 +1028,26 @@ function JobDescriptionEditor({
             className="h-[92px] w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
           />
           <div className="mt-2.5 flex flex-wrap items-center gap-3">
-            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-3.5 py-1.5 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-3.5 py-1.5 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50"
+            >
               <Upload size={14} />
               Upload JD PDF
-              <input type="file" accept="application/pdf,.pdf" className="sr-only"
-                onChange={(e) => { onFileChange(e.target.files?.[0]); e.currentTarget.value = ""; }}
-              />
-            </label>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/pdf,.pdf"
+              className="hidden"
+              tabIndex={-1}
+              aria-hidden="true"
+              onChange={(e) => {
+                onFileChange(e.target.files?.[0]);
+                e.currentTarget.value = "";
+              }}
+            />
             <span className="text-xs text-slate-500">Choose either typed text or one PDF upload.</span>
           </div>
         </>

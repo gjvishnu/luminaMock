@@ -226,6 +226,11 @@ export function UserManagement() {
       setModalError("Email and password are required.");
       return;
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setModalError("Please enter a valid email address.");
+      return;
+    }
     if (password.length < 4) {
       setModalError("Password must be at least 4 characters.");
       return;
@@ -236,6 +241,15 @@ export function UserManagement() {
     }
     if (combinedUsers.some((u) => u.email.toLowerCase() === trimmedEmail.toLowerCase())) {
       setModalError("A user with this email already exists.");
+      return;
+    }
+    if (
+      selectedRole === "STUDENT" &&
+      combinedUsers.some(
+        (u) => u.regno && u.regno.trim().toLowerCase() === trimmedRegno.toLowerCase()
+      )
+    ) {
+      setModalError("A student with this register number already exists.");
       return;
     }
 
@@ -263,6 +277,13 @@ export function UserManagement() {
       setPassword("");
       setRegno("");
       setSelectedRole("STUDENT");
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error("[userManagement.handleCreateUser failed]:", err);
+      }
+      setModalError(
+        err instanceof Error ? err.message : "Failed to create user. Please try again."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -285,6 +306,13 @@ export function UserManagement() {
       setSkillCategory("");
       setSkillName("");
       setSkillDomain("");
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error("[userManagement.handleAddSkill failed]:", err);
+      }
+      setSkillError(
+        err instanceof Error ? err.message : "Failed to add skill. Please try again."
+      );
     } finally {
       setSkillSubmitting(false);
     }
@@ -305,6 +333,13 @@ export function UserManagement() {
       setIsDepartmentModalOpen(false);
       setDepartmentName("");
       setDepartmentDomain("");
+    } catch (err) {
+      if (import.meta.env.DEV) {
+        console.error("[userManagement.handleAddDepartment failed]:", err);
+      }
+      setDepartmentError(
+        err instanceof Error ? err.message : "Failed to add department. Please try again."
+      );
     } finally {
       setDepartmentSubmitting(false);
     }
