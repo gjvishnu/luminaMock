@@ -258,7 +258,7 @@ export const CampusDrive = () => {
   
   <button
     type="button"
-    onClick={() => navigate("/add_drives")}
+    onClick={() => navigate("/dashboard/add_drives")}
     className="inline-flex h-9 items-center gap-1.5 rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
   >
     <CalendarDays size={14} />
@@ -1324,11 +1324,11 @@ const Table = ()=>{
         {drives.map((drive) => (
           <tr
             key={drive.company}
-            onClick={() => navigate(`/campusdrive/${drive.company.toLowerCase()}`)}
+            onClick={() => navigate(`/dashboard/campusdrive/${drive.company.toLowerCase()}`)}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                navigate(`/campusdrive/${drive.company.toLowerCase()}`);
+                navigate(`/dashboard/campusdrive/${drive.company.toLowerCase()}`);
               }
             }}
             tabIndex={0}

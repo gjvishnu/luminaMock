@@ -16,7 +16,7 @@ import {
   Underline,
   Upload,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type Channel = "Email" | "SMS / Text Message" | "WhatsApp" | "In-App Notification";
 
@@ -48,6 +48,7 @@ export const Announcements = () => {
   const [channels, setChannels] = useState<Channel[]>(["Email", "SMS / Text Message", "WhatsApp"]);
   const [attachments, setAttachments] = useState(initialAttachments);
   const [notice, setNotice] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const toggleChannel = (channel: Channel) => {
     setChannels((selected) => selected.includes(channel) ? selected.filter((item) => item !== channel) : [...selected, channel]);
@@ -55,6 +56,44 @@ export const Announcements = () => {
 
   const updateAttachment = (file: Attachment) => {
     setAttachments((current) => [...current, file]);
+  };
+
+  const handleSaveDraft = () => {
+    try {
+      if (!title.trim()) {
+        setNotice("Please enter an announcement title before saving as draft.");
+        return;
+      }
+      setNotice("Announcement saved as draft.");
+    } catch (err) {
+      if (import.meta.env.DEV) console.error("[announcements.handleSaveDraft failed]:", err);
+      setNotice("Failed to save draft. Please try again.");
+    }
+  };
+
+  const handleSendAnnouncement = () => {
+    try {
+      if (!title.trim() && !message.trim()) {
+        setNotice("Please enter an announcement title and message before sending.");
+        return;
+      }
+      if (!title.trim()) {
+        setNotice("Please enter an announcement title.");
+        return;
+      }
+      if (!message.trim()) {
+        setNotice("Please enter an announcement message.");
+        return;
+      }
+      if (channels.length === 0) {
+        setNotice("Please select at least one delivery channel.");
+        return;
+      }
+      setNotice("Announcement is ready to send.");
+    } catch (err) {
+      if (import.meta.env.DEV) console.error("[announcements.handleSendAnnouncement failed]:", err);
+      setNotice("Failed to send announcement. Please try again.");
+    }
   };
 
   return (
@@ -65,8 +104,8 @@ export const Announcements = () => {
           <p className="mt-1 text-xs text-slate-500">Share important updates with students and keep everyone informed.</p>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => setNotice("Announcement saved as draft.")} className="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">Save as Draft</button>
-          <button type="button" onClick={() => setNotice("Announcement is ready to send.")} className="inline-flex h-9 items-center gap-1.5 rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"><Send size={14} /> Send Announcement</button>
+          <button type="button" onClick={handleSaveDraft} className="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">Save as Draft</button>
+          <button type="button" onClick={handleSendAnnouncement} className="inline-flex h-9 items-center gap-1.5 rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"><Send size={14} /> Send Announcement</button>
         </div>
       </div>
 
@@ -88,15 +127,15 @@ export const Announcements = () => {
             </div>
             <div className="mt-3">
               <FieldLabel label="Attach Files (Optional)" />
-              <label className="flex h-[68px] cursor-pointer items-center justify-center gap-3 rounded-md border border-dashed border-cyan-200 bg-cyan-50/10 px-3 text-center transition hover:bg-cyan-50/40">
+              <div onClick={() => fileInputRef.current?.click()} className="flex h-[68px] cursor-pointer items-center justify-center gap-3 rounded-md border border-dashed border-cyan-200 bg-cyan-50/10 px-3 text-center transition hover:bg-cyan-50/40">
                 <Upload size={18} className="text-cyan-500" />
                 <span className="text-xs text-slate-600">Drag &amp; drop files here or</span>
                 <span className="rounded-md border border-cyan-300 bg-white px-4 py-1.5 text-xs font-semibold text-cyan-600">Browse Files</span>
-                <input type="file" multiple className="sr-only" onChange={(event) => {
+                <input ref={fileInputRef} type="file" multiple className="hidden" tabIndex={-1} aria-hidden="true" onChange={(event) => {
                   Array.from(event.target.files ?? []).forEach((file) => updateAttachment({ name: file.name, size: `${Math.max(file.size / 1024, 1).toFixed(0)} KB`, type: file.name.endsWith(".docx") ? "doc" : "pdf" }));
                   event.currentTarget.value = "";
                 }} />
-              </label>
+              </div>
               <p className="mt-1.5 text-[10px] text-slate-500">Allowed files: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, JPG, PNG (Max 10MB each)</p>
             </div>
           </section>

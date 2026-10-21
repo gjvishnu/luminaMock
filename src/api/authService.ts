@@ -1,7 +1,9 @@
 import axios from "axios";
+import { ApiError, parseApiError } from "./apiError";
 
 const api = axios.create({
   withCredentials: true,
+  timeout: 10000,
 });
 
 /**
@@ -39,9 +41,31 @@ export type LoginResponse = {
 export async function login(
   credentials: LoginCredentials,
 ): Promise<LoginResponse> {
-  const { data } = await api.post<LoginResponse>("/login", credentials, {
-    baseURL: USER_SERVICE_ORIGIN,
-  });
+  const trimmedEmail = credentials?.email?.trim();
+  const password = credentials?.password;
 
-  return data;
+  if (!trimmedEmail || !password) {
+    throw new ApiError(400, "Email and password are required.");
+  }
+
+  try {
+    const { data } = await api.post<LoginResponse>(
+      "/login",
+      { email: trimmedEmail, password },
+      {
+        baseURL: USER_SERVICE_ORIGIN,
+      }
+    );
+
+    if (!data || typeof data !== "object") {
+      throw new ApiError(500, "Received an unexpected response from the server.");
+    }
+
+    return data;
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("[authService.login failed]:", error);
+    }
+    throw parseApiError(error);
+  }
 }
