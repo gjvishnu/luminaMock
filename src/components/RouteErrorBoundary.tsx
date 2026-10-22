@@ -1,6 +1,6 @@
 import { Suspense, lazy, useMemo, useState, type ComponentType } from "react";
 import { useLocation } from "react-router-dom";
-import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundary } from "./ErrorBoundary";
 import { PageError } from "./PageError";
 import { PageFallback } from "./PageFallback";
 
@@ -11,10 +11,9 @@ type LazyModule = { default: ComponentType<Record<string, never>> };
  * chunk-error fallback.
  *
  * Two failure modes are handled (both bite without this):
- * 1. Stuck fallback across pages — react-error-boundary keeps showing its
- *    fallback until reset. React reuses the same boundary instance across
- *    route changes, so without `resetKeys` the error screen from page A
- *    would linger on page B. Keying on the pathname auto-resets on nav.
+ * 1. Stuck fallback across pages — the boundary is keyed on `pathname`, so
+ *    navigating away unmounts/remounts it and an error screen from page A
+ *    can never linger on page B.
  * 2. Stale rejected import — React.lazy() caches the first import result,
  *    so a failed chunk stays rejected even after reset. Bumping `retryKey`
  *    on Try Again re-creates the lazy component, forcing a fresh import().
@@ -29,14 +28,16 @@ export const lazyRoute = (loader: () => Promise<LazyModule>) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const LazyComponent = useMemo(() => lazy(loader), [retryKey]);
 
+    // key={pathname}: unmount/remount on navigation resets the boundary,
+    // so errors never stick across pages.
     return (
       <ErrorBoundary
-        resetKeys={[pathname, retryKey]}
-        FallbackComponent={({ resetErrorBoundary }) => (
+        key={pathname}
+        fallback={({ reset }) => (
           <PageError
             onRetry={() => {
               setRetryKey((key) => key + 1);
-              resetErrorBoundary();
+              reset();
             }}
           />
         )}
