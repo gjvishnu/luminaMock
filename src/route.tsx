@@ -1,29 +1,31 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 
 import { Home } from "./pages/home";
-import { Dashboard } from "./components/dashboard";
-import { Students } from "./components/students";
-import { UserManagement } from "./components/userManagement";
 import { RouterError } from "./components/routerError";
-import { CampusDrive } from "./components/campusDrive";
-import { DriveDetails } from "./components/driveDetails";
-import { JDRecommendation } from "./components/jdRecommendation";
-import { DriveStudents } from "./components/driveStudents";
-import { AddDrive } from "./components/addDrive";
-import { AnnouncementsRoute } from "./components/announcementsRoute";
-import { Reports } from "./components/reports";
-import { StatusTracker } from "./components/statusTracker";
 import { RoleProvider } from "./context/roleProvider";
 
-import { ApplicationDetailRoute } from "./components/student/applications/ApplicationDetailRoute";
-import { StudentApplicationDetailRoute } from "./components/student/applications/StudentApplicationDetailRoute";
-import { StudentApplications } from "./components/student/applications/StudentApplications";
-import { StudentJobDetails } from "./components/student/jobs/StudentJobDetails";
-import { StudentJobs } from "./components/student/jobs/StudentJobs";
-import { StudentApplicationDetails } from "./components/student/misc/StudentApplicationDetails";
-import { StudentDetails } from "./components/student/misc/StudentDetails";
-import { StudentResume } from "./components/student/misc/StudentResume";
-import { StudentProfile } from "./components/student/profile/StudentProfile";
+import {
+  AddDriveElement,
+  AnnouncementsElement,
+  ApplicationDetailElement,
+  CampusDriveElement,
+  DashboardElement,
+  DriveDetailsElement,
+  DriveStudentsElement,
+  JdRecommendationElement,
+  ReportsElement,
+  StatusTrackerElement,
+  StudentApplicationDetailElement,
+  StudentApplicationDetailsElement,
+  StudentApplicationsElement,
+  StudentDetailsElement,
+  StudentJobDetailsElement,
+  StudentJobsElement,
+  StudentProfileElement,
+  StudentResumeElement,
+  StudentsElement,
+  UserManagementElement,
+} from "./components/lazyRoutes";
 
 function AppLayout() {
   return (
@@ -51,11 +53,11 @@ export const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <Dashboard />,
+                element: DashboardElement,
               },
               {
                 path: "actions",
-                element: <UserManagement />,
+                element: UserManagementElement,
               },
               {
                 path: "user-management",
@@ -63,83 +65,83 @@ export const router = createBrowserRouter([
               },
               {
                 path: "students",
-                element: <Students />,
+                element: StudentsElement,
               },
               {
                 path: "students/:studentId",
-                element: <StudentDetails />,
+                element: StudentDetailsElement,
               },
               {
                 path: "students/:studentId/applications",
-                element: <StudentApplicationDetails />,
+                element: StudentApplicationDetailsElement,
               },
               {
                 path: "students/:studentId/applications/:applicationId",
-                element: <StudentApplicationDetailRoute />,
+                element: StudentApplicationDetailElement,
               },
               {
                 path: "campusdrive",
-                element: <CampusDrive />,
+                element: CampusDriveElement,
               },
               {
                 path: "campusdrive/:driveId",
-                element: <DriveDetails />,
+                element: DriveDetailsElement,
               },
               {
                 path: "jdrecommendation",
-                element: <JDRecommendation />,
+                element: JdRecommendationElement,
               },
               {
                 path: "jdrecommendation/:driveId/students",
-                element: <DriveStudents />,
+                element: DriveStudentsElement,
               },
               {
                 path: "jdrecommendation/students",
-                element: <DriveStudents />,
+                element: DriveStudentsElement,
               },
               {
                 path: "add_drives",
-                element: <AddDrive />,
+                element: AddDriveElement,
               },
               {
                 path: "announcements",
-                element: <AnnouncementsRoute />,
+                element: AnnouncementsElement,
               },
               {
                 path: "reports",
-                element: <Reports />,
+                element: ReportsElement,
               },
               {
                 path: "status-tracker",
-                element: <StatusTracker />,
+                element: StatusTrackerElement,
               },
               {
                 path: "status-tracker/:driveId",
-                element: <StatusTracker />,
+                element: StatusTrackerElement,
               },
               {
                 path: "jobs",
-                element: <StudentJobs />,
+                element: StudentJobsElement,
               },
               {
                 path: "jobs/:jobId",
-                element: <StudentJobDetails />,
+                element: StudentJobDetailsElement,
               },
               {
                 path: "applications",
-                element: <StudentApplications />,
+                element: StudentApplicationsElement,
               },
               {
                 path: "applications/:applicationId",
-                element: <ApplicationDetailRoute />,
+                element: ApplicationDetailElement,
               },
               {
                 path: "profile",
-                element: <StudentProfile />,
+                element: StudentProfileElement,
               },
               {
                 path: "resume",
-                element: <StudentResume />,
+                element: StudentResumeElement,
               },
             ],
           },
