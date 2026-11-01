@@ -130,7 +130,7 @@ export const AddDrive = () => {
 
   const handleSaveDrive = () => {
     toast.success("Campus Drive saved successfully!");
-    navigate("/dashboard/campusdrive");
+    navigate("/campusdrive");
   };
 
   return (
@@ -139,7 +139,7 @@ export const AddDrive = () => {
       <div className="flex items-center gap-2 text-xs">
         <button
           type="button"
-          onClick={() => navigate("/dashboard/campusdrive")}
+          onClick={() => navigate("/campusdrive")}
           className="flex items-center text-cyan-500 hover:opacity-80 transition"
           aria-label="Home"
         >
@@ -148,7 +148,7 @@ export const AddDrive = () => {
         <ChevronRight size={13} className="text-slate-300" />
         <button
           type="button"
-          onClick={() => navigate("/dashboard/campusdrive")}
+          onClick={() => navigate("/campusdrive")}
           className="text-slate-400 hover:text-slate-600 transition"
         >
           Applications
@@ -216,7 +216,7 @@ export const AddDrive = () => {
               </button>
               <button
                 type="button"
-                onClick={() => navigate("/dashboard/campusdrive")}
+                onClick={() => navigate("/campusdrive")}
                 className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
               >
                 Cancel

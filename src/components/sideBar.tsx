@@ -1,7 +1,6 @@
 import {
   BarChart3,
   BriefcaseBusiness,
-  Building2,
   CalendarDays,
   CirclePlus,
   ClipboardList,
@@ -29,27 +28,6 @@ type MenuSection = {
   items: MenuItem[];
 };
 
-const adminMenuSections: MenuSection[] = [
-  {
-    title: "MAIN",
-    items: [
-      { label: "Dashboard", icon: LayoutDashboard, route: "dashboard" },
-      { label: "Jobs & Drives", icon: BriefcaseBusiness, route: "campusdrive" },
-      { label: "Applications", icon: ClipboardList, route: "applications" },
-      { label: "Students", icon: Users, route: "students" },
-      { label: "Companies", icon: Building2, route: "jdrecommendation" },
-      { label: "Reports", icon: BarChart3, route: "reports" },
-    ],
-  },
-  {
-    title: "MANAGEMENT",
-    items: [
-      { label: "Actions", icon: UserCheck, route: "actions" },
-      { label: "Announcements", icon: Megaphone, route: "announcements" },
-    ],
-  },
-];
-
 const officerMenuSections: MenuSection[] = [
   {
     title: "MAIN",
@@ -70,6 +48,18 @@ const officerMenuSections: MenuSection[] = [
     ],
   },
 ];
+
+const adminMenuSections: MenuSection[] = officerMenuSections.map((section) =>
+  section.title === "ACTIONS"
+    ? {
+        ...section,
+        items: [
+          { label: "Actions", icon: UserCheck, route: "actions" },
+          ...section.items,
+        ],
+      }
+    : section,
+);
 
 const studentMenuSections: MenuSection[] = [
   {
@@ -98,17 +88,15 @@ export const Sidebar = ({ onClose }: SidebarProps) => {
     if (route === "dashboard") {
       return current === "/dashboard" || current === "";
     }
-    const dashboardRoute = `/dashboard/${route}`;
+    const routePath = `/${route}`;
     return (
-      current === dashboardRoute ||
-      current.startsWith(`${dashboardRoute}/`) ||
-      current === `/${route}` ||
-      current.startsWith(`/${route}/`)
+      current === routePath ||
+      current.startsWith(`${routePath}/`)
     );
   };
 
   const handleNavigate = (route: string) => {
-    const target = route === "dashboard" ? "/dashboard" : `/dashboard/${route}`;
+    const target = route === "dashboard" ? "/dashboard" : `/${route}`;
     navigate(target);
     onClose?.();
   };

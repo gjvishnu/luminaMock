@@ -15,12 +15,12 @@ test('root redirects straight to the dashboard', async ({ page }) => {
 test('all main sections render without login', async ({ page }) => {
   const sections = [
     '/dashboard',
-    '/dashboard/actions',
-    '/dashboard/students',
-    '/dashboard/campusdrive',
-    '/dashboard/jdrecommendation',
-    '/dashboard/reports',
-    '/dashboard/profile',
+    '/actions',
+    '/students',
+    '/campusdrive',
+    '/jdrecommendation',
+    '/reports',
+    '/profile',
   ];
 
   for (const route of sections) {
