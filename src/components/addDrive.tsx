@@ -8,15 +8,34 @@ import {
   Eye,
   FileText,
   Home,
+  LoaderCircle,
+  MapPin,
   Pencil,
   Plus,
+  Search,
   Trash2,
   Upload,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import {
+  type CompanyRecord,
+  type CreateDriveRequest,
+  type DepartmentRecord,
+  type DriveJobType,
+  type DriveStatus,
+  type SelectionProcess,
+  type SkillRecord,
+  useCreateCompanyMutation,
+  useCreateDepartmentMutation,
+  useCreateDriveMutation,
+  useCreateSkillMutation,
+  useGetCompaniesQuery,
+  useGetDepartmentsQuery,
+  useGetSkillsQuery,
+} from "../redux/api";
 
 type JdFile = {
   name: string;
@@ -47,17 +66,21 @@ type RoleSection = {
   selectionProcesses: string[];
 };
 
-const departmentOptions = ["CSE", "ECE", "EEE", "IT", "MECH", "CIVIL"];
-const jobTypeOptions = ["Full Time", "Internship", "Contract"];
+type CatalogModalKind = "skill" | "department";
+
+const jobTypeOptions = ["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT", "APPRENTICESHIP"];
 const batchOptions = ["2026", "2025", "2024", "2023"];
-const degreeOptions = ["B.E / B.Tech", "BCA", "MCA", "B.Sc", "Any Degree"];
-const driveStatusOptions = ["Upcoming", "Registration Open", "Ongoing", "Completed"];
-const skillOptions = [
-  "JavaScript", "TypeScript", "React", "Node.js", "Python",
-  "Java", "SQL", "Git", "AWS", "Figma",
-];
+const driveStatusOptions = ["DRAFT", "UPCOMING", "ONGOING"];
 const selectionProcessOptions = [
-  "Aptitude", "Technical", "GD", "HR Interview", "Coding Round",
+  "ONLINE_ASSESSMENT",
+  "APTITUDE_TEST",
+  "TECHNICAL_TEST",
+  "GROUP_DISCUSSION",
+  "TECHNICAL_INTERVIEW",
+  "HR_INTERVIEW",
+  "MANAGERIAL_INTERVIEW",
+  "CASE_STUDY",
+  "CODING_ROUND",
 ];
 
 const defaultRoleSection = (): RoleSection => ({
@@ -79,11 +102,45 @@ const defaultRoleSection = (): RoleSection => ({
   selectionProcesses: [],
 });
 
+function getCompanyId(company: CompanyRecord) {
+  return String(company.companyUuid ?? company.companyId ?? company.id ?? "");
+}
+
+function getCatalogRecordId(record: SkillRecord | DepartmentRecord) {
+  return String("skill" in record
+    ? record.skillUuid ?? record.skillId ?? record.id ?? ""
+    : record.departmentUuid ?? record.departmentId ?? record.id ?? "");
+}
+
+function getCatalogRecordLabel(record: SkillRecord | DepartmentRecord) {
+  return "skill" in record ? record.skill : record.name;
+}
+
+function formatCatalogValues(values: string[], options: (SkillRecord | DepartmentRecord)[]) {
+  return values.map((value) => {
+    const option = options.find((item) => getCatalogRecordId(item) === value);
+    return option ? getCatalogRecordLabel(option) : value;
+  }).join(", ");
+}
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (typeof error === "object" && error !== null && "data" in error) {
+    const data = (error as { data?: { message?: string } | string }).data;
+    if (typeof data === "string") return data;
+    if (data?.message) return data.message;
+  }
+
+  return fallback;
+}
+
+type FieldErrors = Record<string, string>;
+
 export const AddDrive = () => {
   const navigate = useNavigate();
   const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   // Card 1: Company & Drive Information
+  const [companyId, setCompanyId] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [companyWebsite, setCompanyWebsite] = useState("");
   const [aboutCompany, setAboutCompany] = useState("");
@@ -92,6 +149,28 @@ export const AddDrive = () => {
   const [venue, setVenue] = useState("");
   const [registrationEndDate, setRegistrationEndDate] = useState("");
   const [driveStatus, setDriveStatus] = useState("");
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [newCompanyWebsite, setNewCompanyWebsite] = useState("");
+  const [newCompanyLocation, setNewCompanyLocation] = useState("");
+  const [companyModalError, setCompanyModalError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+
+  const companiesQuery = useGetCompaniesQuery();
+  const departmentsQuery = useGetDepartmentsQuery();
+  const skillsQuery = useGetSkillsQuery();
+  const [createCompany, { isLoading: isCreatingCompany }] = useCreateCompanyMutation();
+  const [createDepartment, { isLoading: isCreatingDepartment }] = useCreateDepartmentMutation();
+  const [createDrive, { isLoading: isCreatingDrive }] = useCreateDriveMutation();
+  const [createSkill, { isLoading: isCreatingSkill }] = useCreateSkillMutation();
+  const companies = companiesQuery.data ?? [];
+  const departments = departmentsQuery.data ?? [];
+  const skills = skillsQuery.data ?? [];
+  const [catalogModal, setCatalogModal] = useState<CatalogModalKind | null>(null);
+  const [catalogName, setCatalogName] = useState("");
+  const [catalogCategory, setCatalogCategory] = useState("");
+  const [catalogDomain, setCatalogDomain] = useState("");
+  const [catalogError, setCatalogError] = useState<string | null>(null);
 
   // Multiple role sections (each has Job Role Info + Eligibility + Role Details)
   const [roleSections, setRoleSections] = useState<RoleSection[]>([
@@ -128,9 +207,159 @@ export const AddDrive = () => {
     );
   };
 
-  const handleSaveDrive = () => {
-    toast.success("Campus Drive saved successfully!");
-    navigate("/campusdrive");
+  const clearFieldError = (field: string) => {
+    setFieldErrors((previous) => {
+      if (!previous[field]) return previous;
+      const next = { ...previous };
+      delete next[field];
+      return next;
+    });
+  };
+
+  const handleCompanySelect = (company: CompanyRecord) => {
+    setCompanyId(getCompanyId(company));
+    setCompanyName(company.name);
+    setCompanyWebsite(company.website ?? "");
+    clearFieldError("companyId");
+  };
+
+  const handleCreateCompany = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCompanyModalError(null);
+
+    try {
+      const company = await createCompany({
+        name: newCompanyName.trim(),
+        website: newCompanyWebsite.trim(),
+        location: newCompanyLocation.trim(),
+      }).unwrap();
+
+      handleCompanySelect(company);
+      setNewCompanyName("");
+      setNewCompanyWebsite("");
+      setNewCompanyLocation("");
+      setIsCompanyModalOpen(false);
+      toast.success("Company added and selected.");
+    } catch (error) {
+      const data = typeof error === "object" && error !== null && "data" in error
+        ? (error as { data?: { message?: string } | string }).data
+        : undefined;
+      setCompanyModalError(typeof data === "string" ? data : data?.message ?? "Unable to add company. Please try again.");
+    }
+  };
+
+  const openCatalogModal = (kind: CatalogModalKind) => {
+    setCatalogModal(kind);
+    setCatalogName("");
+    setCatalogCategory("");
+    setCatalogDomain("");
+    setCatalogError(null);
+  };
+
+  const closeCatalogModal = () => {
+    setCatalogModal(null);
+    setCatalogError(null);
+  };
+
+  const handleCreateCatalogItem = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCatalogError(null);
+
+    try {
+      if (catalogModal === "skill") {
+        await createSkill({
+          skill: catalogName.trim(),
+          category: catalogCategory.trim(),
+          domain: catalogDomain.trim(),
+        }).unwrap();
+        toast.success("Skill added and available in the dropdown.");
+      } else if (catalogModal === "department") {
+        await createDepartment({ name: catalogName.trim() }).unwrap();
+        toast.success("Department added and available in the dropdown.");
+      }
+      closeCatalogModal();
+    } catch (error) {
+      const data = typeof error === "object" && error !== null && "data" in error
+        ? (error as { data?: { message?: string } | string }).data
+        : undefined;
+      setCatalogError(typeof data === "string" ? data : data?.message ?? "Unable to add this item. Please try again.");
+    }
+  };
+
+  const handleSaveDrive = async () => {
+    const validationErrors: FieldErrors = {};
+    const addError = (field: string, message: string) => {
+      validationErrors[field] = message;
+    };
+
+    if (!companyId) addError("companyId", "Company is required.");
+    if (!driveDate) addError("driveDate", "Drive date is required.");
+    if (!driveTime) addError("driveTime", "Drive time is required.");
+    if (!venue.trim()) addError("venue", "Venue is required.");
+    if (!registrationEndDate) addError("registrationEndDate", "Registration end date is required.");
+    if (!driveStatus) addError("driveStatus", "Drive status is required.");
+
+    roleSections.forEach((role, index) => {
+      const prefix = roleSections.length > 1 ? `Role ${index + 1}: ` : "";
+      const field = (name: string) => `role:${role.id}.${name}`;
+      if (!role.jobRole.trim()) addError(field("jobRole"), `${prefix}Job role is required.`);
+      if (!role.jobLocation.trim()) addError(field("jobLocation"), `${prefix}Job location is required.`);
+      if (!role.jobType) addError(field("jobType"), `${prefix}Job type is required.`);
+      if (!role.ctc.trim()) addError(field("ctc"), `${prefix}CTC / package is required.`);
+      if (!role.openings || !Number.isInteger(Number(role.openings)) || Number(role.openings) <= 0) {
+        addError(field("openings"), `${prefix}Enter a valid number of openings.`);
+      }
+      if (role.departments.length === 0) addError(field("departments"), `${prefix}Select at least one department.`);
+      if (!role.batch || !Number.isFinite(Number(role.batch))) addError(field("batch"), `${prefix}Graduation year is required.`);
+      if (!role.minimumCgpa || !Number.isFinite(Number(role.minimumCgpa))) addError(field("minimumCgpa"), `${prefix}Enter a valid minimum CGPA.`);
+      if (!role.maximumBacklogs || !Number.isFinite(Number(role.maximumBacklogs))) addError(field("maximumBacklogs"), `${prefix}Enter maximum backlogs.`);
+      if (!role.degree.trim()) addError(field("degree"), `${prefix}Degree is required.`);
+      if (role.selectionProcesses.length === 0) addError(field("selectionProcesses"), `${prefix}Select at least one selection process.`);
+      if (role.skills.length === 0) addError(field("skills"), `${prefix}Select at least one skill.`);
+    });
+
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
+      if (isPreviewMode) setIsPreviewMode(false);
+      toast.error("Please complete the highlighted fields.");
+      return;
+    }
+
+    setFieldErrors({});
+
+    const payload: CreateDriveRequest = {
+      companyId,
+      driveDate: `${driveDate}T00:00:00.000Z`,
+      driveTime,
+      venue: venue.trim(),
+      registrationEndDate: `${registrationEndDate}T00:00:00.000Z`,
+      status: driveStatus as DriveStatus,
+      roles: roleSections.map((role) => ({
+        jobRole: role.jobRole.trim(),
+        jobLocation: role.jobLocation.trim(),
+        jobType: role.jobType as DriveJobType,
+        ctcPackage: role.ctc.trim(),
+        numberOfOpenings: Number(role.openings),
+        departments: role.departments,
+        graduationYears: [Number(role.batch)],
+        minimumCgpa: Number(role.minimumCgpa),
+        maximumBacklogs: Number(role.maximumBacklogs),
+        degree: role.degree,
+        otherCriteria: role.otherCriteria.trim() ? [role.otherCriteria.trim()] : [],
+        jobDescription: role.jobDescription.trim() || undefined,
+        jdPdfUrl: null,
+        selectionProcesses: role.selectionProcesses as SelectionProcess[],
+        skillIds: role.skills,
+      })),
+    };
+
+    try {
+      await createDrive(payload).unwrap();
+      toast.success("Campus Drive saved successfully!");
+      navigate("/campusdrive");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Unable to save the campus drive. Please try again."));
+    }
   };
 
   return (
@@ -199,9 +428,10 @@ export const AddDrive = () => {
               <button
                 type="button"
                 onClick={handleSaveDrive}
-                className="rounded-lg bg-cyan-500 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
+                disabled={isCreatingDrive}
+                className="rounded-lg bg-cyan-500 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Save Drive
+                {isCreatingDrive ? "Saving..." : "Save Drive"}
               </button>
             </>
           ) : (
@@ -224,9 +454,10 @@ export const AddDrive = () => {
               <button
                 type="button"
                 onClick={handleSaveDrive}
-                className="rounded-lg bg-cyan-500 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
+                disabled={isCreatingDrive}
+                className="rounded-lg bg-cyan-500 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Save Drive
+                {isCreatingDrive ? "Saving..." : "Save Drive"}
               </button>
             </>
           )}
@@ -299,7 +530,7 @@ export const AddDrive = () => {
                   <PreviewField label="Job Location" value={role.jobLocation} />
                 </div>
                 <div className="md:col-span-2 lg:col-span-3">
-                  <PreviewField label="Skills Required" value={role.skills.length > 0 ? role.skills.join(", ") : ""} />
+                  <PreviewField label="Skills Required" value={formatCatalogValues(role.skills, skills)} />
                 </div>
               </div>
 
@@ -310,7 +541,7 @@ export const AddDrive = () => {
                 </h3>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <div>
-                    <PreviewField label="Departments" value={role.departments.length > 0 ? role.departments.join(", ") : ""} />
+                    <PreviewField label="Departments" value={formatCatalogValues(role.departments, departments)} />
                   </div>
                   <div>
                     <PreviewField label="Batch / Graduation Year" value={role.batch} />
@@ -347,7 +578,7 @@ export const AddDrive = () => {
                   <div className="lg:col-span-4">
                     <PreviewField
                       label="Selection Process"
-                      value={role.selectionProcesses.length > 0 ? role.selectionProcesses.join(", ") : ""}
+                      value={role.selectionProcesses.map((process, processIndex) => `Round ${processIndex + 1}: ${process}`).join(", ")}
                     />
                   </div>
                 </div>
@@ -368,9 +599,10 @@ export const AddDrive = () => {
             <button
               type="button"
               onClick={handleSaveDrive}
-              className="rounded-lg bg-cyan-500 px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
+              disabled={isCreatingDrive}
+              className="rounded-lg bg-cyan-500 px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Save Drive
+              {isCreatingDrive ? "Saving..." : "Save Drive"}
             </button>
           </div>
         </div>
@@ -386,7 +618,17 @@ export const AddDrive = () => {
             {/* Row 1: Company Name | Company Website | About Company (rowspan 2) */}
             <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
               <div className="lg:col-span-4">
-                <InputField label="Company Name" required placeholder="Enter company name" value={companyName} onChange={setCompanyName} />
+                <CompanyDropdown
+                  companies={companies}
+                  value={companyId}
+                  isLoading={companiesQuery.isLoading}
+                  onSelect={handleCompanySelect}
+                  error={fieldErrors.companyId}
+                  onAddCompany={() => {
+                    setCompanyModalError(null);
+                    setIsCompanyModalOpen(true);
+                  }}
+                />
               </div>
               <div className="lg:col-span-4">
                 <InputField label="Company Website" placeholder="https://" value={companyWebsite} onChange={setCompanyWebsite} />
@@ -405,26 +647,28 @@ export const AddDrive = () => {
 
               {/* Row 2: Drive Date | Drive Time */}
               <div className="lg:col-span-4">
-                <DateField label="Drive Date" required placeholder="Select date" value={driveDate} onChange={setDriveDate} />
+                <DateField label="Drive Date" required placeholder="Select date" value={driveDate} onChange={(value) => { setDriveDate(value); clearFieldError("driveDate"); }} error={fieldErrors.driveDate} />
               </div>
               <div className="lg:col-span-4">
-                <TimeField label="Drive Time" required placeholder="Select time" value={driveTime} onChange={setDriveTime} />
+                <TimeField label="Drive Time" required placeholder="Select time" value={driveTime} onChange={(value) => { setDriveTime(value); clearFieldError("driveTime"); }} error={fieldErrors.driveTime} />
               </div>
 
               {/* Row 3: Venue | Registration End Date | Drive Status */}
               <div className="lg:col-span-4">
-                <InputField label="Venue" required placeholder="Enter venue" value={venue} onChange={setVenue} />
+                <InputField label="Venue" required placeholder="Enter venue" value={venue} onChange={(value) => { setVenue(value); clearFieldError("venue"); }} error={fieldErrors.venue} />
               </div>
               <div className="lg:col-span-4">
-                <DateField label="Registration End Date" placeholder="Select date" value={registrationEndDate} onChange={setRegistrationEndDate} />
+                <DateField label="Registration End Date" required placeholder="Select date" value={registrationEndDate} onChange={(value) => { setRegistrationEndDate(value); clearFieldError("registrationEndDate"); }} error={fieldErrors.registrationEndDate} />
               </div>
               <div className="lg:col-span-2">
                 <SelectField
                   label="Drive Status"
+                  required
                   placeholder="Select an option"
                   options={driveStatusOptions}
                   value={driveStatus}
-                  onChange={setDriveStatus}
+                  onChange={(value) => { setDriveStatus(value); clearFieldError("driveStatus"); }}
+                  error={fieldErrors.driveStatus}
                 />
               </div>
             </div>
@@ -440,13 +684,123 @@ export const AddDrive = () => {
               onUpdate={(patch) => updateRole(role.id, patch)}
               onDelete={() => handleDeleteRole(role.id)}
               onAddAnother={handleAddRole}
+              skills={skills}
+              departments={departments}
+              skillsLoading={skillsQuery.isLoading}
+              departmentsLoading={departmentsQuery.isLoading}
+              onAddSkill={() => openCatalogModal("skill")}
+              onAddDepartment={() => openCatalogModal("department")}
+              errors={fieldErrors}
+              onClearError={clearFieldError}
             />
           ))}
         </div>
       )}
+
+      {isCompanyModalOpen && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-base font-bold text-slate-900">Add Company</h2>
+                <p className="mt-1 text-xs text-slate-500">Create a company and select it for this drive.</p>
+              </div>
+              <button type="button" onClick={() => setIsCompanyModalOpen(false)} aria-label="Close add company dialog" className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCompany} className="mt-6 space-y-4">
+              {companyModalError && <p role="alert" className="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-medium text-rose-600">{companyModalError}</p>}
+              <InputField label="Company Name" required placeholder="Enter company name" value={newCompanyName} onChange={setNewCompanyName} />
+              <InputField label="Company Website" placeholder="https://" value={newCompanyWebsite} onChange={setNewCompanyWebsite} />
+              <InputField label="Location" required placeholder="Enter company location" value={newCompanyLocation} onChange={setNewCompanyLocation} />
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setIsCompanyModalOpen(false)} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                <button type="submit" disabled={isCreatingCompany} className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60">
+                  {isCreatingCompany && <LoaderCircle size={14} className="animate-spin" />}
+                  {isCreatingCompany ? "Adding..." : "Add Company"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {catalogModal && (
+        <CatalogModal
+          kind={catalogModal}
+          name={catalogName}
+          category={catalogCategory}
+          domain={catalogDomain}
+          error={catalogError}
+          isLoading={catalogModal === "skill" ? isCreatingSkill : isCreatingDepartment}
+          onNameChange={setCatalogName}
+          onCategoryChange={setCatalogCategory}
+          onDomainChange={setCatalogDomain}
+          onClose={closeCatalogModal}
+          onSubmit={handleCreateCatalogItem}
+        />
+      )}
     </div>
   );
 };
+
+function CatalogModal({
+  kind,
+  name,
+  category,
+  domain,
+  error,
+  isLoading,
+  onNameChange,
+  onCategoryChange,
+  onDomainChange,
+  onClose,
+  onSubmit,
+}: {
+  kind: CatalogModalKind;
+  name: string;
+  category: string;
+  domain: string;
+  error: string | null;
+  isLoading: boolean;
+  onNameChange: (value: string) => void;
+  onCategoryChange: (value: string) => void;
+  onDomainChange: (value: string) => void;
+  onClose: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  const isSkill = kind === "skill";
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Add {isSkill ? "Skill" : "Department"}</h2>
+            <p className="mt-1 text-xs text-slate-500">Create a new catalog item for campus drive eligibility.</p>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close catalog dialog" className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X size={18} /></button>
+        </div>
+
+        <form onSubmit={onSubmit} className="mt-6 space-y-4">
+          {error && <p role="alert" className="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-medium text-rose-600">{error}</p>}
+          <InputField label={isSkill ? "Skill" : "Department Name"} required placeholder={isSkill ? "Enter skill name" : "Enter department name"} value={name} onChange={onNameChange} />
+          {isSkill && <InputField label="Category" required placeholder="Enter skill category" value={category} onChange={onCategoryChange} />}
+          {isSkill && <InputField label="Domain" required placeholder="Enter skill domain" value={domain} onChange={onDomainChange} />}
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+            <button type="submit" disabled={isLoading} className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60">
+              {isLoading && <LoaderCircle size={14} className="animate-spin" />}
+              {isLoading ? "Adding..." : `Add ${isSkill ? "Skill" : "Department"}`}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 /* --- Helper for Read-Only Preview Display --- */
 function PreviewField({
@@ -483,6 +837,14 @@ function RoleSectionCard({
   onUpdate,
   onDelete,
   onAddAnother,
+  skills,
+  departments,
+  skillsLoading,
+  departmentsLoading,
+  onAddSkill,
+  onAddDepartment,
+  errors,
+  onClearError,
 }: {
   role: RoleSection;
   index: number;
@@ -490,6 +852,14 @@ function RoleSectionCard({
   onUpdate: (patch: Partial<Omit<RoleSection, "id">>) => void;
   onDelete: () => void;
   onAddAnother: () => void;
+  skills: SkillRecord[];
+  departments: DepartmentRecord[];
+  skillsLoading: boolean;
+  departmentsLoading: boolean;
+  onAddSkill: () => void;
+  onAddDepartment: () => void;
+  errors: FieldErrors;
+  onClearError: (field: string) => void;
 }) {
   const handleJdFileChange = (file: File | undefined) => {
     const isPdf = file?.type === "application/pdf" || file?.name.toLowerCase().endsWith(".pdf");
@@ -507,11 +877,10 @@ function RoleSectionCard({
     onUpdate({ jdFile: null });
   };
 
-  const toggleDept = (dept: string) => {
-    const departments = role.departments.includes(dept)
-      ? role.departments.filter((d) => d !== dept)
-      : [...role.departments, dept];
-    onUpdate({ departments });
+  const errorKey = (field: string) => `role:${role.id}.${field}`;
+  const updateField = (patch: Partial<Omit<RoleSection, "id">>, field: string) => {
+    onUpdate(patch);
+    onClearError(errorKey(field));
   };
 
   return (
@@ -554,38 +923,44 @@ function RoleSectionCard({
           <div>
             <InputField
               label="Job Role" required placeholder="Enter job role"
-              value={role.jobRole} onChange={(v) => onUpdate({ jobRole: v })}
+              value={role.jobRole} onChange={(v) => updateField({ jobRole: v }, "jobRole")} error={errors[errorKey("jobRole")]}
             />
           </div>
           <div>
             <InputField
-              label="Job Location" placeholder="Enter job location"
-              value={role.jobLocation} onChange={(v) => onUpdate({ jobLocation: v })}
+              label="Job Location" required placeholder="Enter job location"
+              value={role.jobLocation} onChange={(v) => updateField({ jobLocation: v }, "jobLocation")} error={errors[errorKey("jobLocation")]}
             />
           </div>
           <div>
             <SelectField
               label="Job Type" required placeholder="Select job type"
-              options={jobTypeOptions} value={role.jobType} onChange={(v) => onUpdate({ jobType: v })}
+              options={jobTypeOptions} value={role.jobType} onChange={(v) => updateField({ jobType: v }, "jobType")} error={errors[errorKey("jobType")]}
             />
           </div>
           <div>
             <InputField
               label="CTC / Package" required placeholder="Enter ctc / package"
-              value={role.ctc} onChange={(v) => onUpdate({ ctc: v })}
+              value={role.ctc} onChange={(v) => updateField({ ctc: v }, "ctc")} error={errors[errorKey("ctc")]}
             />
           </div>
           <div>
             <SkillsPicker
               label="Skills Required"
+              required
               value={role.skills}
-              onChange={(v) => onUpdate({ skills: v })}
+              onChange={(v) => updateField({ skills: v }, "skills")}
+              options={skills}
+              isLoading={skillsLoading}
+              onAddOption={onAddSkill}
+              addLabel="Add skill"
+              error={errors[errorKey("skills")]}
             />
           </div>
           <div>
             <InputField
-              label="Number of Openings" placeholder="Enter number of openings"
-              value={role.openings} onChange={(v) => onUpdate({ openings: v })}
+              label="Number of Openings" required placeholder="Enter number of openings"
+              value={role.openings} onChange={(v) => updateField({ openings: v }, "openings")} error={errors[errorKey("openings")]}
             />
           </div>
         </div>
@@ -596,48 +971,41 @@ function RoleSectionCard({
         <h3 className="mb-3 text-sm font-bold text-cyan-500">Eligibility Criteria</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <FieldLabel label="Departments" required />
-            <div className="flex h-10 w-full flex-wrap items-center gap-1 overflow-x-auto rounded-lg border border-slate-200 bg-white px-2 py-1">
-              {departmentOptions.map((dept) => {
-                const sel = role.departments.includes(dept);
-                return (
-                  <button
-                    key={dept}
-                    type="button"
-                    onClick={() => toggleDept(dept)}
-                    className={`shrink-0 rounded px-2 py-1 text-[11px] font-semibold transition ${
-                      sel ? "bg-cyan-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
-                    {dept}
-                  </button>
-                );
-              })}
-            </div>
+            <SkillsPicker
+              label="Departments"
+              value={role.departments}
+              onChange={(v) => updateField({ departments: v }, "departments")}
+              options={departments}
+              isLoading={departmentsLoading}
+              onAddOption={onAddDepartment}
+              addLabel="Add department"
+              required
+              error={errors[errorKey("departments")]}
+            />
           </div>
 
           <div>
             <SelectField
               label="Batch / Graduation Year" required placeholder="Select batch / graduation year"
-              options={batchOptions} value={role.batch} onChange={(v) => onUpdate({ batch: v })}
+              options={batchOptions} value={role.batch} onChange={(v) => updateField({ batch: v }, "batch")} error={errors[errorKey("batch")]}
             />
           </div>
           <div>
             <InputField
               label="Minimum CGPA" required placeholder="Enter minimum cgpa"
-              value={role.minimumCgpa} onChange={(v) => onUpdate({ minimumCgpa: v })}
+              value={role.minimumCgpa} onChange={(v) => updateField({ minimumCgpa: v }, "minimumCgpa")} error={errors[errorKey("minimumCgpa")]}
             />
           </div>
           <div>
             <InputField
-              label="Maximum Backlogs" placeholder="e.g. 0"
-              value={role.maximumBacklogs} onChange={(v) => onUpdate({ maximumBacklogs: v })}
+              label="Maximum Backlogs" required placeholder="e.g. 0"
+              value={role.maximumBacklogs} onChange={(v) => updateField({ maximumBacklogs: v }, "maximumBacklogs")} error={errors[errorKey("maximumBacklogs")]}
             />
           </div>
           <div>
-            <SelectField
-              label="Degree" placeholder="Select degree"
-              options={degreeOptions} value={role.degree} onChange={(v) => onUpdate({ degree: v })}
+            <InputField
+              label="Degree" required placeholder="Enter degree"
+              value={role.degree} onChange={(v) => updateField({ degree: v }, "degree")} error={errors[errorKey("degree")]}
             />
           </div>
           <div>
@@ -654,7 +1022,7 @@ function RoleSectionCard({
         <h3 className="mb-3 text-sm font-bold text-cyan-500">Role Details &amp; Additional Information</h3>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">
-            <FieldLabel label="Job Description / JD" required />
+            <FieldLabel label="Job Description / JD" />
             <JobDescriptionEditor
               value={role.jobDescription}
               onChange={(v) => onUpdate({ jobDescription: v })}
@@ -666,8 +1034,10 @@ function RoleSectionCard({
           <div className="lg:col-span-4">
             <SelectionProcessPicker
               label="Selection Process"
+              required
               value={role.selectionProcesses}
-              onChange={(v) => onUpdate({ selectionProcesses: v })}
+              onChange={(v) => updateField({ selectionProcesses: v }, "selectionProcesses")}
+              error={errors[errorKey("selectionProcesses")]}
             />
           </div>
         </div>
@@ -687,11 +1057,17 @@ function FieldLabel({ label, required }: { label: string; required?: boolean }) 
   );
 }
 
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="mt-1 text-[11px] font-medium leading-4 text-red-500">{message}</p>;
+}
+
 function InputField({
-  label, placeholder, required = false, value, onChange,
+  label, placeholder, required = false, value, onChange, error,
 }: {
   label: string; placeholder: string; required?: boolean;
   value?: string; onChange?: (value: string) => void;
+  error?: string;
 }) {
   return (
     <label className="block">
@@ -703,15 +1079,133 @@ function InputField({
         placeholder={placeholder}
         className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
       />
+      <FieldError message={error} />
     </label>
   );
 }
 
+function CompanyDropdown({
+  companies,
+  value,
+  isLoading,
+  onSelect,
+  onAddCompany,
+  error,
+}: {
+  companies: CompanyRecord[];
+  value: string;
+  isLoading: boolean;
+  onSelect: (company: CompanyRecord) => void;
+  onAddCompany: () => void;
+  error?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const selectedCompany = companies.find((company) => getCompanyId(company) === value);
+  const filteredCompanies = companies.filter((company) => {
+    const query = searchQuery.trim().toLowerCase();
+    return !query || [company.name, company.location ?? ""].some((field) => field.toLowerCase().includes(query));
+  });
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", closeOnOutsideClick);
+    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
+  }, []);
+
+  const openDropdown = () => {
+    setSearchQuery("");
+    setIsOpen((open) => !open);
+  };
+
+  const handleAddCompany = () => {
+    setIsOpen(false);
+    setSearchQuery("");
+    onAddCompany();
+  };
+
+  return (
+    <div ref={dropdownRef} className="relative">
+      <FieldLabel label="Company Name" required />
+      <button
+        type="button"
+        onClick={openDropdown}
+        className={`flex h-10 w-full items-center justify-between rounded-lg border bg-white px-3 text-left text-xs outline-none transition ${isOpen ? "border-cyan-500 ring-2 ring-cyan-100" : "border-slate-200 hover:border-slate-300"}`}
+      >
+        <span className={`truncate ${selectedCompany ? "font-medium text-slate-700" : "text-slate-400"}`}>
+          {selectedCompany?.name ?? (isLoading ? "Loading companies..." : "Select a company")}
+        </span>
+        <ChevronDown size={14} className={`ml-2 shrink-0 text-slate-500 transition-transform ${isOpen ? "rotate-180 text-cyan-500" : ""}`} />
+      </button>
+      <FieldError message={error} />
+
+      {isOpen && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl">
+          <div className="border-b border-slate-100 p-2">
+            <div className="relative">
+              <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                autoFocus
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search companies..."
+                className="h-8 w-full rounded-md border border-slate-200 pl-8 pr-2 text-xs text-slate-700 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-100"
+              />
+            </div>
+          </div>
+
+          <div className="max-h-52 overflow-y-auto p-1.5">
+            {isLoading ? (
+              <p className="px-2.5 py-3 text-xs text-slate-400">Loading companies...</p>
+            ) : filteredCompanies.length === 0 ? (
+              <p className="px-2.5 py-3 text-xs text-slate-400">No companies found.</p>
+            ) : (
+              filteredCompanies.map((company) => {
+                const companyId = getCompanyId(company);
+                return (
+                  <button
+                    key={companyId || company.name}
+                    type="button"
+                    onClick={() => {
+                      onSelect(company);
+                      setIsOpen(false);
+                      setSearchQuery("");
+                    }}
+                    className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left transition ${companyId === value ? "bg-cyan-50 text-cyan-700" : "text-slate-700 hover:bg-slate-50"}`}
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-xs font-semibold">{company.name}</span>
+                      {company.location && <span className="mt-0.5 flex items-center gap-1 text-[10px] text-slate-400"><MapPin size={10} />{company.location}</span>}
+                    </span>
+                    {companyId === value && <Check size={14} className="shrink-0 text-cyan-500" />}
+                  </button>
+                );
+              })
+            )}
+          </div>
+
+          <button type="button" onClick={handleAddCompany} className="flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2.5 text-left text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">
+            <Plus size={14} /> Add company
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SelectField({
-  label, options, required = false, value, onChange, placeholder = "Select an option",
+  label, options, required = false, value, onChange, placeholder = "Select an option", error,
 }: {
   label: string; options: string[]; required?: boolean;
   value?: string; onChange?: (value: string) => void; placeholder?: string;
+  error?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -776,24 +1270,37 @@ function SelectField({
           </div>
         )}
       </div>
+      <FieldError message={error} />
     </div>
   );
 }
 
 function DateField({
-  label, placeholder, required = false, value, onChange,
+  label, placeholder, required = false, value, onChange, error,
 }: {
   label: string; placeholder: string; required?: boolean;
   value?: string; onChange?: (value: string) => void;
+  error?: string;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openDatePicker = () => {
+    const input = inputRef.current;
+    if (!input) return;
+    input.type = "date";
+    input.showPicker?.();
+  };
+
   return (
     <label className="block">
       <FieldLabel label={label} required={required} />
       <div className="relative">
         <CalendarDays size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         <input
+          ref={inputRef}
           type="text"
           onFocus={(e) => { e.target.type = "date"; }}
+          onClick={openDatePicker}
           onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
           value={value}
           onChange={onChange ? (e) => onChange(e.target.value) : undefined}
@@ -801,24 +1308,37 @@ function DateField({
           className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
         />
       </div>
+      <FieldError message={error} />
     </label>
   );
 }
 
 function TimeField({
-  label, placeholder, required = false, value, onChange,
+  label, placeholder, required = false, value, onChange, error,
 }: {
   label: string; placeholder: string; required?: boolean;
   value?: string; onChange?: (value: string) => void;
+  error?: string;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openTimePicker = () => {
+    const input = inputRef.current;
+    if (!input) return;
+    input.type = "time";
+    input.showPicker?.();
+  };
+
   return (
     <label className="block">
       <FieldLabel label={label} required={required} />
       <div className="relative">
         <Clock3 size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
         <input
+          ref={inputRef}
           type="text"
           onFocus={(e) => { e.target.type = "time"; }}
+          onClick={openTimePicker}
           onBlur={(e) => { if (!e.target.value) e.target.type = "text"; }}
           value={value}
           onChange={onChange ? (e) => onChange(e.target.value) : undefined}
@@ -826,14 +1346,34 @@ function TimeField({
           className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
         />
       </div>
+      <FieldError message={error} />
     </label>
   );
 }
 
-function SkillsPicker({ label, value, onChange }: {
-  label: string; value: string[]; onChange: (val: string[]) => void;
+function SkillsPicker({
+  label,
+  value,
+  onChange,
+  options,
+  isLoading,
+  onAddOption,
+  addLabel,
+  required = false,
+  error,
+}: {
+  label: string;
+  value: string[];
+  onChange: (val: string[]) => void;
+  options: (SkillRecord | DepartmentRecord)[];
+  isLoading: boolean;
+  onAddOption: () => void;
+  addLabel: string;
+  required?: boolean;
+  error?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -844,47 +1384,86 @@ function SkillsPicker({ label, value, onChange }: {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  const toggle = (s: string) =>
-    onChange(value.includes(s) ? value.filter((x) => x !== s) : [...value, s]);
+  const filteredOptions = options.filter((option) => {
+    const optionId = getCatalogRecordId(option);
+    return optionId && getCatalogRecordLabel(option).toLowerCase().includes(searchQuery.trim().toLowerCase());
+  });
+  const selectedLabels = value.map((selectedId) => {
+    const option = options.find((item) => getCatalogRecordId(item) === selectedId);
+    return option ? getCatalogRecordLabel(option) : selectedId;
+  });
+  const toggle = (option: SkillRecord | DepartmentRecord) => {
+    const optionId = getCatalogRecordId(option);
+    onChange(value.includes(optionId) ? value.filter((item) => item !== optionId) : [...value, optionId]);
+  };
+  const handleAddOption = () => {
+    setIsOpen(false);
+    setSearchQuery("");
+    onAddOption();
+  };
 
   return (
     <div ref={ref}>
-      <FieldLabel label={label} />
+      <FieldLabel label={label} required={required} />
       <div className="relative">
         <button
           type="button"
-          onClick={() => setIsOpen((p) => !p)}
+          onClick={() => {
+            setSearchQuery("");
+            setIsOpen((p) => !p);
+          }}
           className="flex h-10 w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 text-xs outline-none transition focus:border-cyan-500"
         >
           {value.length === 0
-            ? <span className="text-slate-400">Select skills</span>
-            : <span className="truncate font-medium text-slate-700">{value.join(", ")}</span>}
+            ? <span className="text-slate-400">{isLoading ? "Loading..." : `Select ${label.toLowerCase()}`}</span>
+            : <span className="truncate font-medium text-slate-700">{selectedLabels.join(", ")}</span>}
           <ChevronDown size={14} className="pointer-events-none ml-1 shrink-0 text-slate-500" />
         </button>
         {isOpen && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-52 overflow-y-auto rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg">
-            {skillOptions.map((s) => {
-              const sel = value.includes(s);
+          <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+            <div className="border-b border-slate-100 p-2">
+              <div className="relative">
+                <Search size={13} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  autoFocus
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder={`Search ${label.toLowerCase()}...`}
+                  className="h-8 w-full rounded-md border border-slate-200 pl-8 pr-2 text-xs text-slate-700 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-100"
+                />
+              </div>
+            </div>
+            <div className="max-h-52 overflow-y-auto p-1.5">
+            {isLoading ? <p className="px-2.5 py-3 text-xs text-slate-400">Loading...</p> : filteredOptions.length === 0 ? <p className="px-2.5 py-3 text-xs text-slate-400">No options found.</p> : filteredOptions.map((option) => {
+              const name = getCatalogRecordLabel(option);
+              const optionId = getCatalogRecordId(option);
+              const sel = value.includes(optionId);
               return (
-                <button key={s} type="button" onClick={() => toggle(s)}
+                <button key={optionId} type="button" onClick={() => toggle(option)}
                   className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-left text-xs font-medium text-slate-700 transition hover:bg-cyan-50"
                 >
                   <span className={`flex h-4 w-4 items-center justify-center rounded border ${sel ? "border-cyan-500 bg-cyan-500 text-white" : "border-slate-300"}`}>
                     {sel && <Check size={11} />}
                   </span>
-                  {s}
+                  {name}
                 </button>
               );
             })}
+            </div>
+            <button type="button" onClick={handleAddOption} className="flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2.5 text-left text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">
+              <Plus size={14} /> {addLabel}
+            </button>
           </div>
         )}
       </div>
+      <FieldError message={error} />
     </div>
   );
 }
 
-function SelectionProcessPicker({ label, value, onChange }: {
-  label: string; value: string[]; onChange: (val: string[]) => void;
+function SelectionProcessPicker({ label, value, onChange, required = false, error }: {
+  label: string; value: string[]; onChange: (val: string[]) => void; required?: boolean; error?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -902,7 +1481,7 @@ function SelectionProcessPicker({ label, value, onChange }: {
 
   return (
     <div ref={ref}>
-      <FieldLabel label={label} />
+      <FieldLabel label={label} required={required} />
       <div className="relative">
         <button
           type="button"
@@ -911,7 +1490,9 @@ function SelectionProcessPicker({ label, value, onChange }: {
         >
           {value.length === 0
             ? <span className="text-slate-400">Select selection processes</span>
-            : <span className="truncate font-medium text-slate-700">{value.join(", ")}</span>}
+            : <span className="truncate font-medium text-slate-700">
+              {value.map((process, index) => `Round ${index + 1}: ${process}`).join(" · ")}
+            </span>}
           <ChevronDown size={14} className="pointer-events-none ml-1 shrink-0 text-slate-500" />
         </button>
         {isOpen && (
@@ -925,13 +1506,27 @@ function SelectionProcessPicker({ label, value, onChange }: {
                   <span className={`flex h-4 w-4 items-center justify-center rounded border ${sel ? "border-cyan-500 bg-cyan-500 text-white" : "border-slate-300"}`}>
                     {sel && <Check size={11} />}
                   </span>
-                  {p}
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <span className="text-[10px] text-slate-400">{sel ? `Round ${value.indexOf(p) + 1}` : ""}</span>
+                    {p}
+                  </span>
                 </button>
               );
             })}
           </div>
         )}
       </div>
+      {value.length > 0 && (
+        <div className="mt-2 space-y-1.5 rounded-lg border border-cyan-100 bg-cyan-50/50 p-2">
+          {value.map((process, index) => (
+            <div key={`${process}-${index}`} className="flex items-center gap-2 text-[11px] font-semibold text-slate-700">
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-cyan-500 px-1.5 text-[10px] text-white">{index + 1}</span>
+              <span>Round {index + 1}: {process}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <FieldError message={error} />
     </div>
   );
 }

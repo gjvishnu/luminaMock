@@ -31,6 +31,13 @@ export const RouterError = () => {
   return (
     <div className="flex h-full min-h-[400px] items-center justify-center">
       <h2>Something went wrong</h2>
+
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="mt-5 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-white"
+        >
+          Go to Dashboard
+        </button>
     </div>
   );
 };

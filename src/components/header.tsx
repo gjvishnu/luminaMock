@@ -1,16 +1,20 @@
 import {
   Bell,
-  BriefcaseBusiness,
   ChevronDown,
+  LogOut,
   Menu,
   Search,
   ShieldCheck,
-  UserRound,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Sidebar } from "./sideBar";
 import { type UserRole } from "../context/roleContext";
 import { useUserRole } from "../context/useUserRole";
+import { authApi, useLogoutMutation } from "../redux/api";
+import { clearCredentials } from "../redux/authSlice";
+import { resetRole } from "../redux/roleSlice";
+import { useAppDispatch } from "../redux";
 
 const roleDetails: Record<UserRole, { name: string; label: string; greeting: string }> = {
   admin: { name: "Admin", label: "Admin", greeting: "Welcome, Admin" },
@@ -19,7 +23,10 @@ const roleDetails: Record<UserRole, { name: string; label: string; greeting: str
 };
 
 export const Header = () => {
-  const { role, setRole } = useUserRole();
+  const { role } = useUserRole();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const [sideBar, setSideBar] = useState(false);
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -64,9 +71,18 @@ export const Header = () => {
     };
   }, [roleMenuOpen]);
 
-  const handleRoleChange = (nextRole: UserRole) => {
-    setRole(nextRole);
-    setRoleMenuOpen(false);
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+    } catch {
+      // Clear the local session even when the access token has already expired.
+    } finally {
+      dispatch(clearCredentials());
+      dispatch(resetRole());
+      dispatch(authApi.util.resetApiState());
+      setRoleMenuOpen(false);
+      navigate("/login", { replace: true });
+    }
   };
 
   return (
@@ -133,32 +149,18 @@ export const Header = () => {
 
               {roleMenuOpen && (
                 <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg" role="menu">
-                  <div className="px-2.5 py-2 text-[10px] font-bold uppercase tracking-wide text-slate-400">Switch view</div>
-                  {(["student", "placementOfficer", "admin"] as UserRole[]).map((option) => {
-                    const details = roleDetails[option];
-                    const isActive = option === role;
-
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        role="menuitem"
-                        onClick={() => handleRoleChange(option)}
-                        className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left transition ${isActive ? "bg-cyan-50 text-cyan-700" : "text-slate-700 hover:bg-slate-50"}`}
-                      >
-                        <span className={`flex h-8 w-8 items-center justify-center rounded-full ${isActive ? "bg-cyan-500 text-white" : "bg-slate-100 text-slate-500"}`}>
-                          {option === "admin" ? <ShieldCheck size={15} /> : option === "student" ? <UserRound size={15} /> : <BriefcaseBusiness size={15} />}
-                        </span>
-                        <span className="flex-1">
-                          <span className="block text-xs font-semibold">{details.label}</span>
-                          <span className="block text-[10px] text-slate-500">
-                            {option === "admin" ? "Platform administration" : option === "student" ? "View jobs and applications" : "Manage campus placements"}
-                          </span>
-                        </span>
-                        {isActive && <span className="h-2 w-2 rounded-full bg-cyan-500" />}
-                      </button>
-                    );
-                  })}
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="flex w-full items-center gap-3 rounded-lg px-2.5 py-2.5 text-left text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-50">
+                      <LogOut size={15} />
+                    </span>
+                    <span className="text-xs font-semibold">{isLoggingOut ? "Logging out..." : "Logout"}</span>
+                  </button>
                 </div>
               )}
             </div>

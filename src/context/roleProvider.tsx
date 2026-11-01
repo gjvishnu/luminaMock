@@ -1,24 +1,34 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { RoleContext, type UserRole } from "./roleContext";
-
-/**
- * View switcher only — no login, no tokens, no backend.
- * The header's "Switch view" menu flips between the three demo personas
- * (student / placementOfficer / admin) so every role-specific menu,
- * dashboard and page can be exercised directly.
- */
-const DEFAULT_ROLE: UserRole = "placementOfficer";
+import { clearCredentials, selectUser, setUser as setStoredUser } from "../redux/authSlice";
+import { mapBackendRole, selectActiveRole, setRole } from "../redux/roleSlice";
+import { useAppDispatch, useAppSelector } from "../redux";
 
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const [role, setRoleState] = useState<UserRole>(DEFAULT_ROLE);
+  const dispatch = useAppDispatch();
+  const role = useAppSelector(selectActiveRole);
+  const user = useAppSelector(selectUser);
 
-  const setRole = (nextRole: UserRole) => {
-    setRoleState(nextRole);
+  useEffect(() => {
+    const authenticatedRole = mapBackendRole(user?.role);
+    if (authenticatedRole) {
+      dispatch(setRole(authenticatedRole));
+    }
+  }, [dispatch, user?.role]);
+
+  const setActiveRole = (nextRole: UserRole) => dispatch(setRole(nextRole));
+  const setUser = (nextUser: typeof user) => {
+    if (nextUser) {
+      dispatch(setStoredUser(nextUser));
+    } else {
+      dispatch(clearCredentials());
+    }
   };
+  const logout = () => dispatch(clearCredentials());
 
   return (
     <RoleContext.Provider
-      value={{ role, setRole, user: null, setUser: () => {}, logout: () => {} }}
+      value={{ role, setRole: setActiveRole, user, setUser, logout }}
     >
       {children}
     </RoleContext.Provider>

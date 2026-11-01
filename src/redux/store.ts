@@ -1,9 +1,28 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from "@reduxjs/toolkit";
+import { authApi } from "./api";
+import { AUTH_STORAGE_KEY, authReducer } from "./authSlice";
+import { roleReducer } from "./roleSlice";
 
-// Login API removed: no auth state, no backend slices. The store is kept
-// (Provider wiring in main.tsx) so future slices have a home.
 export const store = configureStore({
-  reducer: {},
+  reducer: {
+    auth: authReducer,
+    role: roleReducer,
+    [authApi.reducerPath]: authApi.reducer,
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(authApi.middleware),
+});
+
+store.subscribe(() => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const auth = store.getState().auth;
+  if (auth.accessToken && auth.refreshToken && auth.user) {
+    window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+  } else {
+    window.localStorage.removeItem(AUTH_STORAGE_KEY);
+  }
 });
 
 export type RootState = ReturnType<typeof store.getState>;

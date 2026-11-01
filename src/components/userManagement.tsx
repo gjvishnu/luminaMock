@@ -1,847 +1,541 @@
-import { useState } from "react";
+import { useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "react-toastify";
 import {
-  Search,
-  Plus,
-  Users,
   BriefcaseBusiness,
-  ShieldCheck,
-  UserCheck,
-  Mail,
-  Lock,
-  UserPlus,
-  X,
+  ChevronLeft,
+  ChevronRight,
+  Download,
   Eye,
   EyeOff,
-  Pencil,
-  Trash2,
   Filter,
-  Download,
-  FileUser,
-  ChevronDown,
-  Settings,
-  Landmark,
-  Layers,
-  Tag,
-  LayoutGrid,
-  Building2,
+  LoaderCircle,
+  Lock,
+  Mail,
+  Plus,
+  Search,
+  ShieldCheck,
+  Trash2,
+  UserCheck,
+  UserPlus,
+  Users,
+  X,
 } from "lucide-react";
+import {
+  type CreateUserRequest,
+  type ManagedUser,
+  useCreateUserMutation,
+  useDeactivateUserMutation,
+  useGetUsersQuery,
+} from "../redux/api";
+import { useUserRole } from "../context/useUserRole";
 
-type UserItem = {
-  id?: number;
-  email: string;
-  role: string;
-  regno?: string | null;
-  name?: string;
-  createdAt?: string;
-  status?: string;
-  dept?: string;
-  batch?: string;
-};
+type FormRole = CreateUserRequest["role"];
+type UserRoleTab = "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER";
+type UserStatusFilter = "ALL" | "ACTIVE" | "INACTIVE";
 
-const seedUsers: UserItem[] = [
-  { id: 1, name: "Arjun Mehta", email: "arjun.mehta@lumina.edu", regno: "CSE2026-014", role: "STUDENT", dept: "CSE", batch: "2026 • 7th Sem", status: "Active", createdAt: "12 Jan 2024" },
-  { id: 2, name: "Rahul Kulkarni", email: "rahul.kulkarni@lumina.edu", regno: "CSE2026-032", role: "STUDENT", dept: "CSE", batch: "2026 • 7th Sem", status: "Active", createdAt: "15 Feb 2024" },
-  { id: 3, name: "Priya Sharma", email: "priya.sharma@lumina.edu", regno: "ECE2026-011", role: "STUDENT", dept: "ECE", batch: "2026 • 7th Sem", status: "Active", createdAt: "10 Mar 2024" },
-  { id: 4, name: "Neha Tomar", email: "neha.tomar@lumina.edu", regno: "IT2026-007", role: "STUDENT", dept: "IT", batch: "2026 • 7th Sem", status: "Inactive", createdAt: "05 Apr 2024" },
-  { id: 5, name: "Sneha Reddy", email: "sneha.reddy@lumina.edu", regno: "CSE2026-089", role: "STUDENT", dept: "CSE", batch: "2026 • 7th Sem", status: "Active", createdAt: "18 Apr 2024" },
-  { id: 6, name: "Vikram Singh", email: "vikram.singh@lumina.edu", regno: "ME2026-021", role: "PLACEMENT_OFFICER", dept: "ME", batch: "2026 • 7th Sem", status: "Active", createdAt: "22 Apr 2024" },
-  { id: 7, name: "Ananya Pillai", email: "ananya.pillai@lumina.edu", regno: "ECE2026-043", role: "STUDENT", dept: "ECE", batch: "2026 • 7th Sem", status: "Active", createdAt: "28 Apr 2024" },
-  { id: 8, name: "Dev Sharma", email: "dev.sharma@lumina.edu", regno: "CSE2026-055", role: "ADMIN", dept: "CSE", batch: "2026 • 7th Sem", status: "Active", createdAt: "03 May 2024" },
+const roleTabs: { key: UserRoleTab; label: string }[] = [
+  { key: "STUDENT", label: "Students" },
+  { key: "PLACEMENT_OFFICER", label: "Placement Officers" },
+  { key: "ADMIN", label: "Admins" },
+  { key: "RECRUITER", label: "Recruiters" },
 ];
 
-function getInitials(nameOrEmail: string) {
-  if (nameOrEmail.includes("@")) {
-    const part = nameOrEmail.split("@")[0];
-    return part.substring(0, 2).toUpperCase();
-  }
-  const parts = nameOrEmail.trim().split(" ");
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  return nameOrEmail.substring(0, 2).toUpperCase();
-}
+const EMPTY_USERS: ManagedUser[] = [];
 
-function getRandomColor(id: number) {
-  const colors = [
-    "bg-cyan-100 text-cyan-700",
-    "bg-purple-100 text-purple-700",
-    "bg-blue-100 text-blue-700",
-    "bg-pink-100 text-pink-700",
-    "bg-emerald-100 text-emerald-700",
-    "bg-amber-100 text-amber-700",
-  ];
-  return colors[id % colors.length];
+function getApiErrorMessage(error: unknown) {
+  if (typeof error === "object" && error !== null && "data" in error) {
+    const data = (error as { data?: { message?: string } | string }).data;
+    if (typeof data === "string") return data;
+    if (data?.message) return data.message;
+  }
+
+  return "Something went wrong. Please try again.";
 }
 
 function formatDate(rawDate?: string) {
-  if (!rawDate) return "12 Jan 2024";
-  if (rawDate.includes("T") || rawDate.includes("-")) {
-    const d = new Date(rawDate);
-    if (!isNaN(d.getTime())) {
-      return d.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-    }
-  }
-  return rawDate;
+  if (!rawDate) return "—";
+  const date = new Date(rawDate);
+  if (Number.isNaN(date.getTime())) return rawDate;
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
-function CustomRoleSelect({
-  value,
-  onChange,
-}: {
-  value: "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER";
-  onChange: (val: "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER") => void;
+function getInitials(value: string) {
+  const name = value.split("@")[0].replace(/[._-]/g, " ").trim();
+  const parts = name.split(/\s+/).filter(Boolean);
+  if (parts.length > 1) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  return name.slice(0, 2).toUpperCase() || "US";
+}
+
+function getUserField(user: ManagedUser, keys: string[]) {
+  const record = user as ManagedUser & Record<string, unknown>;
+  return keys.map((key) => record[key]).find((value) => value !== undefined && value !== null && value !== "");
+}
+
+function getUserName(user: ManagedUser) {
+  const value = getUserField(user, ["name", "fullName", "displayName"]);
+  return typeof value === "string" ? value : user.userUuid;
+}
+
+function getUserDepartment(user: ManagedUser) {
+  const value = getUserField(user, ["department", "departmentName"]);
+  if (typeof value === "string") return value;
+  if (value && typeof value === "object") {
+    const name = (value as { name?: unknown }).name;
+    if (typeof name === "string") return name;
+  }
+  return "—";
+}
+
+function getUserBatch(user: ManagedUser) {
+  const value = getUserField(user, ["batch", "batchYear", "graduationYear", "semester"]);
+  return value === undefined ? "—" : String(value);
+}
+
+function getUserRegistrationNumber(user: ManagedUser) {
+  const value = getUserField(user, ["registrationNumber", "registrationNo", "registerNumber"]);
+  return typeof value === "string" || typeof value === "number" ? String(value) : "—";
+}
+
+function statusLabel(status?: string) {
+  return status?.toUpperCase() === "INACTIVE" ? "Inactive" : "Active";
+}
+
+function statusClass(status?: string) {
+  return status?.toUpperCase() === "INACTIVE"
+    ? "bg-rose-50 text-rose-600"
+    : "bg-emerald-50 text-emerald-600";
+}
+
+function ModalShell({ title, description, icon: Icon, onClose, children }: {
+  title: string;
+  description: string;
+  icon: typeof UserPlus;
+  onClose: () => void;
+  children: ReactNode;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const roleOptions: { key: "STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER"; label: string }[] = [
-    { key: "STUDENT", label: "Student" },
-    { key: "PLACEMENT_OFFICER", label: "Placement Officer" },
-    { key: "ADMIN", label: "Admin" },
-    { key: "RECRUITER", label: "Recruiter" },
-  ];
-
-  const selectedOption = roleOptions.find((o) => o.key === value) || roleOptions[0];
-
   return (
-    <div className="relative w-full">
-      <button
-        type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
-        className={`flex h-10 w-full items-center justify-between rounded-xl border bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition ${
-          isOpen ? "border-cyan-500 ring-2 ring-cyan-100" : "border-gray-200 hover:border-cyan-300"
-        }`}
-      >
-        <Users size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-        <span className="font-medium text-slate-800">{selectedOption.label}</span>
-        <ChevronDown
-          size={16}
-          className={`text-slate-400 transition-transform duration-200 ${isOpen ? "rotate-180 text-cyan-500" : ""}`}
-        />
-      </button>
-
-      {isOpen && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-xl animate-in fade-in-50 zoom-in-95">
-          {roleOptions.map((option) => {
-            const isSelected = option.key === value;
-
-            return (
-              <button
-                key={option.key}
-                type="button"
-                onClick={() => {
-                  onChange(option.key);
-                  setIsOpen(false);
-                }}
-                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition ${
-                  isSelected
-                    ? "bg-cyan-50 font-bold text-cyan-700"
-                    : "font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900"
-                }`}
-              >
-                <span>{option.label}</span>
-                {isSelected && <span className="h-2 w-2 rounded-full bg-cyan-500" />}
-              </button>
-            );
-          })}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
+              <Icon size={22} />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-gray-900">{title}</h2>
+              <p className="text-xs text-gray-500">{description}</p>
+            </div>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close dialog" className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
+            <X size={18} />
+          </button>
         </div>
-      )}
+        {children}
+      </div>
     </div>
   );
 }
 
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs font-semibold text-slate-700">{label} <span className="text-red-500">*</span></span>
+      {children}
+    </label>
+  );
+}
+
+function TextInput({ icon: Icon, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { icon: typeof Mail }) {
+  return (
+    <span className="relative block">
+      <Icon size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+      <input {...props} className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
+    </span>
+  );
+}
+
+function StatusBadge({ status }: { status?: string }) {
+  const inactive = status?.toUpperCase() === "INACTIVE";
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusClass(status)}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${inactive ? "bg-rose-500" : "bg-emerald-500"}`} />
+      {statusLabel(status)}
+    </span>
+  );
+}
+
+function LoadingRow({ colSpan }: { colSpan: number }) {
+  return (
+    <tr>
+      <td colSpan={colSpan} className="p-10 text-center text-xs text-slate-400">
+        <span className="inline-flex items-center gap-2"><LoaderCircle size={15} className="animate-spin" /> Loading users from server...</span>
+      </td>
+    </tr>
+  );
+}
+
+function ActionButtons({ onDelete, disabled }: { onDelete: () => void; disabled: boolean }) {
+  return (
+    <div className="flex items-center justify-center gap-1">
+      <button type="button" title="View (coming soon)" aria-label="View user (coming soon)" disabled className="rounded p-1 text-slate-300"><Eye size={15} /></button>
+      <button type="button" title="Delete user" aria-label="Delete user" disabled={disabled} onClick={onDelete} className="rounded p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"><Trash2 size={15} /></button>
+    </div>
+  );
+}
+
+function ModalActions({ isLoading, onCancel }: { isLoading: boolean; onCancel: () => void }) {
+  return (
+    <div className="mt-6 flex items-center justify-end gap-3 pt-2">
+      <button type="button" onClick={onCancel} className="rounded-xl border border-gray-200 bg-slate-100 px-5 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200">Cancel</button>
+      <button type="submit" disabled={isLoading} className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-50">
+        {isLoading && <LoaderCircle size={15} className="animate-spin" />}
+        {isLoading ? "Saving..." : "Create User"}
+      </button>
+    </div>
+  );
+}
+
+function FormError({ message }: { message: string }) {
+  return <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-600">{message}</div>;
+}
+
 export function UserManagement() {
-  const [activeTab, setActiveTab] = useState<"STUDENT" | "PLACEMENT_OFFICER" | "ADMIN">("STUDENT");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSkillModalOpen, setIsSkillModalOpen] = useState(false);
-  const [isDepartmentModalOpen, setIsDepartmentModalOpen] = useState(false);
+  const { role } = useUserRole();
+  const usersQuery = useGetUsersQuery(undefined, { skip: role !== "admin" });
+  const [createUser, { isLoading: isCreatingUser }] = useCreateUserMutation();
+  const [deactivateUser, { isLoading: isDeletingUser }] = useDeactivateUserMutation();
+
+  const users = usersQuery.data ?? EMPTY_USERS;
+  const [activeTab, setActiveTab] = useState<UserRoleTab>("STUDENT");
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [realUsers, setRealUsers] = useState<UserItem[]>([]);
-  const loadingUsers = false;
-
-  // Form State
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<"STUDENT" | "PLACEMENT_OFFICER" | "ADMIN" | "RECRUITER">("STUDENT");
-  const [regno, setRegno] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("All Departments");
+  const [batchFilter, setBatchFilter] = useState("All Batches");
+  const [statusFilter, setStatusFilter] = useState<UserStatusFilter>("ALL");
+  const [modalOpen, setModalOpen] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+  const [userPassword, setUserPassword] = useState("");
+  const [userRole, setUserRole] = useState<FormRole>("STUDENT");
+  const [showPassword, setShowPassword] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [userToDelete, setUserToDelete] = useState<ManagedUser | null>(null);
+  const pageSize = 10;
 
-  // Add Skill form state (text inputs only)
-  const [skillCategory, setSkillCategory] = useState("");
-  const [skillName, setSkillName] = useState("");
-  const [skillDomain, setSkillDomain] = useState("");
-  const [skillError, setSkillError] = useState<string | null>(null);
-  const [skillSubmitting, setSkillSubmitting] = useState(false);
+  const countByRole = (userRoleValue: string) => users.filter((user) => user.role.toUpperCase() === userRoleValue).length;
+  const departmentOptions = useMemo(() => {
+    const values = users.map(getUserDepartment).filter((value) => value !== "—");
+    return ["All Departments", ...Array.from(new Set(values)).sort()];
+  }, [users]);
 
-  // Add Department form state (text inputs only)
-  const [departmentName, setDepartmentName] = useState("");
-  const [departmentDomain, setDepartmentDomain] = useState("");
-  const [departmentError, setDepartmentError] = useState<string | null>(null);
-  const [departmentSubmitting, setDepartmentSubmitting] = useState(false);
+  const batchOptions = useMemo(() => {
+    const values = users.map(getUserBatch).filter((value) => value !== "—");
+    return ["All Batches", ...Array.from(new Set(values)).sort()];
+  }, [users]);
 
-  // Local-only demo data (login API removed): the Actions page works
-  // entirely from the built-in mock list below.
+  const filteredUsers = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return users.filter((user) => {
+      const name = getUserName(user);
+      const matchesRole = user.role.toUpperCase() === activeTab;
+      const matchesSearch = !query || [name, user.email, getUserRegistrationNumber(user), user.userUuid].some((value) => value.toLowerCase().includes(query));
+      const matchesDepartment = departmentFilter === "All Departments" || getUserDepartment(user) === departmentFilter;
+      const matchesBatch = batchFilter === "All Batches" || getUserBatch(user) === batchFilter;
+      const matchesStatus = statusFilter === "ALL" || user.status.toUpperCase() === statusFilter;
+      return matchesRole && matchesSearch && matchesDepartment && matchesBatch && matchesStatus;
+    });
+  }, [activeTab, batchFilter, departmentFilter, searchQuery, statusFilter, users]);
 
-  const combinedUsers = [...realUsers];
-  seedUsers.forEach((seed) => {
-    if (!combinedUsers.some((u) => u.email === seed.email)) {
-      combinedUsers.push(seed);
-    }
-  });
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedUsers = useMemo(
+    () => filteredUsers.slice((safePage - 1) * pageSize, safePage * pageSize),
+    [filteredUsers, safePage],
+  );
 
-  const studentsCount = combinedUsers.filter((u) => u.role === "STUDENT").length;
-  const officersCount = combinedUsers.filter((u) => u.role === "PLACEMENT_OFFICER" || u.role === "RECRUITER").length;
-  const adminsCount = combinedUsers.filter((u) => u.role === "ADMIN").length;
-  const totalCount = combinedUsers.length;
+  const closeModal = () => {
+    setModalOpen(false);
+    setModalError(null);
+    setShowPassword(false);
+  };
 
-  const currentTabUsers = combinedUsers.filter((u) => {
-    if (activeTab === "STUDENT") return u.role === "STUDENT";
-    if (activeTab === "PLACEMENT_OFFICER") return u.role === "PLACEMENT_OFFICER" || u.role === "RECRUITER";
-    if (activeTab === "ADMIN") return u.role === "ADMIN";
-    return true;
-  }).filter((u) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      (u.name && u.name.toLowerCase().includes(query)) ||
-      u.email.toLowerCase().includes(query) ||
-      (u.regno && u.regno.toLowerCase().includes(query))
-    );
-  });
-
-  const handleCreateUser = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateUser = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setModalError(null);
 
-    const trimmedEmail = email.trim();
-    const trimmedRegno = regno.trim();
-    if (!trimmedEmail || !password) {
-      setModalError("Email and password are required.");
-      return;
-    }
-    if (password.length < 4) {
-      setModalError("Password must be at least 4 characters.");
-      return;
-    }
-    if (selectedRole === "STUDENT" && !trimmedRegno) {
-      setModalError("Register number is required for students.");
-      return;
-    }
-    if (combinedUsers.some((u) => u.email.toLowerCase() === trimmedEmail.toLowerCase())) {
-      setModalError("A user with this email already exists.");
-      return;
-    }
-
-    setSubmitting(true);
     try {
-      const nextId = combinedUsers.reduce((max, u) => Math.max(max, u.id ?? 0), 0) + 1;
-      setRealUsers((prev) => [
-        ...prev,
-        {
-          id: nextId,
-          email: trimmedEmail,
-          role: selectedRole,
-          regno: selectedRole === "STUDENT" ? trimmedRegno : null,
-          status: "Active",
-          createdAt: new Date().toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          }),
-        },
-      ]);
+      await createUser({ email: userEmail.trim(), password: userPassword, role: userRole }).unwrap();
       toast.success("User created successfully.");
-      setIsModalOpen(false);
-      setEmail("");
-      setPassword("");
-      setRegno("");
-      setSelectedRole("STUDENT");
-    } finally {
-      setSubmitting(false);
+      setUserEmail("");
+      setUserPassword("");
+      setUserRole("STUDENT");
+      closeModal();
+    } catch (error) {
+      setModalError(getApiErrorMessage(error));
     }
   };
 
-  const handleAddSkill = (e: React.FormEvent) => {
-    e.preventDefault();
-    const category = skillCategory.trim();
-    const name = skillName.trim();
-    const domain = skillDomain.trim();
-    if (!category || !name || !domain) {
-      setSkillError("Please fill in Category, Skill, and Domain.");
-      return;
-    }
-    setSkillError(null);
-    setSkillSubmitting(true);
+  const handleDeleteUser = async () => {
+    const user = userToDelete;
+    if (!user?.userUuid) return;
+
     try {
-      toast.success(`Skill "${name}" added successfully.`);
-      setIsSkillModalOpen(false);
-      setSkillCategory("");
-      setSkillName("");
-      setSkillDomain("");
-    } finally {
-      setSkillSubmitting(false);
+      await deactivateUser(user.userUuid).unwrap();
+      setUserToDelete(null);
+      toast.success(`${user.email} deleted successfully.`);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error));
     }
   };
 
-  const handleAddDepartment = (e: React.FormEvent) => {
-    e.preventDefault();
-    const name = departmentName.trim();
-    const domain = departmentDomain.trim();
-    if (!name || !domain) {
-      setDepartmentError("Please fill in Department and Domain.");
-      return;
-    }
-    setDepartmentError(null);
-    setDepartmentSubmitting(true);
-    try {
-      toast.success(`Department "${name}" added successfully.`);
-      setIsDepartmentModalOpen(false);
-      setDepartmentName("");
-      setDepartmentDomain("");
-    } finally {
-      setDepartmentSubmitting(false);
-    }
+  const handleExport = () => {
+    const rows = filteredUsers.map((user) => [
+      getUserName(user),
+      user.email,
+      getUserRegistrationNumber(user),
+      getUserDepartment(user),
+      getUserBatch(user),
+      statusLabel(user.status),
+      formatDate(user.createdAt),
+    ]);
+    const header = ["Name", "Email", "Registration No.", "Department", "Batch / Semester", "Status", "Created On"];
+    const csv = [header, ...rows].map((row) => row.map((value) => `"${value.replaceAll('"', '""')}"`).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "lumina-users.csv";
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <div className="w-full space-y-4">
-      {/* Header Banner */}
+    <div className="w-full space-y-4 text-slate-800">
       <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
           <UserCheck size={22} strokeWidth={2} />
         </div>
         <div>
           <h1 className="text-base font-bold text-gray-900 sm:text-lg">Actions</h1>
-          <p className="text-xs text-gray-500">Create, manage, and assign roles to platform users.</p>
+          <p className="text-xs text-gray-500">Manage users, placements, drives and the entire platform.</p>
         </div>
       </div>
 
-      {/* 4 Stat Cards */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {/* Students */}
-        <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div>
-            <p className="text-xs font-medium text-gray-500">Students</p>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-xl font-bold text-gray-900">{studentsCount}</span>
-              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">↑ 12%</span>
-            </div>
-          </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
-            <Users size={20} />
-          </div>
-        </div>
-
-        {/* Placement Officers */}
-        <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div>
-            <p className="text-xs font-medium text-gray-500">Placement Officers</p>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-xl font-bold text-gray-900">{officersCount}</span>
-              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">↑ 0%</span>
-            </div>
-          </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-            <BriefcaseBusiness size={20} />
-          </div>
-        </div>
-
-        {/* Admins */}
-        <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div>
-            <p className="text-xs font-medium text-gray-500">Admins</p>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-xl font-bold text-gray-900">{adminsCount}</span>
-              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">↑ 0%</span>
-            </div>
-          </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-            <ShieldCheck size={20} />
-          </div>
-        </div>
-
-        {/* Total Users */}
-        <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <div>
-            <p className="text-xs font-medium text-gray-500">Total Users</p>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-xl font-bold text-gray-900">{totalCount}</span>
-              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">↑ 10%</span>
-            </div>
-          </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-            <UserCheck size={20} />
-          </div>
-        </div>
+        <StatCard label="Students" value={countByRole("STUDENT")} icon={Users} tone="cyan" />
+        <StatCard label="Placement Officers" value={countByRole("PLACEMENT_OFFICER")} icon={BriefcaseBusiness} tone="violet" />
+        <StatCard label="Admins" value={countByRole("ADMIN")} icon={ShieldCheck} tone="blue" />
+        <StatCard label="Total Users" value={users.length} icon={UserCheck} tone="emerald" />
       </div>
 
-      {/* Table Container Card */}
       <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-        {/* Tabs + Create New User Button Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 pt-4 pb-3">
-          <div className="flex items-center gap-6">
-            <button
-              onClick={() => setActiveTab("STUDENT")}
-              className={`pb-2 text-xs font-bold transition border-b-2 ${
-                activeTab === "STUDENT" ? "border-cyan-500 text-cyan-600" : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Students ({studentsCount})
-            </button>
-            <button
-              onClick={() => setActiveTab("PLACEMENT_OFFICER")}
-              className={`pb-2 text-xs font-bold transition border-b-2 ${
-                activeTab === "PLACEMENT_OFFICER" ? "border-cyan-500 text-cyan-600" : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Placement Officers ({officersCount})
-            </button>
-            <button
-              onClick={() => setActiveTab("ADMIN")}
-              className={`pb-2 text-xs font-bold transition border-b-2 ${
-                activeTab === "ADMIN" ? "border-cyan-500 text-cyan-600" : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Admins ({adminsCount})
-            </button>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 pb-3 pt-4">
+          <div className="flex items-center gap-6 overflow-x-auto">
+            {roleTabs.map((tab) => {
+              const count = countByRole(tab.key);
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(tab.key);
+                    setSearchQuery("");
+                    setStatusFilter("ALL");
+                    setCurrentPage(1);
+                    if (tab.key !== "STUDENT") {
+                      setDepartmentFilter("All Departments");
+                      setBatchFilter("All Batches");
+                    }
+                  }}
+                  className={`whitespace-nowrap border-b-2 pb-2 text-xs font-bold transition ${activeTab === tab.key ? "border-cyan-500 text-cyan-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}
+                >
+                  {tab.label} ({count})
+                </button>
+              );
+            })}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setSkillCategory("");
-                setSkillName("");
-                setSkillDomain("");
-                setSkillError(null);
-                setIsSkillModalOpen(true);
-              }}
-              className="flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600 shadow-sm"
-            >
-              <Plus size={16} />
-              Add Skills
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setDepartmentName("");
-                setDepartmentDomain("");
-                setDepartmentError(null);
-                setIsDepartmentModalOpen(true);
-              }}
-              className="flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600 shadow-sm"
-            >
-              <Plus size={16} />
-              Add Departments
-            </button>
-            <button
-              onClick={() => {
-                setEmail("");
-                setPassword("");
-                setRegno("");
-                setSelectedRole("STUDENT");
-                setModalError(null);
-                setIsModalOpen(true);
-              }}
-              className="flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600 shadow-sm"
-            >
-              <Plus size={16} />
-              Create New User
-            </button>
-          </div>
+          <button type="button" onClick={() => setModalOpen(true)} className="flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600">
+            <Plus size={16} /> Create New User
+          </button>
         </div>
 
-        {/* Filter Controls Row */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 p-4 bg-slate-50/50">
-          {/* Search Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 bg-slate-50/50 p-4">
           <div className="relative min-w-[260px] flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              type="text"
+              type="search"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                setCurrentPage(1);
+              }}
               placeholder="Search by name, email, or registration number..."
               className="h-9 w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 text-xs text-gray-700 outline-none placeholder:text-gray-400 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-100"
             />
           </div>
-
-          {/* Filter Dropdowns */}
           <div className="flex flex-wrap items-center gap-2">
-            <select className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-600 outline-none">
-              <option>All Departments</option>
-              <option>CSE</option>
-              <option>ECE</option>
-              <option>IT</option>
-              <option>ME</option>
-            </select>
-
-            <select className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-600 outline-none">
-              <option>All Batches</option>
-              <option>2026 • 7th Sem</option>
-              <option>2027 • 5th Sem</option>
-            </select>
-
-            <select className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-xs text-gray-600 outline-none">
-              <option>All Status</option>
-              <option>Active</option>
-              <option>Inactive</option>
-            </select>
-
-            <button className="flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-medium text-gray-600 hover:bg-gray-50">
-              <Filter size={14} />
-              Filter
+            {activeTab === "STUDENT" && (
+              <>
+                <FilterSelect label="Department" value={departmentFilter} options={departmentOptions} onChange={(value) => { setDepartmentFilter(value); setCurrentPage(1); }} />
+                <FilterSelect label="Batch" value={batchFilter} options={batchOptions} onChange={(value) => { setBatchFilter(value); setCurrentPage(1); }} />
+              </>
+            )}
+            <FilterSelect label="Status" value={statusFilter === "ALL" ? "All Status" : statusFilter} options={["All Status", "ACTIVE", "INACTIVE"]} onChange={(value) => { setStatusFilter(value === "All Status" ? "ALL" : value as UserStatusFilter); setCurrentPage(1); }} />
+            <button type="button" onClick={() => setCurrentPage(1)} className="flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-medium text-gray-600 hover:bg-gray-50">
+              <Filter size={14} /> Filter
             </button>
-
-            <button className="flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-medium text-gray-600 hover:bg-gray-50">
-              <Download size={14} />
-              Export
+            <button type="button" onClick={handleExport} className="flex h-9 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-medium text-gray-600 hover:bg-gray-50">
+              <Download size={14} /> Export
             </button>
           </div>
         </div>
 
-        {/* User Table */}
-        <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-xs text-gray-600">
-            <thead className="border-b border-gray-200 bg-gray-50 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
-              <tr>
-                <th className="p-3 pl-4 w-8">
-                  <input type="checkbox" className="h-3.5 w-3.5 accent-cyan-600 rounded" />
-                </th>
-                <th className="p-3 w-10">#</th>
-                <th className="p-3">Name</th>
-                <th className="p-3">Email</th>
-                <th className="p-3">Registration No.</th>
-                <th className="p-3">Department</th>
-                <th className="p-3">Batch / Semester</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Created On</th>
-                <th className="p-3 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {loadingUsers ? (
-                <tr>
-                  <td colSpan={10} className="p-8 text-center text-gray-400">
-                    Loading users from server...
-                  </td>
-                </tr>
-              ) : currentTabUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="p-8 text-center text-gray-400">
-                    No users found for this category.
-                  </td>
-                </tr>
-              ) : (
-                currentTabUsers.map((user, idx) => {
-                  const displayName = user.name || user.email.split("@")[0];
-                  const initials = getInitials(displayName);
-                  const colorClass = getRandomColor(user.id || idx);
+        {usersQuery.error ? (
+          <div className="flex flex-col items-center gap-2 p-10 text-center">
+            <p className="text-sm font-semibold text-rose-600">Unable to load users.</p>
+            <p className="max-w-md text-xs text-slate-500">{getApiErrorMessage(usersQuery.error)}</p>
+            <button type="button" onClick={() => void usersQuery.refetch()} className="mt-2 rounded-lg bg-cyan-500 px-3 py-2 text-xs font-semibold text-white hover:bg-cyan-600">Try again</button>
+          </div>
+        ) : (
+          <UserTable users={paginatedUsers} isLoading={usersQuery.isLoading} isStudentTab={activeTab === "STUDENT"} onDelete={setUserToDelete} />
+        )}
 
-                  return (
-                    <tr key={user.id || user.email} className="hover:bg-gray-50/70 transition">
-                      <td className="p-3 pl-4">
-                        <input type="checkbox" className="h-3.5 w-3.5 accent-cyan-600 rounded" />
-                      </td>
-                      <td className="p-3 font-medium text-gray-400">{idx + 1}</td>
-                      <td className="p-3">
-                        <div className="flex items-center gap-2.5">
-                          <span className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold ${colorClass}`}>
-                            {initials}
-                          </span>
-                          <span className="font-semibold text-gray-900">{displayName}</span>
-                        </div>
-                      </td>
-                      <td className="p-3 text-gray-500">{user.email}</td>
-                      <td className="p-3 font-mono text-[11px] text-gray-600">{user.regno || "—"}</td>
-                      <td className="p-3 text-gray-600">{user.dept || (user.role === "ADMIN" ? "Admin" : "CSE")}</td>
-                      <td className="p-3 text-gray-600">{user.batch || "2026 • 7th Sem"}</td>
-                      <td className="p-3">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                            user.status === "Inactive"
-                              ? "bg-red-50 text-red-600"
-                              : "bg-emerald-50 text-emerald-600"
-                          }`}
-                        >
-                          <span className={`h-1.5 w-1.5 rounded-full ${user.status === "Inactive" ? "bg-red-500" : "bg-emerald-500"}`} />
-                          {user.status || "Active"}
-                        </span>
-                      </td>
-                      <td className="p-3 text-gray-500">{formatDate(user.createdAt)}</td>
-                      <td className="p-3">
-                        <div className="flex items-center justify-center gap-1">
-                          <button title="View" className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-cyan-600">
-                            <Eye size={14} />
-                          </button>
-                          <button title="Edit" className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-blue-600">
-                            <Pencil size={14} />
-                          </button>
-                          <button title="Delete" className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-red-600">
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination Footer */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 p-4 text-xs text-gray-500">
-          <span>Showing 1 to {currentTabUsers.length} of {currentTabUsers.length} entries</span>
-          <div className="flex items-center gap-1">
-            <button className="rounded border border-gray-200 px-2 py-1 hover:bg-gray-50">‹</button>
-            <button className="rounded border border-cyan-500 bg-cyan-500 px-2.5 py-1 font-semibold text-white">1</button>
-            <button className="rounded border border-gray-200 px-2.5 py-1 hover:bg-gray-50">2</button>
-            <button className="rounded border border-gray-200 px-2.5 py-1 hover:bg-gray-50">3</button>
-            <button className="rounded border border-gray-200 px-2 py-1 hover:bg-gray-50">›</button>
+          <span>
+            Showing {filteredUsers.length === 0 ? 0 : (safePage - 1) * pageSize + 1} to {Math.min(safePage * pageSize, filteredUsers.length)} of {filteredUsers.length} user{filteredUsers.length === 1 ? "" : "s"}
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button type="button" aria-label="Previous page" disabled={safePage === 1} onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"><ChevronLeft size={15} /></button>
+            {Array.from({ length: Math.max(3, totalPages) }, (_, index) => index + 1).map((page) => (
+              <button key={page} type="button" disabled={page > totalPages} onClick={() => setCurrentPage(page)} className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-semibold ${safePage === page ? "border-cyan-400 bg-cyan-50 text-cyan-600" : "border-gray-200 text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"}`}>{page}</button>
+            ))}
+            <button type="button" aria-label="Next page" disabled={safePage === totalPages} onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"><ChevronRight size={15} /></button>
           </div>
+          <span className="text-[11px] text-slate-400">Live data from Lumina API</span>
         </div>
       </div>
 
-      {/* =========================================================
-          CREATE NEW USER MODAL (Matching Image 2 exactly)
-      ========================================================= */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
-            {/* Modal Header */}
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
-                  <UserPlus size={22} />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-gray-900">Create New User</h2>
-                  <p className="text-xs text-gray-500">Add a new user to the platform.</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-              >
-                <X size={18} />
+      {modalOpen && (
+        <ModalShell title="Create New User" description="Add a user to the platform." icon={UserPlus} onClose={closeModal}>
+          <form onSubmit={handleCreateUser} className="mt-6 space-y-4">
+            {modalError && <FormError message={modalError} />}
+            <Field label="Email Address"><TextInput icon={Mail} type="email" value={userEmail} onChange={(event) => setUserEmail(event.target.value)} placeholder="Enter email address" autoComplete="off" required /></Field>
+            <Field label="Password">
+              <span className="relative block">
+                <Lock size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input type={showPassword ? "text" : "password"} value={userPassword} onChange={(event) => setUserPassword(event.target.value)} placeholder="Enter password" autoComplete="new-password" required className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-10 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
+                <button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </span>
+            </Field>
+            <Field label="Role">
+              <select value={userRole} onChange={(event) => setUserRole(event.target.value as FormRole)} className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs text-slate-800 outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100">
+                <option value="STUDENT">Student</option>
+                <option value="PLACEMENT_OFFICER">Placement Officer</option>
+                <option value="ADMIN">Admin</option>
+                <option value="RECRUITER">Recruiter</option>
+              </select>
+            </Field>
+            <ModalActions isLoading={isCreatingUser} onCancel={closeModal} />
+          </form>
+        </ModalShell>
+      )}
+
+      {userToDelete && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/40 p-4" role="presentation">
+          <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="delete-user-title">
+            <h2 id="delete-user-title" className="text-base font-bold text-slate-900">Delete user?</h2>
+            <p className="mt-2 text-sm text-slate-500">Are you sure you want to delete {userToDelete.email}? This user will be marked inactive.</p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => setUserToDelete(null)} disabled={isDeletingUser} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">Cancel</button>
+              <button type="button" onClick={handleDeleteUser} disabled={isDeletingUser} className="inline-flex items-center gap-2 rounded-lg bg-rose-500 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60">
+                {isDeletingUser ? "Deleting..." : "Delete"}
               </button>
             </div>
-
-            {/* Modal Form */}
-            <form onSubmit={handleCreateUser} autoComplete="off" className="mt-6 space-y-4">
-              {modalError && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-600">
-                  {modalError}
-                </div>
-              )}
-
-              {/* Email Address */}
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">
-                  Email Address <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="email"
-                    required
-                    autoComplete="off"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter email address"
-                    className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">
-                  Password <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    autoComplete="new-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password"
-                    className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-9 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Role */}
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">
-                  Role <span className="text-red-500">*</span>
-                </label>
-                <CustomRoleSelect
-                  value={selectedRole}
-                  onChange={(val) => setSelectedRole(val)}
-                />
-              </div>
-
-              {/* Registration Number (Only for Student role) */}
-              {selectedRole === "STUDENT" && (
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-700">
-                    Registration Number <span className="text-slate-400 font-normal">(Optional)</span>
-                  </label>
-                  <div className="relative">
-                    <FileUser size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      autoComplete="off"
-                      value={regno}
-                      onChange={(e) => setRegno(e.target.value)}
-                      placeholder="Enter registration number"
-                      className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Modal Buttons */}
-              <div className="mt-6 flex items-center justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="rounded-xl border border-gray-200 bg-slate-100 px-5 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-cyan-600 active:scale-[0.99] disabled:opacity-50 shadow-sm"
-                >
-                  <UserPlus size={16} />
-                  {submitting ? "Creating..." : "Create New User"}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
-      {/* ADD SKILL MODAL (all text inputs) */}
-      {isSkillModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
-                  <Layers size={22} />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-gray-900">Add New Skill</h2>
-                  <p className="text-xs text-gray-500">Add a new skill to the platform.</p>
-                </div>
-              </div>
-              <button onClick={() => setIsSkillModalOpen(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
-                <X size={18} />
-              </button>
-            </div>
-            <form onSubmit={handleAddSkill} autoComplete="off" className="mt-6 space-y-4">
-              {skillError && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-600">{skillError}</div>
-              )}
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Skill Category <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <LayoutGrid size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input type="text" required autoComplete="off" value={skillCategory} onChange={(e) => setSkillCategory(e.target.value)} placeholder="Enter skill category" className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Skill Name <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <Tag size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input type="text" required autoComplete="off" value={skillName} onChange={(e) => setSkillName(e.target.value)} placeholder="Enter skill name" className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Domain <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <Settings size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input type="text" required autoComplete="off" value={skillDomain} onChange={(e) => setSkillDomain(e.target.value)} placeholder="Enter domain" className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
-                </div>
-              </div>
-              <div className="mt-6 flex items-center justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setIsSkillModalOpen(false)} className="rounded-xl border border-gray-200 bg-slate-100 px-5 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200">Cancel</button>
-                <button type="submit" disabled={skillSubmitting} className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-cyan-600 active:scale-[0.99] disabled:opacity-50 shadow-sm">
-                  <Plus size={16} />
-                  {skillSubmitting ? "Adding..." : "Add Skill"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      {/* ADD DEPARTMENT MODAL (all text inputs) */}
-      {isDepartmentModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600">
-                  <Landmark size={22} />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold text-gray-900">Add New Department</h2>
-                  <p className="text-xs text-gray-500">Add a new department to the platform.</p>
-                </div>
-              </div>
-              <button onClick={() => setIsDepartmentModalOpen(false)} className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600">
-                <X size={18} />
-              </button>
-            </div>
-            <form onSubmit={handleAddDepartment} autoComplete="off" className="mt-6 space-y-4">
-              {departmentError && (
-                <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-medium text-red-600">{departmentError}</div>
-              )}
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Department Name <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input type="text" required autoComplete="off" value={departmentName} onChange={(e) => setDepartmentName(e.target.value)} placeholder="Enter department name" className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
-                </div>
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Domain <span className="text-red-500">*</span></label>
-                <div className="relative">
-                  <Settings size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input type="text" required autoComplete="off" value={departmentDomain} onChange={(e) => setDepartmentDomain(e.target.value)} placeholder="Enter domain" className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
-                </div>
-              </div>
-              <div className="mt-6 flex items-center justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setIsDepartmentModalOpen(false)} className="rounded-xl border border-gray-200 bg-slate-100 px-5 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200">Cancel</button>
-                <button type="submit" disabled={departmentSubmitting} className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-cyan-600 active:scale-[0.99] disabled:opacity-50 shadow-sm">
-                  <Plus size={16} />
-                  {departmentSubmitting ? "Adding..." : "Add Department"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+    </div>
+  );
+}
 
+function StatCard({ label, value, icon: Icon, tone }: { label: string; value: number; icon: typeof Users; tone: "cyan" | "violet" | "blue" | "emerald" }) {
+  const tones = {
+    cyan: "bg-cyan-50 text-cyan-600",
+    violet: "bg-violet-50 text-violet-600",
+    blue: "bg-blue-50 text-blue-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+  };
+
+  return (
+    <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div>
+        <p className="text-xs font-medium text-gray-500">{label}</p>
+        <p className="mt-1 text-xl font-bold text-gray-900">{value}</p>
+      </div>
+      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${tones[tone]}`}><Icon size={20} /></div>
+    </div>
+  );
+}
+
+function FilterSelect({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) {
+  return (
+    <label className="relative">
+      <span className="sr-only">{label}</span>
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-9 min-w-[132px] appearance-none rounded-lg border border-gray-200 bg-white px-3 pr-8 text-xs font-medium text-gray-600 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-100">
+        {options.map((option) => <option key={option} value={option}>{option === "ACTIVE" ? "Active" : option === "INACTIVE" ? "Inactive" : option}</option>)}
+      </select>
+      <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">⌄</span>
+    </label>
+  );
+}
+
+function UserTable({ users, isLoading, isStudentTab, onDelete }: { users: ManagedUser[]; isLoading: boolean; isStudentTab: boolean; onDelete: (user: ManagedUser) => void }) {
+  const columnCount = isStudentTab ? 9 : 6;
+
+  return (
+    <div className="w-full overflow-x-auto">
+      <table className={`w-full ${isStudentTab ? "min-w-[980px]" : "min-w-[680px]"} text-left text-xs text-gray-600`}>
+        <thead className="border-b border-gray-200 bg-gray-50 text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+          <tr>
+            <th className="p-3 pl-5">#</th>
+            <th className="p-3">Name</th>
+            <th className="p-3">Email</th>
+            {isStudentTab && <th className="p-3">Registration No.</th>}
+            {isStudentTab && <th className="p-3">Department</th>}
+            {isStudentTab && <th className="p-3">Batch / Semester</th>}
+            <th className="p-3">Status</th>
+            <th className="p-3">Created On</th>
+            <th className="p-3 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-100">
+          {isLoading ? <LoadingRow colSpan={columnCount} /> : users.length === 0 ? (
+            <tr><td colSpan={columnCount} className="p-10 text-center text-xs text-slate-400">No users found.</td></tr>
+          ) : users.map((user, index) => (
+            <tr key={user.userUuid} className="hover:bg-gray-50/70">
+              <td className="p-3 pl-5 font-medium text-gray-400">{index + 1}</td>
+              <td className="p-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-100 text-[10px] font-bold text-cyan-700">{getInitials(getUserName(user))}</span>
+                  <span className="font-semibold text-gray-900">{getUserName(user)}</span>
+                </div>
+              </td>
+              <td className="p-3 text-gray-500">{user.email}</td>
+              {isStudentTab && <td className="p-3">{getUserRegistrationNumber(user)}</td>}
+              {isStudentTab && <td className="p-3">{getUserDepartment(user)}</td>}
+              {isStudentTab && <td className="p-3">{getUserBatch(user)}</td>}
+              <td className="p-3"><StatusBadge status={user.status} /></td>
+              <td className="p-3 text-gray-500">{formatDate(user.createdAt)}</td>
+              <td className="p-3 text-center"><ActionButtons onDelete={() => onDelete(user)} disabled={user.status.toUpperCase() === "INACTIVE"} /></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

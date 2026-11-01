@@ -10,9 +10,11 @@ import {
   ChevronDown,
   Eye,
   FileUser,
+  LoaderCircle,
 } from "lucide-react";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useMediaQuery } from "@mui/material";
+import { type StudentRecord, useGetStudentsQuery } from "../redux/api";
 
 export const Students = () => {
   const departments = [
@@ -717,82 +719,6 @@ function FilterSelect({
   );
 }
 
-const profileImage =
-  "https://www.gravatar.com/avatar/2c7d99fe281ecd3bcd65ab915bac6dd5?s=250";
-
-const students = [
-  {
-    name: "Rahul Kumar",
-    reg: "22CS101",
-    dept: "CSE",
-    batch: "2022 - 2026",
-    cgpa: "8.72",
-    backlogs: 0,
-    skills: "React, Python",
-    moreSkills: 5,
-    status: "Placed",
-    drives: 8,
-    resume: "Uploaded",
-    profile: 96,
-  },
-  {
-    name: "Arun M",
-    reg: "22EC056",
-    dept: "ECE",
-    batch: "2022 - 2026",
-    cgpa: "7.45",
-    backlogs: 1,
-    skills: "Python, SQL",
-    moreSkills: 3,
-    status: "Unplaced",
-    drives: 5,
-    resume: "Uploaded",
-    profile: 82,
-  },
-  {
-    name: "Kiran S",
-    reg: "22ME033",
-    dept: "MECH",
-    batch: "2022 - 2026",
-    cgpa: "6.12",
-    backlogs: 3,
-    skills: "AutoCAD, SolidWorks",
-    moreSkills: 4,
-    status: "Not Eligible",
-    drives: 0,
-    resume: "Not Uploaded",
-    profile: 45,
-  },
-  {
-    name: "Priya N",
-    reg: "22CS118",
-    dept: "CSE",
-    batch: "2022 - 2026",
-    cgpa: "8.91",
-    backlogs: 0,
-    skills: "React, TypeScript",
-    moreSkills: 4,
-    status: "Interview",
-    drives: 7,
-    resume: "Uploaded",
-    profile: 93,
-  },
-  {
-    name: "Vignesh P",
-    reg: "22EE077",
-    dept: "EEE",
-    batch: "2022 - 2026",
-    cgpa: "7.88",
-    backlogs: 1,
-    skills: "Python, MATLAB",
-    moreSkills: 2,
-    status: "Shortlisted",
-    drives: 6,
-    resume: "Uploaded",
-    profile: 89,
-  },
-];
-
 const statusStyles: Record<string, string> = {
   Placed: "bg-green-50 text-green-600",
   Unplaced: "bg-yellow-50 text-yellow-600",
@@ -810,15 +736,121 @@ function getCgpaStyle(cgpa: string) {
   return "bg-red-50 text-red-500";
 }
 
+function getStudentValue(student: StudentRecord, keys: string[]): unknown {
+  const record = student as unknown as Record<string, unknown>;
+
+  for (const key of keys) {
+    const value = record[key];
+    if (value !== undefined && value !== null && value !== "") {
+      return value;
+    }
+  }
+
+  if (student.user) {
+    const user = student.user as Record<string, unknown>;
+    for (const key of keys) {
+      const value = user[key];
+      if (value !== undefined && value !== null && value !== "") {
+        return value;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+function getDisplayValue(value: unknown): string {
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+
+  return "—";
+}
+
+function getStudentName(student: StudentRecord): string {
+  return getDisplayValue(getStudentValue(student, ["name", "fullName", "displayName"]));
+}
+
+function getStudentInitials(name: string): string {
+  if (name === "—") return "—";
+
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+}
+
+function getStudentDepartment(student: StudentRecord): string {
+  const value = getStudentValue(student, ["department", "departmentName"]);
+
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+
+  if (value && typeof value === "object" && "name" in value) {
+    return getDisplayValue((value as { name?: unknown }).name);
+  }
+
+  return "—";
+}
+
+function getStudentBatch(student: StudentRecord): string {
+  const batch = getStudentValue(student, ["batch"]);
+  const semester = getStudentValue(student, ["semester"]);
+
+  if (batch === undefined && semester === undefined) return "—";
+  if (semester === undefined) return getDisplayValue(batch);
+  if (batch === undefined) return `Semester ${getDisplayValue(semester)}`;
+
+  return `${getDisplayValue(batch)} · Sem ${getDisplayValue(semester)}`;
+}
+
+function getStudentSkills(student: StudentRecord): { label: string; more: number } {
+  const value = getStudentValue(student, ["skills"]);
+
+  if (!Array.isArray(value)) return { label: "—", more: 0 };
+
+  const labels = value
+    .map((skill) => {
+      if (typeof skill === "string") return skill;
+      if (skill && typeof skill === "object") {
+        const skillRecord = skill as { name?: unknown; skill?: unknown };
+        return getDisplayValue(skillRecord.name ?? skillRecord.skill);
+      }
+      return "—";
+    })
+    .filter((skill) => skill !== "—");
+
+  if (labels.length === 0) return { label: "—", more: 0 };
+
+  return {
+    label: labels.slice(0, 2).join(", "),
+    more: Math.max(labels.length - 2, 0),
+  };
+}
+
+function getStudentCount(value: unknown): string {
+  if (Array.isArray(value)) return String(value.length);
+  return getDisplayValue(value);
+}
+
 export default function StudentTable() {
   const navigate = useNavigate();
+  const {
+    data: students = [],
+    isLoading,
+    error,
+    refetch,
+  } = useGetStudentsQuery();
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-hidden rounded-xl border border-gray-200 bg-white">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3">
         <h2 className="text-xs font-semibold text-gray-900 sm:text-sm">
-          Student Directory (1,248)
+          Student Directory ({students.length})
         </h2>
 
         <div className="flex gap-1.5 sm:gap-2">
@@ -890,169 +922,246 @@ export default function StudentTable() {
           </div>
 
           {/* Students */}
-          {students.map((student) => (
-            <div
-              key={student.reg}
-              className="flex items-center border-b border-gray-100 px-3 py-2 last:border-0 hover:bg-gray-50 sm:px-4 sm:py-3"
-            >
-              {/* Checkbox */}
-              <div className="w-[30px] shrink-0 sm:w-[35px]">
-                <input
-                  type="checkbox"
-                  className="h-3.5 w-3.5 accent-cyan-600 sm:h-4 sm:w-4"
-                />
-              </div>
+          {isLoading ? (
+            <div className="flex min-h-28 items-center justify-center gap-2 text-xs text-gray-500">
+              <LoaderCircle size={16} className="animate-spin" />
+              Loading students...
+            </div>
+          ) : error ? (
+            <div className="flex min-h-28 items-center justify-center gap-3 text-xs text-red-500">
+              Unable to load students.
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="font-semibold text-cyan-600 hover:underline"
+              >
+                Retry
+              </button>
+            </div>
+          ) : students.length === 0 ? (
+            <div className="flex min-h-28 items-center justify-center text-xs text-gray-500">
+              No students found.
+            </div>
+          ) : (
+            students.map((student, index) => {
+              const studentName = getStudentName(student);
+              const registrationNumber = getDisplayValue(
+                getStudentValue(student, [
+                  "registrationNumber",
+                  "registrationNo",
+                  "registerNumber",
+                ]),
+              );
+              const studentId = getDisplayValue(
+                student.id ??
+                  student.studentUuid ??
+                  student.studentId ??
+                  student.userUuid ??
+                  (registrationNumber !== "—" ? registrationNumber : ""),
+              );
+              const cgpa = getDisplayValue(getStudentValue(student, ["cgpa"]));
+              const backlogs = getStudentCount(
+                getStudentValue(student, ["backlogs"]),
+              );
+              const skills = getStudentSkills(student);
+              const placementStatus = getDisplayValue(
+                getStudentValue(student, ["placementStatus"]),
+              );
+              const drives = getStudentCount(
+                getStudentValue(student, ["drives"]),
+              );
+              const resumeValue = getStudentValue(student, ["resume"]);
+              const resumeUrl = getStudentValue(student, ["resumeUrl"]);
+              const resume =
+                typeof resumeValue === "boolean"
+                  ? resumeValue
+                    ? "Uploaded"
+                    : "Not Uploaded"
+                  : getDisplayValue(resumeValue ?? resumeUrl);
+              const profileValue = getStudentValue(student, [
+                "profileCompletion",
+                "profile",
+              ]);
+              const profile =
+                typeof profileValue === "number"
+                  ? profileValue
+                  : typeof profileValue === "string" && profileValue.trim() !== ""
+                    ? Number(profileValue)
+                    : null;
+              const hasProfile = profile !== null && Number.isFinite(profile);
+              const statusClass =
+                statusStyles[placementStatus] ?? "bg-slate-50 text-slate-500";
 
-              {/* Student */}
-              <div className="w-[160px] shrink-0 sm:w-[180px]">
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  <img
-                    src={profileImage}
-                    alt={student.name}
-                    className="h-7 w-7 shrink-0 rounded-full object-cover sm:h-8 sm:w-8"
-                  />
-
-                  <span className="whitespace-nowrap text-[10px] font-semibold text-gray-800 sm:text-xs">
-                    {student.name}
-                  </span>
-                </div>
-              </div>
-
-              {/* Register */}
-              <div className="w-[120px] shrink-0 text-[10px] text-gray-600 sm:w-[130px] sm:text-xs">
-                {student.reg}
-              </div>
-
-              {/* Department */}
-              <div className="w-[90px] shrink-0 text-[10px] text-gray-600 sm:w-[100px] sm:text-xs">
-                {student.dept}
-              </div>
-
-              {/* Batch */}
-              <div className="w-[110px] shrink-0 text-[10px] text-gray-600 sm:w-[125px] sm:text-xs">
-                {student.batch}
-              </div>
-
-              {/* CGPA */}
-              <div className="w-[70px] shrink-0 sm:w-[80px]">
-                <span
-                  className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${getCgpaStyle(
-                    student.cgpa,
-                  )}`}
+              return (
+                <div
+                  key={`${studentId}-${index}`}
+                  className="flex items-center border-b border-gray-100 px-3 py-2 last:border-0 hover:bg-gray-50 sm:px-4 sm:py-3"
                 >
-                  {student.cgpa}
-                </span>
-              </div>
-
-              {/* Backlogs */}
-              <div className="w-[70px] shrink-0 text-[10px] text-gray-600 sm:w-[80px] sm:text-xs">
-                {student.backlogs}
-              </div>
-
-              {/* Skills */}
-              <div className="w-[190px] shrink-0 sm:w-[210px]">
-                <div className="flex items-center gap-1.5 whitespace-nowrap text-[10px] text-gray-600 sm:gap-2 sm:text-xs">
-                  <span>{student.skills}</span>
-
-                  <span className="font-semibold text-blue-600">
-                    +{student.moreSkills} skills
-                  </span>
-                </div>
-              </div>
-
-              {/* Status */}
-              <div className="w-[120px] shrink-0 sm:w-[135px]">
-                <span
-                  className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${statusStyles[student.status]}`}
-                >
-                  {student.status}
-                </span>
-              </div>
-
-              {/* Drives */}
-              <div className="w-[70px] shrink-0 text-[10px] text-gray-600 sm:w-[80px] sm:text-xs">
-                {student.drives}
-              </div>
-
-              {/* Resume */}
-              <div className="w-[110px] shrink-0 sm:w-[125px]">
-                <span
-                  className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${
-                    student.resume === "Uploaded"
-                      ? "bg-green-50 text-green-600"
-                      : "bg-red-50 text-red-500"
-                  }`}
-                >
-                  {student.resume}
-                </span>
-              </div>
-
-              {/* Profile */}
-              <div className="w-[80px] shrink-0 sm:w-[90px]">
-                <div className="w-14 sm:w-16">
-                  <div className="mb-1 text-[10px] font-semibold text-gray-700 sm:text-xs">
-                    {student.profile}%
-                  </div>
-
-                  <div className="h-1 w-full overflow-hidden rounded-full bg-gray-200 sm:h-1.5">
-                    <div
-                      className={`h-full rounded-full ${
-                        student.profile < 60 ? "bg-red-500" : "bg-green-500"
-                      }`}
-                      style={{
-                        width: `${student.profile}%`,
-                      }}
+                  {/* Checkbox */}
+                  <div className="w-[30px] shrink-0 sm:w-[35px]">
+                    <input
+                      type="checkbox"
+                      className="h-3.5 w-3.5 accent-cyan-600 sm:h-4 sm:w-4"
                     />
                   </div>
+
+                  {/* Student */}
+                  <div className="w-[160px] shrink-0 sm:w-[180px]">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-[9px] font-semibold text-cyan-700 sm:h-8 sm:w-8 sm:text-[10px]">
+                        {getStudentInitials(studentName)}
+                      </span>
+
+                      <span className="whitespace-nowrap text-[10px] font-semibold text-gray-800 sm:text-xs">
+                        {studentName}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Register */}
+                  <div className="w-[120px] shrink-0 text-[10px] text-gray-600 sm:w-[130px] sm:text-xs">
+                    {registrationNumber}
+                  </div>
+
+                  {/* Department */}
+                  <div className="w-[90px] shrink-0 text-[10px] text-gray-600 sm:w-[100px] sm:text-xs">
+                    {getStudentDepartment(student)}
+                  </div>
+
+                  {/* Batch */}
+                  <div className="w-[110px] shrink-0 text-[10px] text-gray-600 sm:w-[125px] sm:text-xs">
+                    {getStudentBatch(student)}
+                  </div>
+
+                  {/* CGPA */}
+                  <div className="w-[70px] shrink-0 sm:w-[80px]">
+                    {cgpa === "—" ? (
+                      <span className="text-[10px] text-gray-600 sm:text-xs">—</span>
+                    ) : (
+                      <span
+                        className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${getCgpaStyle(
+                          cgpa,
+                        )}`}
+                      >
+                        {cgpa}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Backlogs */}
+                  <div className="w-[70px] shrink-0 text-[10px] text-gray-600 sm:w-[80px] sm:text-xs">
+                    {backlogs}
+                  </div>
+
+                  {/* Skills */}
+                  <div className="w-[190px] shrink-0 sm:w-[210px]">
+                    <div className="flex items-center gap-1.5 whitespace-nowrap text-[10px] text-gray-600 sm:gap-2 sm:text-xs">
+                      <span>{skills.label}</span>
+
+                      {skills.more > 0 && (
+                        <span className="font-semibold text-blue-600">
+                          +{skills.more} skills
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="w-[120px] shrink-0 sm:w-[135px]">
+                    <span
+                      className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${statusClass}`}
+                    >
+                      {placementStatus}
+                    </span>
+                  </div>
+
+                  {/* Drives */}
+                  <div className="w-[70px] shrink-0 text-[10px] text-gray-600 sm:w-[80px] sm:text-xs">
+                    {drives}
+                  </div>
+
+                  {/* Resume */}
+                  <div className="w-[110px] shrink-0 sm:w-[125px]">
+                    {resume === "—" ? (
+                      <span className="text-[10px] text-gray-600 sm:text-xs">—</span>
+                    ) : (
+                      <span
+                        className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold sm:px-2 sm:py-1 sm:text-xs ${
+                          resume === "Uploaded"
+                            ? "bg-green-50 text-green-600"
+                            : "bg-red-50 text-red-500"
+                        }`}
+                      >
+                        {resume}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Profile */}
+                  <div className="w-[80px] shrink-0 sm:w-[90px]">
+                    {hasProfile ? (
+                      <div className="w-14 sm:w-16">
+                        <div className="mb-1 text-[10px] font-semibold text-gray-700 sm:text-xs">
+                          {profile}%
+                        </div>
+
+                        <div className="h-1 w-full overflow-hidden rounded-full bg-gray-200 sm:h-1.5">
+                          <div
+                            className={`h-full rounded-full ${
+                              profile < 60 ? "bg-red-500" : "bg-green-500"
+                            }`}
+                            style={{
+                              width: `${profile}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-gray-600 sm:text-xs">—</span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="w-[80px] shrink-0 sm:w-[90px]">
+                    <div className="flex w-fit items-center rounded-md border border-gray-200 bg-white sm:rounded-lg">
+                      <button
+                        type="button"
+                        title="View Student"
+                        aria-label={`View ${studentName}`}
+                        disabled={!studentId || studentId === "—"}
+                        onClick={() => navigate(`/students/${studentId}`)}
+                        className="p-1.5 text-cyan-500 transition hover:bg-cyan-50 hover:text-cyan-600 disabled:cursor-not-allowed disabled:opacity-40 sm:p-2"
+                      >
+                        <Eye size={13} className="sm:h-[15px] sm:w-[15px]" />
+                      </button>
+
+                      <div className="h-4 w-px bg-gray-200 sm:h-5" />
+
+                      <button
+                        type="button"
+                        title="View Applications"
+                        aria-label={`View applications for ${studentName}`}
+                        disabled={!studentId || studentId === "—"}
+                        onClick={() =>
+                          navigate(`/students/${studentId}/applications`)
+                        }
+                        className="p-1.5 text-cyan-500 transition hover:bg-cyan-50 hover:text-cyan-600 disabled:cursor-not-allowed disabled:opacity-40 sm:p-2"
+                      >
+                        <FileUser size={13} className="sm:h-[15px] sm:w-[15px]" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-
-              {/* ==============================
-                  ACTIONS
-              ============================== */}
-              <div className="w-[80px] shrink-0 sm:w-[90px]">
-                <div className="flex w-fit items-center rounded-md border border-gray-200 bg-white sm:rounded-lg">
-                  {/* ==============================
-                      VIEW STUDENT
-                  ============================== */}
-                  <button
-                    type="button"
-                    title="View Student"
-                    aria-label={`View ${student.name}`}
-                    onClick={() => navigate(`/students/${student.reg}`)}
-                    className="p-1.5 text-cyan-500 transition hover:bg-cyan-50 hover:text-cyan-600 sm:p-2"
-                  >
-                    <Eye size={13} className="sm:h-[15px] sm:w-[15px]" />
-                  </button>
-
-                  {/* Divider */}
-                  <div className="h-4 w-px bg-gray-200 sm:h-5" />
-
-                  {/* ==============================
-                      VIEW APPLICATIONS
-                  ============================== */}
-                  <button
-                    type="button"
-                    title="View Applications"
-                    aria-label={`View applications for ${student.name}`}
-                    onClick={() =>
-                      navigate(`/students/${student.reg}/applications`)
-                    }
-                    className="p-1.5 text-cyan-500 transition hover:bg-cyan-50 hover:text-cyan-600 sm:p-2"
-                  >
-                    <FileUser size={13} className="sm:h-[15px] sm:w-[15px]" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
       </div>
 
       {/* Footer */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-3 py-2.5 sm:gap-3 sm:px-4 sm:py-3">
         <span className="text-[10px] text-gray-500 sm:text-xs">
-          Showing 1–10 of 1,248 students
+          Showing {students.length === 0 ? 0 : 1}–{students.length} of {students.length} students
         </span>
 
         <div className="flex items-center gap-1">

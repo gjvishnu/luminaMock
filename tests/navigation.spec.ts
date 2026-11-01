@@ -1,18 +1,60 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
-/**
- * Login API removed: the app opens straight into the dashboard.
- * These specs verify every section renders with no login step.
- */
-test('root redirects straight to the dashboard', async ({ page }) => {
+const testUser = {
+  userUuid: 'test-user-uuid',
+  email: 'placement.officer@lumina.edu',
+  role: 'PLACEMENT_OFFICER',
+  status: 'ACTIVE',
+  createdAt: '2026-10-27T18:56:42.858Z',
+  updatedAt: '2026-10-27T18:56:42.858Z',
+};
+
+async function mockAuthApi(page: Page) {
+  await page.route('**/api/users/login', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        message: 'Login successful',
+        user: testUser,
+        accessToken: 'test-access-token',
+        refreshToken: 'test-refresh-token',
+        tokenType: 'Bearer',
+      }),
+    });
+  });
+
+  await page.route('**/api/users/logout', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ message: 'Logout successful' }),
+    });
+  });
+}
+
+async function login(page: Page) {
+  await mockAuthApi(page);
+  await page.goto('/login');
+  await page.getByLabel('Email address').fill(testUser.email);
+  await page.getByLabel('Password').fill('password123');
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page).toHaveURL(/\/dashboard/);
+}
+
+test('root redirects to the dashboard after login', async ({ page }) => {
+  await login(page);
   await page.goto('/');
-  await page.waitForLoadState('networkidle');
 
   await expect(page).toHaveURL(/\/dashboard/, { timeout: 5000 });
   await expect(page.locator('text=Total Students').first()).toBeVisible({ timeout: 5000 });
 });
 
-test('all main sections render without login', async ({ page }) => {
+test('login protects the application and all main sections render', async ({ page }) => {
+  await page.goto('/dashboard');
+  await expect(page).toHaveURL(/\/login/);
+
+  await login(page);
   const sections = [
     '/dashboard',
     '/actions',
@@ -25,43 +67,29 @@ test('all main sections render without login', async ({ page }) => {
 
   for (const route of sections) {
     await page.goto(route);
-    await page.waitForLoadState('networkidle');
-    // No redirect to /login — every page renders directly.
     await expect(page).toHaveURL(new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), {
       timeout: 5000,
     });
   }
 });
 
-test('role switch dropdown has all three views', async ({ page }) => {
-  await page.goto('/dashboard');
-  await page.waitForLoadState('networkidle');
-  await expect(page.locator('text=Total Students').first()).toBeVisible({ timeout: 5000 });
+test('header menu only exposes logout', async ({ page }) => {
+  await login(page);
 
   const profileButton = page.locator('button[aria-haspopup="menu"]').first();
   await profileButton.click();
-  await page.waitForTimeout(500);
 
-  await expect(page.locator('text=Student').first()).toBeVisible();
-  await expect(page.locator('text=Placement Officer').first()).toBeVisible();
-  await expect(page.locator('text=Admin').first()).toBeVisible();
+  await expect(page.getByRole('menuitem')).toHaveCount(1);
+  await expect(page.getByRole('menuitem', { name: 'Logout' })).toBeVisible();
+  await expect(page.getByText('Switch view')).not.toBeVisible();
 });
 
-test('role switch dropdown changes views', async ({ page }) => {
-  await page.goto('/dashboard');
-  await page.waitForLoadState('networkidle');
-  await expect(page.locator('text=Total Students').first()).toBeVisible({ timeout: 5000 });
+test('logout clears the session and returns to login', async ({ page }) => {
+  await login(page);
 
-  const profileButton = page.locator('button[aria-haspopup="menu"]').first();
-  await expect(profileButton).toBeVisible();
-  await profileButton.click();
-  await page.waitForTimeout(500);
+  await page.locator('button[aria-haspopup="menu"]').first().click();
+  await page.getByRole('menuitem', { name: 'Logout' }).click();
 
-  const placementOfficerOption = page.locator('text=Placement Officer').first();
-  await expect(placementOfficerOption).toBeVisible({ timeout: 3000 });
-  await placementOfficerOption.click();
-  await page.waitForTimeout(500);
-
-  await expect(page.locator('text=Welcome, Vikram')).toBeVisible({ timeout: 3000 });
-  await expect(page.locator('text=Placement Officer Dashboard')).toBeVisible({ timeout: 3000 });
+  await expect(page).toHaveURL(/\/login/);
+  await expect(page.getByRole('heading', { name: 'Sign in to Lumina' })).toBeVisible();
 });
