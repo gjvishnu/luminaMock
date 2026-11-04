@@ -2,8 +2,11 @@ import {
   Building2,
   CalendarDays,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   CircleCheckBig,
   Download,
+  Eye,
   Pencil,
   RotateCcw,
   Search,
@@ -11,10 +14,19 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { type DriveRecord, useDeleteDriveMutation, useGetDrivesQuery } from "../redux/api";
+import { toast } from "material-react-toastify";
+import {
+  type CompanyRecord,
+  type DriveJobType,
+  type DrivePagination,
+  type DriveRecord,
+  type DriveStatus,
+  useDeleteDriveMutation,
+  useGetCompaniesQuery,
+  useGetDrivesQuery,
+} from "../redux/api";
 
 const stats = [
   {
@@ -51,10 +63,27 @@ const stats = [
   },
 ];
 
-const driveStatuses = ["All", "DRAFT", "UPCOMING", "ONGOING"];
-const dateFilters = ["All", "Today", "This Week", "This Month"];
+type FilterOption = { value: string; label: string };
+
+const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 400;
+const SEARCH_MAX_LENGTH = 150;
+const ALL_OPTION: FilterOption = { value: "All", label: "All" };
+
+const toFilterOptions = (values: string[]): FilterOption[] => [
+  ALL_OPTION,
+  ...values.map((value) => ({ value, label: prettyEnum(value) })),
+];
+
+const driveStatusOptions = toFilterOptions(["DRAFT", "UPCOMING", "ONGOING", "COMPLETED", "CANCELLED"]);
+const jobTypeOptions = toFilterOptions(["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT", "APPRENTICESHIP"]);
+const dateFilterOptions = toFilterOptions(["Today", "This Week", "This Month"]);
 
 type DriveRole = NonNullable<DriveRecord["roles"]>[number];
+
+function getCompanyId(company: CompanyRecord) {
+  return String(company.companyUuid ?? company.companyId ?? company.id ?? "");
+}
 
 function getDriveId(drive: DriveRecord) {
   return String(drive.driveUuid ?? drive.driveId ?? drive.id ?? "");
@@ -96,21 +125,6 @@ function getApiErrorMessage(error: unknown) {
   return "Unable to delete this campus drive. Please try again.";
 }
 
-function getRoleDepartments(role: DriveRole | undefined) {
-  const departments = role?.departments as unknown;
-  if (!Array.isArray(departments)) return [];
-
-  return departments.map((department) => {
-    if (typeof department === "string") return department;
-    if (department && typeof department === "object") {
-      const record = department as Record<string, unknown>;
-      const name = record.name ?? record.departmentName ?? record.department;
-      return typeof name === "string" ? name : "";
-    }
-    return "";
-  }).filter(Boolean);
-}
-
 function getDriveNumber(drive: DriveRecord, keys: string[]) {
   const record = drive as Record<string, unknown>;
   const value = keys.map((key) => record[key]).find((item) => typeof item === "number");
@@ -135,75 +149,100 @@ function getStatusStyle(status?: string) {
       return "bg-amber-100 text-amber-700";
     case "DRAFT":
       return "bg-slate-100 text-slate-600";
+    case "COMPLETED":
+      return "bg-green-100 text-green-700";
+    case "CANCELLED":
+      return "bg-rose-100 text-rose-600";
     default:
       return "bg-blue-100 text-blue-700";
   }
 }
 
-function isWithinDateFilter(value: string | undefined, filter: string) {
-  if (filter === "All") return true;
-  if (!value) return false;
+function toDateParam(date: Date) {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return false;
-
+function getDateParams(filter: string) {
   const today = new Date();
-  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const driveDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const differenceInDays = Math.floor((driveDay.getTime() - startOfToday.getTime()) / 86400000);
+  const year = today.getFullYear();
+  const month = today.getMonth();
 
-  if (filter === "Today") return differenceInDays === 0;
-  if (filter === "This Week") return differenceInDays >= 0 && differenceInDays < 7;
+  if (filter === "Today") return { driveDate: toDateParam(today) };
+  if (filter === "This Week") {
+    return {
+      driveDateFrom: toDateParam(today),
+      driveDateTo: toDateParam(new Date(year, month, today.getDate() + 6)),
+    };
+  }
   if (filter === "This Month") {
-    return date.getFullYear() === today.getFullYear() && date.getMonth() === today.getMonth();
+    return {
+      driveDateFrom: toDateParam(new Date(year, month, 1)),
+      driveDateTo: toDateParam(new Date(year, month + 1, 0)),
+    };
   }
 
-  return true;
+  return {};
 }
 
 export const CampusDrive = () => {
   const navigate = useNavigate();
-  const { data: drives = [], error, isLoading, isFetching, refetch } = useGetDrivesQuery();
   const [searchQuery, setSearchQuery] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const [companyFilter, setCompanyFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [departmentFilter, setDepartmentFilter] = useState("All");
-  const [jobRoleFilter, setJobRoleFilter] = useState("All");
+  const [jobTypeFilter, setJobTypeFilter] = useState("All");
   const [dateFilter, setDateFilter] = useState("All");
+  const [page, setPage] = useState(1);
 
-  const departmentOptions = useMemo(() => {
-    const values = drives.flatMap((drive) => (drive.roles ?? []).flatMap((role) => getRoleDepartments(role)));
-    return ["All", ...Array.from(new Set(values)).sort()];
-  }, [drives]);
+  const { data: companies } = useGetCompaniesQuery();
+  const { data, error, isLoading, isFetching, refetch } = useGetDrivesQuery({
+    page,
+    pageSize: PAGE_SIZE,
+    search: appliedSearch || undefined,
+    companyId: companyFilter === "All" ? undefined : companyFilter,
+    status: statusFilter === "All" ? undefined : statusFilter as DriveStatus,
+    jobType: jobTypeFilter === "All" ? undefined : jobTypeFilter as DriveJobType,
+    ...getDateParams(dateFilter),
+  });
 
-  const jobRoleOptions = useMemo(() => {
-    const values = drives.flatMap((drive) => (drive.roles ?? []).map((role) => getRoleName(role))).filter((value) => value !== "—");
-    return ["All", ...Array.from(new Set(values)).sort()];
-  }, [drives]);
+  // Deleting the last row of the last page leaves the current page out of range.
+  const lastPage = Math.max(data?.pagination.totalPages ?? 1, 1);
+  if (data && !isFetching && page > lastPage) {
+    setPage(lastPage);
+  }
 
-  const filteredDrives = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
+  const companyOptions = useMemo(() => [
+    ALL_OPTION,
+    ...(companies ?? []).map((company) => ({ value: getCompanyId(company), label: company.name })),
+  ], [companies]);
 
-    return drives.filter((drive) => {
-      const roles = drive.roles ?? [];
-      const company = getCompanyName(drive).toLowerCase();
-      const jobRoles = roles.map((item) => getRoleName(item));
-      const status = String(drive.status ?? "").toUpperCase();
-      const departmentsForDrive = roles.flatMap((item) => getRoleDepartments(item));
+  useEffect(() => {
+    const nextSearch = searchQuery.trim();
+    if (nextSearch === appliedSearch) return;
 
-      return (!query || company.includes(query) || jobRoles.some((jobRole) => jobRole.toLowerCase().includes(query)))
-        && (statusFilter === "All" || status === statusFilter)
-        && (departmentFilter === "All" || departmentsForDrive.includes(departmentFilter))
-        && (jobRoleFilter === "All" || jobRoles.includes(jobRoleFilter))
-        && isWithinDateFilter(drive.driveDate, dateFilter);
-    });
-  }, [dateFilter, departmentFilter, drives, jobRoleFilter, searchQuery, statusFilter]);
+    const timer = window.setTimeout(() => {
+      setAppliedSearch(nextSearch);
+      setPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [appliedSearch, searchQuery]);
+
+  const changeFilter = (setFilter: (value: string) => void) => (value: string) => {
+    setFilter(value);
+    setPage(1);
+  };
 
   const resetFilters = () => {
     setSearchQuery("");
+    setAppliedSearch("");
+    setCompanyFilter("All");
     setStatusFilter("All");
-    setDepartmentFilter("All");
-    setJobRoleFilter("All");
+    setJobTypeFilter("All");
     setDateFilter("All");
+    setPage(1);
   };
 
   return (
@@ -254,16 +293,17 @@ export const CampusDrive = () => {
                 type="text"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search company or role..."
+                maxLength={SEARCH_MAX_LENGTH}
+                placeholder="Search company, role, location, venue..."
                 className="h-9 w-full rounded-md border border-gray-200 bg-white pl-8 pr-3 text-[11px] text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
               />
             </div>
           </div>
 
-          <FilterDropdown label="Drive Status" options={driveStatuses} value={statusFilter} onChange={setStatusFilter} />
-          <FilterDropdown label="Department" options={departmentOptions} value={departmentFilter} onChange={setDepartmentFilter} />
-          <FilterDropdown label="Job Role" options={jobRoleOptions} value={jobRoleFilter} onChange={setJobRoleFilter} />
-          <FilterDropdown label="Date" options={dateFilters} value={dateFilter} onChange={setDateFilter} />
+          <FilterDropdown label="Company" options={companyOptions} value={companyFilter} onChange={changeFilter(setCompanyFilter)} />
+          <FilterDropdown label="Drive Status" options={driveStatusOptions} value={statusFilter} onChange={changeFilter(setStatusFilter)} />
+          <FilterDropdown label="Job Type" options={jobTypeOptions} value={jobTypeFilter} onChange={changeFilter(setJobTypeFilter)} />
+          <FilterDropdown label="Date" options={dateFilterOptions} value={dateFilter} onChange={changeFilter(setDateFilter)} />
 
           <button
             type="button"
@@ -278,7 +318,10 @@ export const CampusDrive = () => {
 
       <div className="mt-2">
         <DriveTable
-          drives={filteredDrives}
+          drives={data?.drives ?? []}
+          pagination={data?.pagination}
+          page={page}
+          onPageChange={setPage}
           isLoading={isLoading}
           isFetching={isFetching}
           error={error}
@@ -286,6 +329,10 @@ export const CampusDrive = () => {
           onOpen={(drive) => {
             const id = getDriveId(drive);
             if (id) navigate(`/campusdrive/${id}`);
+          }}
+          onEdit={(drive) => {
+            const id = getDriveId(drive);
+            if (id) navigate(`/campusdrive/${id}/edit`);
           }}
         />
       </div>
@@ -300,7 +347,7 @@ function FilterDropdown({
   onChange,
 }: {
   label: string;
-  options: string[];
+  options: FilterOption[];
   value: string;
   onChange: (value: string) => void;
 }) {
@@ -313,7 +360,7 @@ function FilterDropdown({
           onChange={(event) => onChange(event.target.value)}
           className="h-9 w-full cursor-pointer appearance-none rounded-md border border-gray-200 bg-white px-2.5 pr-8 text-[11px] font-medium text-slate-700 outline-none transition focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
         >
-          {options.map((option) => <option key={option} value={option}>{option === "All" ? option : prettyEnum(option)}</option>)}
+          {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
         <ChevronDown size={14} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
       </div>
@@ -323,21 +370,36 @@ function FilterDropdown({
 
 function DriveTable({
   drives,
+  pagination,
+  page,
+  onPageChange,
   isLoading,
   isFetching,
   error,
   onRetry,
   onOpen,
+  onEdit,
 }: {
   drives: DriveRecord[];
+  pagination?: DrivePagination;
+  page: number;
+  onPageChange: (page: number) => void;
   isLoading: boolean;
   isFetching: boolean;
   error: unknown;
   onRetry: () => void;
   onOpen: (drive: DriveRecord) => void;
+  onEdit: (drive: DriveRecord) => void;
 }) {
   const [driveToDelete, setDriveToDelete] = useState<DriveRecord | null>(null);
   const [deleteDrive, { isLoading: isDeleting }] = useDeleteDriveMutation();
+
+  const total = pagination?.total ?? 0;
+  const totalPages = Math.max(pagination?.totalPages ?? 1, 1);
+  const firstRow = drives.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const lastRow = drives.length === 0 ? 0 : firstRow + drives.length - 1;
+  const firstVisiblePage = Math.max(1, Math.min(page - 2, totalPages - 4));
+  const visiblePages = Array.from({ length: Math.min(5, totalPages) }, (_, index) => firstVisiblePage + index);
 
   const handleDelete = async () => {
     const driveId = driveToDelete ? getDriveId(driveToDelete) : "";
@@ -410,7 +472,7 @@ function DriveTable({
 
                 return (
                   <tr
-                    key={id || `${company}-${drive.driveDate ?? "unknown"}-${index}`}
+                    key={`${id || company}-${role?.id ?? index}`}
                     onClick={() => onOpen(drive)}
                     onKeyDown={(event) => {
                       if ((event.key === "Enter" || event.key === " ") && id) {
@@ -449,9 +511,26 @@ function DriveTable({
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           type="button"
+                          aria-label={`View ${company} drive`}
+                          title="View drive"
+                          disabled={!id}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onOpen(drive);
+                          }}
+                          className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 text-slate-500 hover:bg-slate-50 hover:text-cyan-600 disabled:cursor-not-allowed disabled:opacity-40 sm:h-9 sm:w-9 sm:rounded-lg"
+                        >
+                          <Eye size={14} className="sm:h-[16px] sm:w-[16px]" />
+                        </button>
+                        <button
+                          type="button"
                           aria-label={`Edit ${company} drive`}
                           title="Edit drive"
-                          onClick={(event) => event.stopPropagation()}
+                          disabled={!id}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onEdit(drive);
+                          }}
                           className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 text-slate-500 hover:bg-slate-50 hover:text-cyan-600 sm:h-9 sm:w-9 sm:rounded-lg"
                         >
                           <Pencil size={14} className="sm:h-[16px] sm:w-[16px]" />
@@ -479,8 +558,15 @@ function DriveTable({
         </div>
       )}
 
-      <div className="border-t border-gray-200 px-3 py-2.5 sm:px-4 sm:py-3">
-        <p className="text-[10px] text-slate-500 sm:text-sm">Showing {drives.length} drive{drives.length === 1 ? "" : "s"}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-200 px-3 py-2.5 sm:px-4 sm:py-3">
+        <p className="text-[10px] text-slate-500 sm:text-sm">Showing {firstRow} to {lastRow} of {total} drive{total === 1 ? "" : "s"}</p>
+        <div className="flex items-center gap-1.5">
+          <button type="button" aria-label="Previous page" disabled={page <= 1} onClick={() => onPageChange(page - 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"><ChevronLeft size={15} /></button>
+          {visiblePages.map((pageNumber) => (
+            <button key={pageNumber} type="button" aria-label={`Page ${pageNumber}`} aria-current={pageNumber === page ? "page" : undefined} onClick={() => onPageChange(pageNumber)} className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-semibold ${pageNumber === page ? "border-cyan-400 bg-cyan-50 text-cyan-600" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>{pageNumber}</button>
+          ))}
+          <button type="button" aria-label="Next page" disabled={page >= totalPages} onClick={() => onPageChange(page + 1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"><ChevronRight size={15} /></button>
+        </div>
       </div>
 
       {driveToDelete && (

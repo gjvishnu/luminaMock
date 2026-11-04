@@ -19,22 +19,30 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "material-react-toastify";
 import {
   type CompanyRecord,
-  type CreateDriveRequest,
+  type CreateDriveRoleRequest,
   type DepartmentRecord,
+  type DriveDetailRecord,
+  type DriveDetailRole,
   type DriveJobType,
   type DriveStatus,
   type SelectionProcess,
   type SkillRecord,
+  useAddDriveRoleMutation,
   useCreateCompanyMutation,
+  useCreateDegreeMutation,
   useCreateDepartmentMutation,
   useCreateDriveMutation,
   useCreateSkillMutation,
+  useDeleteDriveRoleMutation,
   useGetCompaniesQuery,
+  useGetDegreesQuery,
   useGetDepartmentsQuery,
   useGetSkillsQuery,
+  useUpdateDriveMutation,
+  useUpdateDriveRoleMutation,
 } from "../redux/api";
 
 type JdFile = {
@@ -46,6 +54,8 @@ type JdFile = {
 // Each role section contains Job Role Info + Eligibility + Role Details
 type RoleSection = {
   id: string;
+  // Set for roles that already exist on the server
+  roleId?: string;
   // Job Role Info
   jobRole: string;
   jobLocation: string;
@@ -66,11 +76,24 @@ type RoleSection = {
   selectionProcesses: string[];
 };
 
-type CatalogModalKind = "skill" | "department";
+type CatalogModalKind = "skill" | "department" | "degree";
+
+type DropdownOption = {
+  value: string;
+  label: string;
+  hint?: string | null;
+};
 
 const jobTypeOptions = ["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT", "APPRENTICESHIP"];
-const batchOptions = ["2026", "2025", "2024", "2023"];
+const batchOptions = ["2028", "2027", "2026", "2025", "2024", "2023"];
 const driveStatusOptions = ["DRAFT", "UPCOMING", "ONGOING"];
+const catalogLabels: Record<CatalogModalKind, string> = {
+  skill: "Skill",
+  department: "Department",
+  degree: "Degree",
+};
+const DEGREE_NAME_MAX_LENGTH = 150;
+const editDriveStatusOptions = [...driveStatusOptions, "COMPLETED", "CANCELLED"];
 const selectionProcessOptions = [
   "ONLINE_ASSESSMENT",
   "APTITUDE_TEST",
@@ -81,6 +104,7 @@ const selectionProcessOptions = [
   "MANAGERIAL_INTERVIEW",
   "CASE_STUDY",
   "CODING_ROUND",
+  "OTHER",
 ];
 
 const defaultRoleSection = (): RoleSection => ({
@@ -101,6 +125,75 @@ const defaultRoleSection = (): RoleSection => ({
   jdFile: null,
   selectionProcesses: [],
 });
+
+const toDateInput = (value?: string | null) => value?.slice(0, 10) ?? "";
+const toDateTime = (value: string) => `${value}T00:00:00.000Z`;
+const toText = (value?: string | number | null) => (value === null || value === undefined ? "" : String(value));
+
+function toRoleSection(role: DriveDetailRole): RoleSection {
+  return {
+    id: String(role.id),
+    roleId: String(role.id),
+    jobRole: toText(role.jobRole),
+    jobLocation: toText(role.jobLocation),
+    jobType: toText(role.jobType),
+    ctc: toText(role.ctcPackage),
+    skills: (role.skills ?? []).map(getCatalogRecordId),
+    openings: toText(role.numberOfOpenings),
+    departments: (role.departments ?? []).map(getCatalogRecordId),
+    batch: (role.graduationYears ?? []).join(", "),
+    minimumCgpa: toText(role.minimumCgpa),
+    maximumBacklogs: toText(role.maximumBacklogs),
+    degree: toText(role.degree),
+    otherCriteria: (role.otherCriteria ?? []).join(", "),
+    jobDescription: toText(role.jobDescription),
+    jdFile: role.jdPdfUrl
+      ? { name: role.jdPdfUrl.split("/").pop() || "Job description", size: "Uploaded", url: role.jdPdfUrl }
+      : null,
+    selectionProcesses: role.selectionProcesses ?? [],
+  };
+}
+
+function toRolePayload(role: RoleSection): CreateDriveRoleRequest {
+  return {
+    jobRole: role.jobRole.trim(),
+    jobLocation: role.jobLocation.trim(),
+    jobType: role.jobType as DriveJobType,
+    ctcPackage: role.ctc.trim(),
+    numberOfOpenings: Number(role.openings),
+    departments: role.departments,
+    graduationYears: role.batch.split(", ").map(Number),
+    minimumCgpa: Number(role.minimumCgpa),
+    maximumBacklogs: Number(role.maximumBacklogs),
+    degree: role.degree,
+    otherCriteria: role.otherCriteria.trim() ? [role.otherCriteria.trim()] : [],
+    jobDescription: role.jobDescription.trim() || undefined,
+    jdPdfUrl: role.jdFile && !isLocalFile(role.jdFile) ? role.jdFile.url : null,
+    selectionProcesses: role.selectionProcesses as SelectionProcess[],
+    skillIds: role.skills,
+  };
+}
+
+// PDF upload is not implemented on the server, so a locally picked file has no URL to send.
+function isLocalFile(file: JdFile) {
+  return file.url.startsWith("blob:");
+}
+
+function getChangedFields<T extends object>(current: T, saved: T) {
+  return Object.fromEntries(
+    Object.entries(current).filter(([key, value]) => JSON.stringify(value) !== JSON.stringify(saved[key as keyof T])),
+  ) as Partial<T>;
+}
+
+function mergeCatalog<T extends SkillRecord | DepartmentRecord>(options: T[], selected: T[]) {
+  const ids = new Set(options.map(getCatalogRecordId));
+  return [...options, ...selected.filter((record) => {
+    const id = getCatalogRecordId(record);
+    if (ids.has(id)) return false;
+    ids.add(id);
+    return true;
+  })];
+}
 
 function getCompanyId(company: CompanyRecord) {
   return String(company.companyUuid ?? company.companyId ?? company.id ?? "");
@@ -135,20 +228,26 @@ function getApiErrorMessage(error: unknown, fallback: string) {
 
 type FieldErrors = Record<string, string>;
 
-export const AddDrive = () => {
+export const AddDrive = ({ drive }: { drive?: DriveDetailRecord }) => {
+  const isEditMode = Boolean(drive);
+  const saveLabel = isEditMode ? "Save Changes" : "Save Drive";
   const navigate = useNavigate();
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const fieldToFocusRef = useRef<string | null>(null);
 
   // Card 1: Company & Drive Information
-  const [companyId, setCompanyId] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [companyWebsite, setCompanyWebsite] = useState("");
+  const [companyId, setCompanyId] = useState(drive?.companyId ?? "");
+  const [companyName, setCompanyName] = useState(drive?.company?.name ?? "");
+  const [companyWebsite, setCompanyWebsite] = useState(drive?.company?.website ?? "");
   const [aboutCompany, setAboutCompany] = useState("");
-  const [driveDate, setDriveDate] = useState("");
-  const [driveTime, setDriveTime] = useState("");
-  const [venue, setVenue] = useState("");
-  const [registrationEndDate, setRegistrationEndDate] = useState("");
-  const [driveStatus, setDriveStatus] = useState("");
+  const [driveDate, setDriveDate] = useState(toDateInput(drive?.driveDate));
+  const [driveTime, setDriveTime] = useState(drive?.driveTime ?? "");
+  const [venue, setVenue] = useState(drive?.venue ?? "");
+  const [registrationEndDate, setRegistrationEndDate] = useState(toDateInput(drive?.registrationEndDate));
+  const [driveStatus, setDriveStatus] = useState(toText(drive?.status));
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [newCompanyName, setNewCompanyName] = useState("");
   const [newCompanyWebsite, setNewCompanyWebsite] = useState("");
@@ -159,23 +258,50 @@ export const AddDrive = () => {
   const companiesQuery = useGetCompaniesQuery();
   const departmentsQuery = useGetDepartmentsQuery();
   const skillsQuery = useGetSkillsQuery();
+  const degreesQuery = useGetDegreesQuery();
   const [createCompany, { isLoading: isCreatingCompany }] = useCreateCompanyMutation();
   const [createDepartment, { isLoading: isCreatingDepartment }] = useCreateDepartmentMutation();
-  const [createDrive, { isLoading: isCreatingDrive }] = useCreateDriveMutation();
+  const [createDrive] = useCreateDriveMutation();
+  const [updateDrive] = useUpdateDriveMutation();
+  const [addDriveRole] = useAddDriveRoleMutation();
+  const [updateDriveRole] = useUpdateDriveRoleMutation();
+  const [deleteDriveRole] = useDeleteDriveRoleMutation();
   const [createSkill, { isLoading: isCreatingSkill }] = useCreateSkillMutation();
+  const [createDegree, { isLoading: isCreatingDegree }] = useCreateDegreeMutation();
   const companies = companiesQuery.data ?? [];
-  const departments = departmentsQuery.data ?? [];
-  const skills = skillsQuery.data ?? [];
+  // Drives store the degree name as text, and GET /api/degrees includes inactive degrees.
+  const degreeOptions = (degreesQuery.data ?? [])
+    .filter((degree) => degree.status !== "INACTIVE")
+    .map((degree) => ({ value: degree.degreeName, label: degree.degreeName }));
+  // A drive can reference inactive records that the catalog lists leave out.
+  const departments = mergeCatalog(departmentsQuery.data ?? [], drive?.roles?.flatMap((role) => role.departments ?? []) ?? []);
+  const skills = mergeCatalog(skillsQuery.data ?? [], drive?.roles?.flatMap((role) => role.skills ?? []) ?? []);
   const [catalogModal, setCatalogModal] = useState<CatalogModalKind | null>(null);
+  const [catalogRoleId, setCatalogRoleId] = useState<string | null>(null);
   const [catalogName, setCatalogName] = useState("");
   const [catalogCategory, setCatalogCategory] = useState("");
   const [catalogDomain, setCatalogDomain] = useState("");
   const [catalogError, setCatalogError] = useState<string | null>(null);
 
   // Multiple role sections (each has Job Role Info + Eligibility + Role Details)
-  const [roleSections, setRoleSections] = useState<RoleSection[]>([
-    { ...defaultRoleSection(), id: "role-1" },
-  ]);
+  const [roleSections, setRoleSections] = useState<RoleSection[]>(() => (
+    drive?.roles?.length ? drive.roles.map(toRoleSection) : [{ ...defaultRoleSection(), id: "role-1" }]
+  ));
+  const [removedRoleIds, setRemovedRoleIds] = useState<string[]>([]);
+
+  const driveFields = {
+    companyId,
+    driveDate: toDateTime(driveDate),
+    driveTime,
+    venue: venue.trim(),
+    registrationEndDate: toDateTime(registrationEndDate),
+    status: driveStatus as DriveStatus,
+  };
+
+  // What the server currently holds, so edits send only what changed and a
+  // retry after a partial failure does not repeat finished steps.
+  const savedDriveFieldsRef = useRef(driveFields);
+  const savedRolesRef = useRef(new Map(roleSections.map((role) => [role.id, toRolePayload(role)])));
 
   // Clean up object URLs on unmount
   useEffect(() => {
@@ -186,6 +312,35 @@ export const AddDrive = () => {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const focusField = (field: string) => {
+    const scroller = pageRef.current?.parentElement;
+    const wrapper = pageRef.current?.querySelector(`[data-field="${field}"]`);
+    if (!scroller || !wrapper) return;
+
+    // scrollIntoView would also scroll the fixed app shell around the page.
+    const wrapperBox = wrapper.getBoundingClientRect();
+    const offset = wrapperBox.top - scroller.getBoundingClientRect().top;
+    scroller.scrollTop += offset - (scroller.clientHeight - wrapperBox.height) / 2;
+    wrapper.querySelector<HTMLElement>("input, textarea, button")?.focus({ preventScroll: true });
+  };
+
+  // Switching between the form and the preview swaps the page content, so
+  // restore the scroll position (or jump to the field being edited).
+  useEffect(() => {
+    const field = fieldToFocusRef.current;
+    fieldToFocusRef.current = null;
+    if (field) {
+      focusField(field);
+    } else {
+      pageRef.current?.parentElement?.scrollTo({ top: 0 });
+    }
+  }, [isPreviewMode]);
+
+  const handleEditField = (field: string) => {
+    fieldToFocusRef.current = field;
+    setIsPreviewMode(false);
+  };
+
   const handleAddRole = () => {
     setRoleSections((prev) => [...prev, defaultRoleSection()]);
     toast.info("Added new role section");
@@ -193,11 +348,11 @@ export const AddDrive = () => {
 
   const handleDeleteRole = (id: string) => {
     if (roleSections.length <= 1) return;
-    setRoleSections((prev) => {
-      const removed = prev.find((r) => r.id === id);
-      if (removed?.jdFile) URL.revokeObjectURL(removed.jdFile.url);
-      return prev.filter((r) => r.id !== id);
-    });
+    const removed = roleSections.find((r) => r.id === id);
+    if (removed?.jdFile) URL.revokeObjectURL(removed.jdFile.url);
+    const removedRoleId = removed?.roleId;
+    if (removedRoleId) setRemovedRoleIds((prev) => [...prev, removedRoleId]);
+    setRoleSections((prev) => prev.filter((r) => r.id !== id));
     toast.info("Deleted role section");
   };
 
@@ -248,8 +403,9 @@ export const AddDrive = () => {
     }
   };
 
-  const openCatalogModal = (kind: CatalogModalKind) => {
+  const openCatalogModal = (kind: CatalogModalKind, roleId: string) => {
     setCatalogModal(kind);
+    setCatalogRoleId(roleId);
     setCatalogName("");
     setCatalogCategory("");
     setCatalogDomain("");
@@ -276,6 +432,13 @@ export const AddDrive = () => {
       } else if (catalogModal === "department") {
         await createDepartment({ name: catalogName.trim() }).unwrap();
         toast.success("Department added and available in the dropdown.");
+      } else if (catalogModal === "degree") {
+        const degree = await createDegree({ degreeName: catalogName.trim() }).unwrap();
+        if (catalogRoleId) {
+          updateRole(catalogRoleId, { degree: degree.degreeName });
+          clearFieldError(`role:${catalogRoleId}.degree`);
+        }
+        toast.success("Degree added and selected.");
       }
       closeCatalogModal();
     } catch (error) {
@@ -286,7 +449,7 @@ export const AddDrive = () => {
     }
   };
 
-  const handleSaveDrive = async () => {
+  const handleReviewDrive = () => {
     const validationErrors: FieldErrors = {};
     const addError = (field: string, message: string) => {
       validationErrors[field] = message;
@@ -310,60 +473,82 @@ export const AddDrive = () => {
         addError(field("openings"), `${prefix}Enter a valid number of openings.`);
       }
       if (role.departments.length === 0) addError(field("departments"), `${prefix}Select at least one department.`);
-      if (!role.batch || !Number.isFinite(Number(role.batch))) addError(field("batch"), `${prefix}Graduation year is required.`);
+      if (!role.batch) addError(field("batch"), `${prefix}Graduation year is required.`);
       if (!role.minimumCgpa || !Number.isFinite(Number(role.minimumCgpa))) addError(field("minimumCgpa"), `${prefix}Enter a valid minimum CGPA.`);
       if (!role.maximumBacklogs || !Number.isFinite(Number(role.maximumBacklogs))) addError(field("maximumBacklogs"), `${prefix}Enter maximum backlogs.`);
       if (!role.degree.trim()) addError(field("degree"), `${prefix}Degree is required.`);
       if (role.selectionProcesses.length === 0) addError(field("selectionProcesses"), `${prefix}Select at least one selection process.`);
       if (role.skills.length === 0) addError(field("skills"), `${prefix}Select at least one skill.`);
+      // PATCH /api/drives/:id/roles/:roleId rejects a blank jobDescription.
+      if (role.roleId && !role.jobDescription.trim() && savedRolesRef.current.get(role.id)?.jobDescription) {
+        addError(field("jobDescription"), `${prefix}Job description cannot be removed once saved.`);
+      }
     });
 
     if (Object.keys(validationErrors).length > 0) {
       setFieldErrors(validationErrors);
-      if (isPreviewMode) setIsPreviewMode(false);
       toast.error("Please complete the highlighted fields.");
+      focusField(Object.keys(validationErrors)[0]);
       return;
     }
 
     setFieldErrors({});
+    setIsPreviewMode(true);
+  };
 
-    const payload: CreateDriveRequest = {
-      companyId,
-      driveDate: `${driveDate}T00:00:00.000Z`,
-      driveTime,
-      venue: venue.trim(),
-      registrationEndDate: `${registrationEndDate}T00:00:00.000Z`,
-      status: driveStatus as DriveStatus,
-      roles: roleSections.map((role) => ({
-        jobRole: role.jobRole.trim(),
-        jobLocation: role.jobLocation.trim(),
-        jobType: role.jobType as DriveJobType,
-        ctcPackage: role.ctc.trim(),
-        numberOfOpenings: Number(role.openings),
-        departments: role.departments,
-        graduationYears: [Number(role.batch)],
-        minimumCgpa: Number(role.minimumCgpa),
-        maximumBacklogs: Number(role.maximumBacklogs),
-        degree: role.degree,
-        otherCriteria: role.otherCriteria.trim() ? [role.otherCriteria.trim()] : [],
-        jobDescription: role.jobDescription.trim() || undefined,
-        jdPdfUrl: null,
-        selectionProcesses: role.selectionProcesses as SelectionProcess[],
-        skillIds: role.skills,
-      })),
-    };
+  const updateExistingDrive = async (driveId: string) => {
+    const driveChanges = getChangedFields(driveFields, savedDriveFieldsRef.current);
+    if (Object.keys(driveChanges).length > 0) {
+      await updateDrive({ driveId, body: driveChanges }).unwrap();
+      savedDriveFieldsRef.current = driveFields;
+    }
+
+    for (const role of roleSections) {
+      const payload = toRolePayload(role);
+      const savedRole = savedRolesRef.current.get(role.id);
+
+      if (role.roleId && savedRole) {
+        const changes = getChangedFields(payload, savedRole);
+        if (role.jdFile && isLocalFile(role.jdFile)) delete changes.jdPdfUrl;
+        if (Object.keys(changes).length > 0) {
+          await updateDriveRole({ driveId, roleId: role.roleId, body: changes }).unwrap();
+          savedRolesRef.current.set(role.id, payload);
+        }
+      } else {
+        const created = await addDriveRole({ driveId, body: payload }).unwrap();
+        updateRole(role.id, { roleId: String(created.id) });
+        savedRolesRef.current.set(role.id, payload);
+      }
+    }
+
+    for (const roleId of removedRoleIds) {
+      await deleteDriveRole({ driveId, roleId }).unwrap();
+      setRemovedRoleIds((prev) => prev.filter((id) => id !== roleId));
+    }
+  };
+
+  const handleSaveDrive = async () => {
+    setIsSaving(true);
 
     try {
-      await createDrive(payload).unwrap();
-      toast.success("Campus Drive saved successfully!");
+      if (drive) {
+        await updateExistingDrive(String(drive.id));
+        toast.success("Campus Drive updated successfully!");
+      } else {
+        await createDrive({ ...driveFields, roles: roleSections.map(toRolePayload) }).unwrap();
+        toast.success("Campus Drive saved successfully!");
+      }
       navigate("/campusdrive");
     } catch (error) {
+      setIsConfirmOpen(false);
       toast.error(getApiErrorMessage(error, "Unable to save the campus drive. Please try again."));
+    } finally {
+      setIsSaving(false);
     }
   };
 
   return (
-    <div className="space-y-4 pb-6 text-slate-800">
+    <div ref={pageRef} className="space-y-4 pb-6 text-slate-800">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs">
         <button
@@ -384,7 +569,7 @@ export const AddDrive = () => {
         </button>
         <ChevronRight size={13} className="text-slate-300" />
         <span className="font-bold text-slate-800">
-          {isPreviewMode ? "Preview Campus Drive" : "Company details"}
+          {isPreviewMode ? "Preview Campus Drive" : isEditMode ? "Edit Campus Drive" : "Company details"}
         </span>
       </div>
 
@@ -404,64 +589,27 @@ export const AddDrive = () => {
           )}
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[26px]">
-              {isPreviewMode ? "Preview Campus Drive" : "Add Campus Drive"}
+              {isPreviewMode ? "Preview Campus Drive" : isEditMode ? "Edit Campus Drive" : "Add Campus Drive"}
             </h1>
             <p className="mt-0.5 text-xs text-slate-500">
               {isPreviewMode
                 ? "Review the drive details before saving."
-                : "Set shared drive details once, then add role-specific requirements."}
+                : isEditMode
+                  ? "Update the drive details and its roles."
+                  : "Set shared drive details once, then add role-specific requirements."}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {isPreviewMode ? (
-            <>
-              <button
-                type="button"
-                onClick={() => setIsPreviewMode(false)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-4 py-2 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50"
-              >
-                <Pencil size={15} />
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveDrive}
-                disabled={isCreatingDrive}
-                className="rounded-lg bg-cyan-500 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isCreatingDrive ? "Saving..." : "Save Drive"}
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => setIsPreviewMode(true)}
-                className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-              >
-                <Eye size={15} />
-                Preview
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate("/campusdrive")}
-                className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveDrive}
-                disabled={isCreatingDrive}
-                className="rounded-lg bg-cyan-500 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isCreatingDrive ? "Saving..." : "Save Drive"}
-              </button>
-            </>
-          )}
-        </div>
+        {!isPreviewMode && (
+          <button
+            type="button"
+            onClick={() => navigate("/campusdrive")}
+            className="rounded-lg border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+        )}
       </div>
 
       {/* --- PREVIEW MODE --- */}
@@ -474,30 +622,30 @@ export const AddDrive = () => {
             </h2>
             <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
               <div className="lg:col-span-4">
-                <PreviewField label="Company Name" value={companyName} />
+                <PreviewField label="Company Name" value={companyName} onEdit={() => handleEditField("companyId")} />
               </div>
               <div className="lg:col-span-4">
-                <PreviewField label="Company Website" value={companyWebsite} />
+                <PreviewField label="Company Website" value={companyWebsite} onEdit={() => handleEditField("companyWebsite")} />
               </div>
               <div className="lg:col-span-4 lg:row-span-2">
-                <PreviewField label="About Company" value={aboutCompany} isTextArea />
+                <PreviewField label="About Company" value={aboutCompany} isTextArea onEdit={() => handleEditField("aboutCompany")} />
               </div>
 
               <div className="lg:col-span-4">
-                <PreviewField label="Drive Date" value={driveDate} />
+                <PreviewField label="Drive Date" value={driveDate} onEdit={() => handleEditField("driveDate")} />
               </div>
               <div className="lg:col-span-4">
-                <PreviewField label="Drive Time" value={driveTime} />
+                <PreviewField label="Drive Time" value={driveTime} onEdit={() => handleEditField("driveTime")} />
               </div>
 
               <div className="lg:col-span-4">
-                <PreviewField label="Venue" value={venue} />
+                <PreviewField label="Venue" value={venue} onEdit={() => handleEditField("venue")} />
               </div>
               <div className="lg:col-span-4">
-                <PreviewField label="Drive Status" value={driveStatus} />
+                <PreviewField label="Drive Status" value={driveStatus} onEdit={() => handleEditField("driveStatus")} />
               </div>
               <div className="lg:col-span-4">
-                <PreviewField label="Registration End Date" value={registrationEndDate} />
+                <PreviewField label="Registration End Date" value={registrationEndDate} onEdit={() => handleEditField("registrationEndDate")} />
               </div>
             </div>
           </section>
@@ -514,23 +662,23 @@ export const AddDrive = () => {
               {/* Sub-section 1: Job Role Information */}
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <div>
-                  <PreviewField label="Job Role" value={role.jobRole} />
+                  <PreviewField label="Job Role" value={role.jobRole} onEdit={() => handleEditField(`role:${role.id}.jobRole`)} />
                 </div>
                 <div>
-                  <PreviewField label="Job Type" value={role.jobType} />
+                  <PreviewField label="Job Type" value={role.jobType} onEdit={() => handleEditField(`role:${role.id}.jobType`)} />
                 </div>
                 <div>
-                  <PreviewField label="CTC / Package" value={role.ctc} />
+                  <PreviewField label="CTC / Package" value={role.ctc} onEdit={() => handleEditField(`role:${role.id}.ctc`)} />
                 </div>
                 <div>
-                  <PreviewField label="Number of Openings" value={role.openings} />
+                  <PreviewField label="Number of Openings" value={role.openings} onEdit={() => handleEditField(`role:${role.id}.openings`)} />
                 </div>
 
                 <div>
-                  <PreviewField label="Job Location" value={role.jobLocation} />
+                  <PreviewField label="Job Location" value={role.jobLocation} onEdit={() => handleEditField(`role:${role.id}.jobLocation`)} />
                 </div>
                 <div className="md:col-span-2 lg:col-span-3">
-                  <PreviewField label="Skills Required" value={formatCatalogValues(role.skills, skills)} />
+                  <PreviewField label="Skills Required" value={formatCatalogValues(role.skills, skills)} onEdit={() => handleEditField(`role:${role.id}.skills`)} />
                 </div>
               </div>
 
@@ -541,23 +689,23 @@ export const AddDrive = () => {
                 </h3>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <div>
-                    <PreviewField label="Departments" value={formatCatalogValues(role.departments, departments)} />
+                    <PreviewField label="Departments" value={formatCatalogValues(role.departments, departments)} onEdit={() => handleEditField(`role:${role.id}.departments`)} />
                   </div>
                   <div>
-                    <PreviewField label="Batch / Graduation Year" value={role.batch} />
+                    <PreviewField label="Batch / Graduation Year" value={role.batch} onEdit={() => handleEditField(`role:${role.id}.batch`)} />
                   </div>
                   <div>
-                    <PreviewField label="Minimum CGPA" value={role.minimumCgpa} />
+                    <PreviewField label="Minimum CGPA" value={role.minimumCgpa} onEdit={() => handleEditField(`role:${role.id}.minimumCgpa`)} />
                   </div>
                   <div>
-                    <PreviewField label="Maximum Backlogs" value={role.maximumBacklogs} />
+                    <PreviewField label="Maximum Backlogs" value={role.maximumBacklogs} onEdit={() => handleEditField(`role:${role.id}.maximumBacklogs`)} />
                   </div>
 
                   <div>
-                    <PreviewField label="Degree" value={role.degree} />
+                    <PreviewField label="Degree" value={role.degree} onEdit={() => handleEditField(`role:${role.id}.degree`)} />
                   </div>
                   <div className="md:col-span-2 lg:col-span-3">
-                    <PreviewField label="Other Criteria" value={role.otherCriteria} />
+                    <PreviewField label="Other Criteria" value={role.otherCriteria} onEdit={() => handleEditField(`role:${role.id}.otherCriteria`)} />
                   </div>
                 </div>
               </div>
@@ -573,12 +721,14 @@ export const AddDrive = () => {
                       label="Job Description / JD"
                       value={role.jdFile ? `PDF File: ${role.jdFile.name} (${role.jdFile.size})` : role.jobDescription}
                       isTextArea
+                      onEdit={() => handleEditField(`role:${role.id}.jobDescription`)}
                     />
                   </div>
                   <div className="lg:col-span-4">
                     <PreviewField
                       label="Selection Process"
                       value={role.selectionProcesses.map((process, processIndex) => `Round ${processIndex + 1}: ${process}`).join(", ")}
+                      onEdit={() => handleEditField(`role:${role.id}.selectionProcesses`)}
                     />
                   </div>
                 </div>
@@ -598,11 +748,10 @@ export const AddDrive = () => {
             </button>
             <button
               type="button"
-              onClick={handleSaveDrive}
-              disabled={isCreatingDrive}
-              className="rounded-lg bg-cyan-500 px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() => setIsConfirmOpen(true)}
+              className="rounded-lg bg-cyan-500 px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
             >
-              {isCreatingDrive ? "Saving..." : "Save Drive"}
+              {saveLabel}
             </button>
           </div>
         </div>
@@ -617,23 +766,31 @@ export const AddDrive = () => {
 
             {/* Row 1: Company Name | Company Website | About Company (rowspan 2) */}
             <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
-              <div className="lg:col-span-4">
-                <CompanyDropdown
-                  companies={companies}
+              <div className="lg:col-span-4" data-field="companyId">
+                <SearchableDropdown
+                  label="Company Name"
+                  noun="companies"
+                  placeholder="Select a company"
+                  addLabel="Add company"
+                  options={companies.map((company) => ({ value: getCompanyId(company), label: company.name, hint: company.location }))}
                   value={companyId}
+                  selectedLabel={companyName}
                   isLoading={companiesQuery.isLoading}
-                  onSelect={handleCompanySelect}
+                  onSelect={(id) => {
+                    const company = companies.find((item) => getCompanyId(item) === id);
+                    if (company) handleCompanySelect(company);
+                  }}
                   error={fieldErrors.companyId}
-                  onAddCompany={() => {
+                  onAdd={() => {
                     setCompanyModalError(null);
                     setIsCompanyModalOpen(true);
                   }}
                 />
               </div>
-              <div className="lg:col-span-4">
+              <div className="lg:col-span-4" data-field="companyWebsite">
                 <InputField label="Company Website" placeholder="https://" value={companyWebsite} onChange={setCompanyWebsite} />
               </div>
-              <div className="lg:col-span-4 lg:row-span-2">
+              <div className="lg:col-span-4 lg:row-span-2" data-field="aboutCompany">
                 <label className="block">
                   <FieldLabel label="About Company" />
                   <textarea
@@ -646,26 +803,26 @@ export const AddDrive = () => {
               </div>
 
               {/* Row 2: Drive Date | Drive Time */}
-              <div className="lg:col-span-4">
+              <div className="lg:col-span-4" data-field="driveDate">
                 <DateField label="Drive Date" required placeholder="Select date" value={driveDate} onChange={(value) => { setDriveDate(value); clearFieldError("driveDate"); }} error={fieldErrors.driveDate} />
               </div>
-              <div className="lg:col-span-4">
+              <div className="lg:col-span-4" data-field="driveTime">
                 <TimeField label="Drive Time" required placeholder="Select time" value={driveTime} onChange={(value) => { setDriveTime(value); clearFieldError("driveTime"); }} error={fieldErrors.driveTime} />
               </div>
 
               {/* Row 3: Venue | Registration End Date | Drive Status */}
-              <div className="lg:col-span-4">
+              <div className="lg:col-span-4" data-field="venue">
                 <InputField label="Venue" required placeholder="Enter venue" value={venue} onChange={(value) => { setVenue(value); clearFieldError("venue"); }} error={fieldErrors.venue} />
               </div>
-              <div className="lg:col-span-4">
+              <div className="lg:col-span-4" data-field="registrationEndDate">
                 <DateField label="Registration End Date" required placeholder="Select date" value={registrationEndDate} onChange={(value) => { setRegistrationEndDate(value); clearFieldError("registrationEndDate"); }} error={fieldErrors.registrationEndDate} />
               </div>
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2" data-field="driveStatus">
                 <SelectField
                   label="Drive Status"
                   required
                   placeholder="Select an option"
-                  options={driveStatusOptions}
+                  options={isEditMode ? editDriveStatusOptions : driveStatusOptions}
                   value={driveStatus}
                   onChange={(value) => { setDriveStatus(value); clearFieldError("driveStatus"); }}
                   error={fieldErrors.driveStatus}
@@ -688,12 +845,45 @@ export const AddDrive = () => {
               departments={departments}
               skillsLoading={skillsQuery.isLoading}
               departmentsLoading={departmentsQuery.isLoading}
-              onAddSkill={() => openCatalogModal("skill")}
-              onAddDepartment={() => openCatalogModal("department")}
+              degreeOptions={degreeOptions}
+              degreesLoading={degreesQuery.isLoading}
+              onAddSkill={() => openCatalogModal("skill", role.id)}
+              onAddDepartment={() => openCatalogModal("department", role.id)}
+              onAddDegree={() => openCatalogModal("degree", role.id)}
               errors={fieldErrors}
               onClearError={clearFieldError}
             />
           ))}
+
+          {/* Footer Action Button */}
+          <div className="flex items-center justify-end pt-2">
+            <button
+              type="button"
+              onClick={handleReviewDrive}
+              className="rounded-lg bg-cyan-500 px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600"
+            >
+              {saveLabel}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isConfirmOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4" role="presentation">
+          <div className="w-full max-w-sm rounded-xl bg-white p-5 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="save-drive-title">
+            <h2 id="save-drive-title" className="text-base font-bold text-slate-900">{isEditMode ? "Save changes?" : "Save campus drive?"}</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Are you sure you want to save the {companyName} drive with {roleSections.length} role{roleSections.length === 1 ? "" : "s"}?
+              {removedRoleIds.length > 0 && ` ${removedRoleIds.length} removed role${removedRoleIds.length === 1 ? "" : "s"} will be permanently deleted.`}
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => setIsConfirmOpen(false)} disabled={isSaving} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">Cancel</button>
+              <button type="button" onClick={handleSaveDrive} disabled={isSaving} className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60">
+                {isSaving && <LoaderCircle size={14} className="animate-spin" />}
+                {isSaving ? "Saving..." : "Yes, Save"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -712,9 +902,9 @@ export const AddDrive = () => {
 
             <form onSubmit={handleCreateCompany} className="mt-6 space-y-4">
               {companyModalError && <p role="alert" className="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-medium text-rose-600">{companyModalError}</p>}
-              <InputField label="Company Name" required placeholder="Enter company name" value={newCompanyName} onChange={setNewCompanyName} />
+              <InputField label="Company Name" required uppercase placeholder="Enter company name" value={newCompanyName} onChange={setNewCompanyName} />
               <InputField label="Company Website" placeholder="https://" value={newCompanyWebsite} onChange={setNewCompanyWebsite} />
-              <InputField label="Location" required placeholder="Enter company location" value={newCompanyLocation} onChange={setNewCompanyLocation} />
+              <InputField label="Location" required uppercase placeholder="Enter company location" value={newCompanyLocation} onChange={setNewCompanyLocation} />
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setIsCompanyModalOpen(false)} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
                 <button type="submit" disabled={isCreatingCompany} className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60">
@@ -734,7 +924,7 @@ export const AddDrive = () => {
           category={catalogCategory}
           domain={catalogDomain}
           error={catalogError}
-          isLoading={catalogModal === "skill" ? isCreatingSkill : isCreatingDepartment}
+          isLoading={{ skill: isCreatingSkill, department: isCreatingDepartment, degree: isCreatingDegree }[catalogModal]}
           onNameChange={setCatalogName}
           onCategoryChange={setCatalogCategory}
           onDomainChange={setCatalogDomain}
@@ -772,13 +962,14 @@ function CatalogModal({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const isSkill = kind === "skill";
+  const kindLabel = catalogLabels[kind];
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-base font-bold text-slate-900">Add {isSkill ? "Skill" : "Department"}</h2>
+            <h2 className="text-base font-bold text-slate-900">Add {kindLabel}</h2>
             <p className="mt-1 text-xs text-slate-500">Create a new catalog item for campus drive eligibility.</p>
           </div>
           <button type="button" onClick={onClose} aria-label="Close catalog dialog" className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X size={18} /></button>
@@ -786,14 +977,14 @@ function CatalogModal({
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           {error && <p role="alert" className="rounded-lg border border-rose-100 bg-rose-50 p-3 text-xs font-medium text-rose-600">{error}</p>}
-          <InputField label={isSkill ? "Skill" : "Department Name"} required placeholder={isSkill ? "Enter skill name" : "Enter department name"} value={name} onChange={onNameChange} />
-          {isSkill && <InputField label="Category" required placeholder="Enter skill category" value={category} onChange={onCategoryChange} />}
-          {isSkill && <InputField label="Domain" required placeholder="Enter skill domain" value={domain} onChange={onDomainChange} />}
+          <InputField label={isSkill ? "Skill" : `${kindLabel} Name`} required uppercase maxLength={kind === "degree" ? DEGREE_NAME_MAX_LENGTH : undefined} placeholder={`Enter ${kindLabel.toLowerCase()} name`} value={name} onChange={onNameChange} />
+          {isSkill && <InputField label="Category" required uppercase placeholder="Enter skill category" value={category} onChange={onCategoryChange} />}
+          {isSkill && <InputField label="Domain" required uppercase placeholder="Enter skill domain" value={domain} onChange={onDomainChange} />}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
             <button type="submit" disabled={isLoading} className="inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-xs font-semibold text-white hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60">
               {isLoading && <LoaderCircle size={14} className="animate-spin" />}
-              {isLoading ? "Adding..." : `Add ${isSkill ? "Skill" : "Department"}`}
+              {isLoading ? "Adding..." : `Add ${kindLabel}`}
             </button>
           </div>
         </form>
@@ -807,17 +998,28 @@ function PreviewField({
   label,
   value,
   isTextArea = false,
+  onEdit,
 }: {
   label: string;
   value?: string;
   isTextArea?: boolean;
+  onEdit: () => void;
 }) {
   const displayVal = value && value.trim() ? value : "-";
   return (
     <div className="w-full">
-      <span className="mb-1.5 block text-xs font-bold text-slate-800">
-        {label}
-      </span>
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <span className="text-xs font-bold text-slate-800">{label}</span>
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={`Edit ${label}`}
+          title={`Edit ${label}`}
+          className="rounded p-0.5 text-slate-400 transition hover:bg-cyan-50 hover:text-cyan-500"
+        >
+          <Pencil size={13} />
+        </button>
+      </div>
       <div
         className={`w-full rounded-lg border border-slate-200/80 bg-slate-50/80 px-3.5 py-2.5 text-xs text-slate-700 ${
           isTextArea ? "min-h-[108px] whitespace-pre-wrap" : "min-h-[40px] flex items-center"
@@ -841,8 +1043,11 @@ function RoleSectionCard({
   departments,
   skillsLoading,
   departmentsLoading,
+  degreeOptions,
+  degreesLoading,
   onAddSkill,
   onAddDepartment,
+  onAddDegree,
   errors,
   onClearError,
 }: {
@@ -856,8 +1061,11 @@ function RoleSectionCard({
   departments: DepartmentRecord[];
   skillsLoading: boolean;
   departmentsLoading: boolean;
+  degreeOptions: DropdownOption[];
+  degreesLoading: boolean;
   onAddSkill: () => void;
   onAddDepartment: () => void;
+  onAddDegree: () => void;
   errors: FieldErrors;
   onClearError: (field: string) => void;
 }) {
@@ -920,31 +1128,31 @@ function RoleSectionCard({
       <div className="mt-5">
         <h3 className="mb-3 text-sm font-bold text-cyan-500">Job Role Information</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div>
+          <div data-field={errorKey("jobRole")}>
             <InputField
               label="Job Role" required placeholder="Enter job role"
               value={role.jobRole} onChange={(v) => updateField({ jobRole: v }, "jobRole")} error={errors[errorKey("jobRole")]}
             />
           </div>
-          <div>
+          <div data-field={errorKey("jobLocation")}>
             <InputField
               label="Job Location" required placeholder="Enter job location"
               value={role.jobLocation} onChange={(v) => updateField({ jobLocation: v }, "jobLocation")} error={errors[errorKey("jobLocation")]}
             />
           </div>
-          <div>
+          <div data-field={errorKey("jobType")}>
             <SelectField
               label="Job Type" required placeholder="Select job type"
               options={jobTypeOptions} value={role.jobType} onChange={(v) => updateField({ jobType: v }, "jobType")} error={errors[errorKey("jobType")]}
             />
           </div>
-          <div>
+          <div data-field={errorKey("ctc")}>
             <InputField
               label="CTC / Package" required placeholder="Enter ctc / package"
               value={role.ctc} onChange={(v) => updateField({ ctc: v }, "ctc")} error={errors[errorKey("ctc")]}
             />
           </div>
-          <div>
+          <div data-field={errorKey("skills")}>
             <SkillsPicker
               label="Skills Required"
               required
@@ -957,7 +1165,7 @@ function RoleSectionCard({
               error={errors[errorKey("skills")]}
             />
           </div>
-          <div>
+          <div data-field={errorKey("openings")}>
             <InputField
               label="Number of Openings" required placeholder="Enter number of openings"
               value={role.openings} onChange={(v) => updateField({ openings: v }, "openings")} error={errors[errorKey("openings")]}
@@ -970,7 +1178,7 @@ function RoleSectionCard({
       <div className="mt-5 border-t border-slate-100 pt-5">
         <h3 className="mb-3 text-sm font-bold text-cyan-500">Eligibility Criteria</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div>
+          <div data-field={errorKey("departments")}>
             <SkillsPicker
               label="Departments"
               value={role.departments}
@@ -984,31 +1192,40 @@ function RoleSectionCard({
             />
           </div>
 
-          <div>
+          <div data-field={errorKey("batch")}>
             <SelectField
-              label="Batch / Graduation Year" required placeholder="Select batch / graduation year"
-              options={batchOptions} value={role.batch} onChange={(v) => updateField({ batch: v }, "batch")} error={errors[errorKey("batch")]}
+              label="Batch / Graduation Year" required multiple placeholder="Select batch / graduation year"
+              options={[...new Set([...batchOptions, ...(role.batch ? role.batch.split(", ") : [])])]} value={role.batch} onChange={(v) => updateField({ batch: v }, "batch")} error={errors[errorKey("batch")]}
             />
           </div>
-          <div>
+          <div data-field={errorKey("minimumCgpa")}>
             <InputField
               label="Minimum CGPA" required placeholder="Enter minimum cgpa"
               value={role.minimumCgpa} onChange={(v) => updateField({ minimumCgpa: v }, "minimumCgpa")} error={errors[errorKey("minimumCgpa")]}
             />
           </div>
-          <div>
+          <div data-field={errorKey("maximumBacklogs")}>
             <InputField
               label="Maximum Backlogs" required placeholder="e.g. 0"
               value={role.maximumBacklogs} onChange={(v) => updateField({ maximumBacklogs: v }, "maximumBacklogs")} error={errors[errorKey("maximumBacklogs")]}
             />
           </div>
-          <div>
-            <InputField
-              label="Degree" required placeholder="Enter degree"
-              value={role.degree} onChange={(v) => updateField({ degree: v }, "degree")} error={errors[errorKey("degree")]}
+          <div data-field={errorKey("degree")}>
+            <SearchableDropdown
+              label="Degree"
+              noun="degrees"
+              placeholder="Select a degree"
+              addLabel="Add degree"
+              options={degreeOptions}
+              value={role.degree}
+              selectedLabel={role.degree}
+              isLoading={degreesLoading}
+              onSelect={(v) => updateField({ degree: v }, "degree")}
+              onAdd={onAddDegree}
+              error={errors[errorKey("degree")]}
             />
           </div>
-          <div>
+          <div data-field={errorKey("otherCriteria")}>
             <InputField
               label="Other Criteria" placeholder="Add other criteria"
               value={role.otherCriteria} onChange={(v) => onUpdate({ otherCriteria: v })}
@@ -1021,17 +1238,18 @@ function RoleSectionCard({
       <div className="mt-5 border-t border-slate-100 pt-5">
         <h3 className="mb-3 text-sm font-bold text-cyan-500">Role Details &amp; Additional Information</h3>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-8" data-field={errorKey("jobDescription")}>
             <FieldLabel label="Job Description / JD" />
             <JobDescriptionEditor
               value={role.jobDescription}
-              onChange={(v) => onUpdate({ jobDescription: v })}
+              onChange={(v) => updateField({ jobDescription: v }, "jobDescription")}
               file={role.jdFile}
               onFileChange={handleJdFileChange}
               onRemoveFile={removeJdFile}
             />
+            <FieldError message={errors[errorKey("jobDescription")]} />
           </div>
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4" data-field={errorKey("selectionProcesses")}>
             <SelectionProcessPicker
               label="Selection Process"
               required
@@ -1063,19 +1281,30 @@ function FieldError({ message }: { message?: string }) {
 }
 
 function InputField({
-  label, placeholder, required = false, value, onChange, error,
+  label, placeholder, required = false, uppercase = false, maxLength, value, onChange, error,
 }: {
-  label: string; placeholder: string; required?: boolean;
+  label: string; placeholder: string; required?: boolean; uppercase?: boolean; maxLength?: number;
   value?: string; onChange?: (value: string) => void;
   error?: string;
 }) {
+  const handleChange = (input: HTMLInputElement) => {
+    if (uppercase) {
+      // Writing the value back here keeps the caret in place when editing mid-text.
+      const caret = input.selectionStart;
+      input.value = input.value.toUpperCase();
+      input.setSelectionRange(caret, caret);
+    }
+    onChange?.(input.value);
+  };
+
   return (
     <label className="block">
       <FieldLabel label={label} required={required} />
       <input
         type="text"
         value={value}
-        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
+        onChange={(e) => handleChange(e.target)}
+        maxLength={maxLength}
         placeholder={placeholder}
         className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
       />
@@ -1084,28 +1313,39 @@ function InputField({
   );
 }
 
-function CompanyDropdown({
-  companies,
+function SearchableDropdown({
+  label,
+  noun,
+  placeholder,
+  addLabel,
+  options,
   value,
+  selectedLabel,
   isLoading,
   onSelect,
-  onAddCompany,
+  onAdd,
   error,
 }: {
-  companies: CompanyRecord[];
+  label: string;
+  noun: string;
+  placeholder: string;
+  addLabel: string;
+  options: DropdownOption[];
   value: string;
+  // Shown when the saved value is missing from the options, such as an old or inactive record.
+  selectedLabel: string;
   isLoading: boolean;
-  onSelect: (company: CompanyRecord) => void;
-  onAddCompany: () => void;
+  onSelect: (value: string) => void;
+  onAdd: () => void;
   error?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const selectedCompany = companies.find((company) => getCompanyId(company) === value);
-  const filteredCompanies = companies.filter((company) => {
+  const selectedOption = options.find((option) => option.value === value);
+  const filteredOptions = options.filter((option) => {
     const query = searchQuery.trim().toLowerCase();
-    return !query || [company.name, company.location ?? ""].some((field) => field.toLowerCase().includes(query));
+    return !query || [option.label, option.hint ?? ""].some((field) => field.toLowerCase().includes(query));
   });
 
   useEffect(() => {
@@ -1124,22 +1364,22 @@ function CompanyDropdown({
     setIsOpen((open) => !open);
   };
 
-  const handleAddCompany = () => {
+  const handleAdd = () => {
     setIsOpen(false);
     setSearchQuery("");
-    onAddCompany();
+    onAdd();
   };
 
   return (
     <div ref={dropdownRef} className="relative">
-      <FieldLabel label="Company Name" required />
+      <FieldLabel label={label} required />
       <button
         type="button"
         onClick={openDropdown}
         className={`flex h-10 w-full items-center justify-between rounded-lg border bg-white px-3 text-left text-xs outline-none transition ${isOpen ? "border-cyan-500 ring-2 ring-cyan-100" : "border-slate-200 hover:border-slate-300"}`}
       >
-        <span className={`truncate ${selectedCompany ? "font-medium text-slate-700" : "text-slate-400"}`}>
-          {selectedCompany?.name ?? (isLoading ? "Loading companies..." : "Select a company")}
+        <span className={`truncate ${value ? "font-medium text-slate-700" : "text-slate-400"}`}>
+          {selectedOption?.label ?? (value ? selectedLabel : isLoading ? `Loading ${noun}...` : placeholder)}
         </span>
         <ChevronDown size={14} className={`ml-2 shrink-0 text-slate-500 transition-transform ${isOpen ? "rotate-180 text-cyan-500" : ""}`} />
       </button>
@@ -1155,7 +1395,7 @@ function CompanyDropdown({
                 type="search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search companies..."
+                placeholder={`Search ${noun}...`}
                 className="h-8 w-full rounded-md border border-slate-200 pl-8 pr-2 text-xs text-slate-700 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-100"
               />
             </div>
@@ -1163,36 +1403,33 @@ function CompanyDropdown({
 
           <div className="max-h-52 overflow-y-auto p-1.5">
             {isLoading ? (
-              <p className="px-2.5 py-3 text-xs text-slate-400">Loading companies...</p>
-            ) : filteredCompanies.length === 0 ? (
-              <p className="px-2.5 py-3 text-xs text-slate-400">No companies found.</p>
+              <p className="px-2.5 py-3 text-xs text-slate-400">Loading {noun}...</p>
+            ) : filteredOptions.length === 0 ? (
+              <p className="px-2.5 py-3 text-xs text-slate-400">No {noun} found.</p>
             ) : (
-              filteredCompanies.map((company) => {
-                const companyId = getCompanyId(company);
-                return (
-                  <button
-                    key={companyId || company.name}
-                    type="button"
-                    onClick={() => {
-                      onSelect(company);
-                      setIsOpen(false);
-                      setSearchQuery("");
-                    }}
-                    className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left transition ${companyId === value ? "bg-cyan-50 text-cyan-700" : "text-slate-700 hover:bg-slate-50"}`}
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate text-xs font-semibold">{company.name}</span>
-                      {company.location && <span className="mt-0.5 flex items-center gap-1 text-[10px] text-slate-400"><MapPin size={10} />{company.location}</span>}
-                    </span>
-                    {companyId === value && <Check size={14} className="shrink-0 text-cyan-500" />}
-                  </button>
-                );
-              })
+              filteredOptions.map((option) => (
+                <button
+                  key={option.value || option.label}
+                  type="button"
+                  onClick={() => {
+                    onSelect(option.value);
+                    setIsOpen(false);
+                    setSearchQuery("");
+                  }}
+                  className={`flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left transition ${option.value === value ? "bg-cyan-50 text-cyan-700" : "text-slate-700 hover:bg-slate-50"}`}
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate text-xs font-semibold">{option.label}</span>
+                    {option.hint && <span className="mt-0.5 flex items-center gap-1 text-[10px] text-slate-400"><MapPin size={10} />{option.hint}</span>}
+                  </span>
+                  {option.value === value && <Check size={14} className="shrink-0 text-cyan-500" />}
+                </button>
+              ))
             )}
           </div>
 
-          <button type="button" onClick={handleAddCompany} className="flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2.5 text-left text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">
-            <Plus size={14} /> Add company
+          <button type="button" onClick={handleAdd} className="flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2.5 text-left text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50">
+            <Plus size={14} /> {addLabel}
           </button>
         </div>
       )}
@@ -1201,14 +1438,28 @@ function CompanyDropdown({
 }
 
 function SelectField({
-  label, options, required = false, value, onChange, placeholder = "Select an option", error,
+  label, options, required = false, multiple = false, value, onChange, placeholder = "Select an option", error,
 }: {
-  label: string; options: string[]; required?: boolean;
+  label: string; options: string[]; required?: boolean; multiple?: boolean;
   value?: string; onChange?: (value: string) => void; placeholder?: string;
   error?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const selectedValues = value ? (multiple ? value.split(", ") : [value]) : [];
+
+  const handleSelect = (option: string) => {
+    if (multiple) {
+      const next = selectedValues.includes(option)
+        ? selectedValues.filter((item) => item !== option)
+        : [...selectedValues, option];
+      onChange?.(next.sort().join(", "));
+      return;
+    }
+
+    onChange?.(option);
+    setIsOpen(false);
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -1247,15 +1498,12 @@ function SelectField({
         {isOpen && (
           <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg">
             {options.map((opt) => {
-              const isSelected = opt === value;
+              const isSelected = selectedValues.includes(opt);
               return (
                 <button
                   key={opt}
                   type="button"
-                  onClick={() => {
-                    onChange?.(opt);
-                    setIsOpen(false);
-                  }}
+                  onClick={() => handleSelect(opt)}
                   className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition ${
                     isSelected
                       ? "bg-cyan-50 font-bold text-cyan-600"
@@ -1572,7 +1820,7 @@ function JobDescriptionEditor({
             className="h-[92px] w-full resize-none rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
           />
           <div className="mt-2.5 flex flex-wrap items-center gap-3">
-            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-3.5 py-1.5 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50">
+            <label className="relative inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-cyan-500 bg-white px-3.5 py-1.5 text-xs font-semibold text-cyan-500 shadow-sm transition hover:bg-cyan-50">
               <Upload size={14} />
               Upload JD PDF
               <input type="file" accept="application/pdf,.pdf" className="sr-only"

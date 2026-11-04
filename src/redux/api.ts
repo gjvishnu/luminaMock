@@ -43,6 +43,13 @@ export type DepartmentRecord = {
   updatedAt?: string;
 };
 
+export type DegreeRecord = {
+  id?: string | number;
+  degreeName: string;
+  status?: ApiStatus;
+  createdAt?: string;
+};
+
 export type ManagedUser = {
   userUuid: string;
   email: string;
@@ -106,6 +113,10 @@ export type CreateDepartmentRequest = {
   name: string;
 };
 
+export type CreateDegreeRequest = {
+  degreeName: string;
+};
+
 export type CompanyRecord = {
   id?: string | number;
   companyId?: string;
@@ -124,7 +135,7 @@ export type CreateCompanyRequest = {
   location: string;
 };
 
-export type DriveStatus = "DRAFT" | "UPCOMING" | "ONGOING";
+export type DriveStatus = "DRAFT" | "UPCOMING" | "ONGOING" | "COMPLETED" | "CANCELLED";
 export type DriveJobType = "FULL_TIME" | "PART_TIME" | "INTERNSHIP" | "CONTRACT" | "APPRENTICESHIP";
 export type SelectionProcess =
   | "ONLINE_ASSESSMENT"
@@ -135,7 +146,8 @@ export type SelectionProcess =
   | "HR_INTERVIEW"
   | "MANAGERIAL_INTERVIEW"
   | "CASE_STUDY"
-  | "CODING_ROUND";
+  | "CODING_ROUND"
+  | "OTHER";
 
 export type CreateDriveRoleRequest = {
   jobRole: string;
@@ -189,9 +201,28 @@ export type DriveRecord = {
   totalApplicants?: number;
 };
 
+export type UpdateDriveRequest = Partial<Omit<CreateDriveRequest, "roles">>;
+export type UpdateDriveRoleRequest = Partial<CreateDriveRoleRequest>;
+
+export type DriveDetailRole = Omit<DriveRoleRecord, "departments" | "skillIds" | "jobLocation" | "minimumCgpa" | "maximumBacklogs" | "degree" | "jobDescription"> & {
+  jobLocation?: string | null;
+  minimumCgpa?: number | null;
+  maximumBacklogs?: number | null;
+  degree?: string | null;
+  jobDescription?: string | null;
+  departments?: DepartmentRecord[];
+  skills?: SkillRecord[];
+};
+
+export type DriveDetailRecord = Omit<DriveRecord, "company" | "roles"> & {
+  company?: { name?: string; website?: string | null; location?: string | null };
+  roles?: DriveDetailRole[];
+};
+
 export type DriveListParams = {
   page?: number;
   pageSize?: number;
+  search?: string;
   companyId?: string;
   status?: DriveStatus;
   driveDate?: string;
@@ -199,6 +230,18 @@ export type DriveListParams = {
   driveDateTo?: string;
   jobRole?: string;
   jobType?: DriveJobType;
+};
+
+export type DrivePagination = {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+};
+
+export type DriveListResponse = {
+  drives: DriveRecord[];
+  pagination: DrivePagination;
 };
 
 function unwrapList<T>(response: unknown, collectionKey: string): T[] {
@@ -273,7 +316,7 @@ const baseQueryWithAuthExpiry: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  tagTypes: ["Users", "Students", "Skills", "Departments", "Companies", "Drives"],
+  tagTypes: ["Users", "Students", "Skills", "Departments", "Degrees", "Companies", "Drives"],
   baseQuery: baseQueryWithAuthExpiry,
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginCredentials>({
@@ -389,6 +432,20 @@ export const authApi = createApi({
       }),
       invalidatesTags: [{ type: "Departments", id: "LIST" }],
     }),
+    getDegrees: builder.query<DegreeRecord[], void>({
+      query: () => "/api/degrees",
+      transformResponse: (response: unknown) => unwrapList<DegreeRecord>(response, "degrees"),
+      providesTags: [{ type: "Degrees", id: "LIST" }],
+    }),
+    createDegree: builder.mutation<DegreeRecord, CreateDegreeRequest>({
+      query: (body) => ({
+        url: "/api/degrees",
+        method: "POST",
+        body,
+      }),
+      transformResponse: (response: unknown) => unwrapEntity<DegreeRecord>(response, "degree"),
+      invalidatesTags: [{ type: "Degrees", id: "LIST" }],
+    }),
     getCompanies: builder.query<CompanyRecord[], void>({
       query: () => "/api/companies",
       transformResponse: (response: unknown) => unwrapList<CompanyRecord>(response, "companies"),
@@ -405,15 +462,33 @@ export const authApi = createApi({
       transformResponse: (response: unknown) => unwrapEntity<CompanyRecord>(response, "company"),
       invalidatesTags: [{ type: "Companies", id: "LIST" }],
     }),
-    getDrives: builder.query<DriveRecord[], DriveListParams | void>({
+    getDrives: builder.query<DriveListResponse, DriveListParams | void>({
       query: (params) => ({
         url: "/api/drives",
         params: params ?? undefined,
       }),
-      transformResponse: (response: unknown) => unwrapList<DriveRecord>(response, "drives"),
+      transformResponse: (response: unknown) => {
+        const drives = unwrapList<DriveRecord>(response, "drives");
+        const pagination = (response as { pagination?: Partial<DrivePagination> } | null)?.pagination;
+
+        return {
+          drives,
+          pagination: {
+            page: pagination?.page ?? 1,
+            pageSize: pagination?.pageSize ?? drives.length,
+            total: pagination?.total ?? drives.length,
+            totalPages: pagination?.totalPages ?? 1,
+          },
+        };
+      },
       providesTags: (result) => result
-        ? [{ type: "Drives", id: "LIST" }, ...result.map((drive) => ({ type: "Drives" as const, id: drive.driveUuid ?? drive.driveId ?? drive.id }))]
+        ? [{ type: "Drives", id: "LIST" }, ...result.drives.map((drive) => ({ type: "Drives" as const, id: drive.driveUuid ?? drive.driveId ?? drive.id }))]
         : [{ type: "Drives", id: "LIST" }],
+    }),
+    getDrive: builder.query<DriveDetailRecord, string>({
+      query: (driveId) => `/api/drives/${driveId}`,
+      transformResponse: (response: unknown) => unwrapEntity<DriveDetailRecord>(response, "drive"),
+      providesTags: (_result, _error, driveId) => [{ type: "Drives", id: driveId }],
     }),
     createDrive: builder.mutation<DriveRecord, CreateDriveRequest>({
       query: (body) => ({
@@ -424,9 +499,40 @@ export const authApi = createApi({
       transformResponse: (response: unknown) => unwrapEntity<DriveRecord>(response, "drive"),
       invalidatesTags: [{ type: "Drives", id: "LIST" }],
     }),
+    updateDrive: builder.mutation<DriveDetailRecord, { driveId: string; body: UpdateDriveRequest }>({
+      query: ({ driveId, body }) => ({
+        url: `/api/drives/${driveId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: [{ type: "Drives", id: "LIST" }],
+    }),
     deleteDrive: builder.mutation<unknown, string>({
       query: (driveId) => ({
         url: `/api/drives/${driveId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "Drives", id: "LIST" }],
+    }),
+    addDriveRole: builder.mutation<DriveDetailRole, { driveId: string; body: CreateDriveRoleRequest }>({
+      query: ({ driveId, body }) => ({
+        url: `/api/drives/${driveId}/roles`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [{ type: "Drives", id: "LIST" }],
+    }),
+    updateDriveRole: builder.mutation<DriveDetailRole, { driveId: string; roleId: string; body: UpdateDriveRoleRequest }>({
+      query: ({ driveId, roleId, body }) => ({
+        url: `/api/drives/${driveId}/roles/${roleId}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: [{ type: "Drives", id: "LIST" }],
+    }),
+    deleteDriveRole: builder.mutation<unknown, { driveId: string; roleId: string }>({
+      query: ({ driveId, roleId }) => ({
+        url: `/api/drives/${driveId}/roles/${roleId}`,
         method: "DELETE",
       }),
       invalidatesTags: [{ type: "Drives", id: "LIST" }],
@@ -450,9 +556,16 @@ export const {
   useCreateDepartmentMutation,
   useUpdateDepartmentMutation,
   useDeactivateDepartmentMutation,
+  useGetDegreesQuery,
+  useCreateDegreeMutation,
   useGetCompaniesQuery,
   useCreateCompanyMutation,
   useGetDrivesQuery,
+  useGetDriveQuery,
   useCreateDriveMutation,
+  useUpdateDriveMutation,
   useDeleteDriveMutation,
+  useAddDriveRoleMutation,
+  useUpdateDriveRoleMutation,
+  useDeleteDriveRoleMutation,
 } = authApi;

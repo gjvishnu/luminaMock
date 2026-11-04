@@ -48,7 +48,7 @@ After logout, both the access token and refresh token for that user are invalida
 | Role | Main access |
 |---|---|
 | `ADMIN` | Full access, including user CRUD |
-| `PLACEMENT_OFFICER` | Manage departments, companies, students, and campus drives |
+| `PLACEMENT_OFFICER` | Manage departments, degrees, companies, students, and campus drives |
 | `STUDENT` | Authenticated read access and complete skill CRUD |
 | `RECRUITER` | Authenticated read access and complete skill CRUD |
 
@@ -261,6 +261,75 @@ DELETE /api/departments/:id
 ```
 
 This changes the department status to `INACTIVE`.
+
+## Degrees
+
+All authenticated roles can get degrees. Only `ADMIN` and `PLACEMENT_OFFICER` can create, edit, or deactivate degrees.
+
+`degreeName` is required, must be unique, and can be up to 150 characters. A duplicate name returns `409`, including the name of an inactive degree.
+
+### Get degrees
+
+```http
+GET /api/degrees
+```
+
+Returns all degrees, newest first, including inactive ones.
+
+Example response:
+
+```json
+[
+  {
+    "id": "3f1c8a52-6e0b-4c1d-9a7e-2b5d4f8e1c30",
+    "degreeName": "B.Tech",
+    "status": "ACTIVE",
+    "createdAt": "2026-11-04T10:15:30.000Z"
+  }
+]
+```
+
+### Create a degree
+
+```http
+POST /api/degrees
+```
+
+```json
+{
+  "degreeName": "B.Tech"
+}
+```
+
+Returns `201` with the created degree.
+
+### Edit a degree
+
+```http
+PUT /api/degrees/:id
+```
+
+```json
+{
+  "degreeName": "B.E."
+}
+```
+
+Returns `200` with the updated degree, or `404` if the degree does not exist.
+
+### Deactivate a degree
+
+```http
+DELETE /api/degrees/:id
+```
+
+This changes the degree status to `INACTIVE`.
+
+```json
+{
+  "message": "Degree marked as inactive"
+}
+```
 
 ## Skills
 
@@ -555,6 +624,7 @@ Optional query parameters:
 ```text
 page=1
 pageSize=20
+search=chennai
 companyId=company-uuid
 status=UPCOMING
 driveDate=2026-11-20
@@ -562,6 +632,14 @@ driveDateFrom=2026-11-01
 driveDateTo=2026-11-30
 jobRole=Engineer
 jobType=FULL_TIME
+```
+
+`search` is a case-insensitive partial match against the company name, job role, job location, and venue. An item is returned if any of these fields match. Maximum 150 characters; a blank value is ignored. It can be combined with the other filters, which must all match as well, and `pagination.total` reflects the filtered results.
+
+Example:
+
+```http
+GET /api/drives?search=software&status=UPCOMING&page=1&pageSize=20
 ```
 
 Each role is returned as a separate drive item. Shared drive and company fields are repeated for each item, and each item contains exactly one object in its `roles` array. Use the drive `id` and `roles[0].id` when editing or deleting a role.

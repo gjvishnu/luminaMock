@@ -7,6 +7,7 @@ import { UserManagement } from "./components/userManagement";
 import { RouterError } from "./components/routerError";
 import { CampusDrive } from "./components/campusDrive";
 import { DriveDetails } from "./components/driveDetails";
+import { EditDrive } from "./components/editDrive";
 import { JDRecommendation } from "./components/jdRecommendation";
 import { DriveStudents } from "./components/driveStudents";
 import { AddDrive } from "./components/addDrive";
@@ -90,6 +91,10 @@ export const router = createBrowserRouter([
               {
                 path: "campusdrive/:driveId",
                 element: <DriveDetails />,
+              },
+              {
+                path: "campusdrive/:driveId/edit",
+                element: <EditDrive />,
               },
               {
                 path: "jdrecommendation",

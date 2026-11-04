@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { toast } from "react-toastify";
+import { toast } from "material-react-toastify";
 import {
   BriefcaseBusiness,
   ChevronLeft,

@@ -29,3 +29,68 @@ body {
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
+
+/* Toasts: white rounded cards with a coloured border, icon and message. */
+:root {
+  --toastify-color-success: #3aa935;
+  --toastify-color-info: #0b3fa8;
+  --toastify-color-warning: #f59c33;
+  --toastify-color-error: #e52e2e;
+  --toastify-toast-width: 340px;
+  --toastify-toast-min-height: 44px;
+  --toastify-toast-border-radius: 22px;
+  --toastify-toast-top-bottom-padding: 4px;
+  --toastify-toast-left-right-padding: 6px;
+  --toastify-font-family: inherit;
+}
+
+.Toastify__toast-theme--light.Toastify__toast--default {
+  --toast-accent: #94a3b8;
+  --toast-text: #334155;
+}
+
+.Toastify__toast-theme--light.Toastify__toast--info {
+  --toast-accent: var(--toastify-color-info);
+  --toast-text: var(--toastify-color-info);
+}
+
+/* Text is a shade darker than the border where the border colour is too pale to read. */
+.Toastify__toast-theme--light.Toastify__toast--success {
+  --toast-accent: var(--toastify-color-success);
+  --toast-text: #2e7d32;
+}
+
+.Toastify__toast-theme--light.Toastify__toast--warning {
+  --toast-accent: var(--toastify-color-warning);
+  --toast-text: #b45309;
+}
+
+.Toastify__toast-theme--light.Toastify__toast--error {
+  --toast-accent: var(--toastify-color-error);
+  --toast-text: #d32f2f;
+}
+
+.Toastify__toast-theme--light.Toastify__toast {
+  background: #fff;
+  border: 1px solid var(--toast-accent);
+  box-shadow: 0 6px 14px rgb(15 23 42 / 0.16);
+  color: var(--toast-text);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.Toastify__toast .Toastify__toast-icon {
+  margin-inline-end: 10px;
+  width: 22px;
+}
+
+.Toastify__toast-theme--light .Toastify__close-button {
+  color: #9ca3af;
+  margin-inline-end: 6px;
+  opacity: 1;
+}
+
+.Toastify__toast-theme--light .Toastify__close-button:hover,
+.Toastify__toast-theme--light .Toastify__close-button:focus {
+  color: #6b7280;
+}
