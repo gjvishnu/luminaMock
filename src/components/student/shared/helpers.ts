@@ -1,10 +1,88 @@
+import type { DegreeRecord, DepartmentRecord, InternshipRecord, ProjectRecord, SkillRecord, StudentProfileRecord } from "../../../redux/api";
+import { emptyStudentProfile } from "./data";
 import type { ProfileChecklistItem, ProfileData } from "./types";
+
+const SEMESTER_SUFFIXES = ["th", "st", "nd", "rd"];
+
+export function formatSemester(semester: number) {
+  return `${semester}${SEMESTER_SUFFIXES[semester] ?? "th"} Semester`;
+}
+
+function formatDateOfBirth(value: string) {
+  return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(value));
+}
+
+function formatMonth(value: string) {
+  return new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(value));
+}
+
+// Used until the student has saved their name.
+function getNameFromEmail(email: string) {
+  return email.split("@")[0].replace(/[._-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()).trim();
+}
+
+export function toProfileData({
+  email,
+  student,
+  departments,
+  degrees,
+  skills,
+  internships,
+  projects,
+}: {
+  email: string;
+  student: StudentProfileRecord | null;
+  departments: DepartmentRecord[];
+  degrees: DegreeRecord[];
+  skills: SkillRecord[];
+  internships: InternshipRecord[];
+  projects: ProjectRecord[];
+}): ProfileData {
+  const name = student?.name || getNameFromEmail(email);
+  const initials = name.split(" ").slice(0, 2).map((part) => part[0]).join("");
+  const profile = { ...emptyStudentProfile, name, initials, email };
+
+  if (!student) return profile;
+
+  return {
+    ...profile,
+    registrationNumber: student.registrationNumber,
+    department: departments.find((department) => department.id === student.departmentId)?.name ?? "",
+    program: degrees.find((degree) => degree.id === student.degreeId)?.degreeName ?? "",
+    batch: student.batch === null ? "" : String(student.batch),
+    semester: student.semester === null ? "" : formatSemester(student.semester),
+    phone: student.phone ?? "",
+    location: student.location ?? "",
+    dateOfBirth: student.dateOfBirth ? formatDateOfBirth(student.dateOfBirth) : "",
+    skillsList: skills.map((skill) => skill.skill),
+    internships: internships.map((internship) => ({
+      id: internship.id,
+      isVerified: internship.isVerified,
+      role: internship.title,
+      company: internship.companyName,
+      duration: `${formatMonth(internship.startDate)} – ${internship.endDate ? formatMonth(internship.endDate) : "Present"}`,
+      description: internship.description,
+      certificateFile: "",
+      certificateSize: "",
+    })),
+    projects: projects.map((project) => ({
+      id: project.id,
+      title: project.title,
+      type: project.projectType,
+      dates: "",
+      description: project.description,
+      technologies: project.technologies.map((technology) => technology.skill),
+      githubUrl: "",
+      reportFile: "",
+    })),
+  };
+}
 
 export function getProfileCompletion(profile: ProfileData) {
   // 1. Basic Details (20%)
+  // Email is left out: every account has one, and officers cannot read it.
   const basicFields = [
     profile.name,
-    profile.email,
     profile.phone,
     profile.dateOfBirth,
     profile.location,

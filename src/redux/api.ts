@@ -93,6 +93,67 @@ export type StudentRecord = {
   };
 };
 
+export type StudentProfileRecord = {
+  id: string;
+  userUuid: string;
+  name: string | null;
+  registrationNumber: string;
+  departmentId: string | null;
+  degreeId: string | null;
+  batch: number | null;
+  semester: number | null;
+  phone: string | null;
+  dateOfBirth: string | null;
+  location: string | null;
+  status: ApiStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type StudentProfileResponse = {
+  freshUser: boolean;
+  student: StudentProfileRecord | null;
+};
+
+export type StudentRequest = {
+  userUuid: string;
+  name?: string;
+  registrationNumber?: string;
+  departmentId?: string | null;
+  degreeId?: string | null;
+  batch?: number | null;
+  semester?: number | null;
+  phone?: string | null;
+  dateOfBirth?: string | null;
+  location?: string | null;
+};
+
+export type InternshipRecord = {
+  id: string;
+  studentId: string;
+  title: string;
+  companyName: string;
+  startDate: string;
+  endDate: string | null;
+  description: string;
+  isVerified: boolean;
+};
+
+export type InternshipRequest = Pick<InternshipRecord, "title" | "companyName" | "startDate" | "endDate" | "description">;
+
+export type ProjectRecord = {
+  id: string;
+  studentId: string;
+  title: string;
+  projectType: string;
+  description: string;
+  technologies: SkillRecord[];
+};
+
+export type ProjectRequest = Pick<ProjectRecord, "title" | "projectType" | "description"> & {
+  technologies: string[];
+};
+
 export type CreateUserRequest = {
   email: string;
   password: string;
@@ -372,6 +433,88 @@ export const authApi = createApi({
         ? [{ type: "Students", id: "LIST" }, ...result.map((student) => ({ type: "Students" as const, id: student.studentUuid ?? student.studentId ?? student.id } ))]
         : [{ type: "Students", id: "LIST" }],
     }),
+    getStudentProfile: builder.query<StudentProfileResponse, string>({
+      query: (userId) => ({
+        url: "/api/students/profile",
+        params: { userId },
+      }),
+      providesTags: (_result, _error, userId) => [{ type: "Students", id: `profile-${userId}` }],
+    }),
+    createStudent: builder.mutation<StudentProfileRecord, StudentRequest & { name: string; registrationNumber: string }>({
+      query: (body) => ({
+        url: "/api/students",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [{ type: "Students", id: "LIST" }],
+    }),
+    updateStudent: builder.mutation<StudentProfileRecord, { studentId: string; body: StudentRequest }>({
+      query: ({ studentId, body }) => ({
+        url: `/api/students/${studentId}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: [{ type: "Students", id: "LIST" }],
+    }),
+    getStudentSkills: builder.query<SkillRecord[], string>({
+      query: (studentId) => `/api/students/${studentId}/skills`,
+      transformResponse: (response: unknown) => unwrapList<SkillRecord>(response, "skills"),
+    }),
+    replaceStudentSkills: builder.mutation<SkillRecord[], { studentId: string; skillIds: string[] }>({
+      query: ({ studentId, skillIds }) => ({
+        url: `/api/students/${studentId}/skills`,
+        method: "PUT",
+        body: { skillIds },
+      }),
+    }),
+    getInternships: builder.query<InternshipRecord[], string>({
+      query: (studentId) => `/api/students/${studentId}/internships`,
+      transformResponse: (response: unknown) => unwrapList<InternshipRecord>(response, "internships"),
+    }),
+    createInternship: builder.mutation<InternshipRecord, { studentId: string; body: InternshipRequest }>({
+      query: ({ studentId, body }) => ({
+        url: `/api/students/${studentId}/internships`,
+        method: "POST",
+        body,
+      }),
+    }),
+    updateInternship: builder.mutation<InternshipRecord, { studentId: string; id: string; body: InternshipRequest }>({
+      query: ({ studentId, id, body }) => ({
+        url: `/api/students/${studentId}/internships/${id}`,
+        method: "PUT",
+        body,
+      }),
+    }),
+    deleteInternship: builder.mutation<unknown, { studentId: string; id: string }>({
+      query: ({ studentId, id }) => ({
+        url: `/api/students/${studentId}/internships/${id}`,
+        method: "DELETE",
+      }),
+    }),
+    getProjects: builder.query<ProjectRecord[], string>({
+      query: (studentId) => `/api/students/${studentId}/projects`,
+      transformResponse: (response: unknown) => unwrapList<ProjectRecord>(response, "projects"),
+    }),
+    createProject: builder.mutation<ProjectRecord, { studentId: string; body: ProjectRequest }>({
+      query: ({ studentId, body }) => ({
+        url: `/api/students/${studentId}/projects`,
+        method: "POST",
+        body,
+      }),
+    }),
+    updateProject: builder.mutation<ProjectRecord, { studentId: string; id: string; body: ProjectRequest }>({
+      query: ({ studentId, id, body }) => ({
+        url: `/api/students/${studentId}/projects/${id}`,
+        method: "PUT",
+        body,
+      }),
+    }),
+    deleteProject: builder.mutation<unknown, { studentId: string; id: string }>({
+      query: ({ studentId, id }) => ({
+        url: `/api/students/${studentId}/projects/${id}`,
+        method: "DELETE",
+      }),
+    }),
     getSkills: builder.query<SkillRecord[], void>({
       query: () => "/api/skills",
       transformResponse: (response: unknown) => unwrapList<SkillRecord>(response, "skills"),
@@ -385,6 +528,7 @@ export const authApi = createApi({
         method: "POST",
         body,
       }),
+      transformResponse: (response: unknown) => unwrapEntity<SkillRecord>(response, "skill"),
       invalidatesTags: [{ type: "Skills", id: "LIST" }],
     }),
     updateSkill: builder.mutation<SkillRecord, { id: string | number; body: CreateSkillRequest }>({
@@ -548,6 +692,19 @@ export const {
   useUpdateUserMutation,
   useDeactivateUserMutation,
   useGetStudentsQuery,
+  useGetStudentProfileQuery,
+  useCreateStudentMutation,
+  useUpdateStudentMutation,
+  useGetStudentSkillsQuery,
+  useReplaceStudentSkillsMutation,
+  useGetInternshipsQuery,
+  useCreateInternshipMutation,
+  useUpdateInternshipMutation,
+  useDeleteInternshipMutation,
+  useGetProjectsQuery,
+  useCreateProjectMutation,
+  useUpdateProjectMutation,
+  useDeleteProjectMutation,
   useGetSkillsQuery,
   useCreateSkillMutation,
   useUpdateSkillMutation,

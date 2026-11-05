@@ -16,7 +16,7 @@ export function ProfileMetric({
           .filter((className) => className.startsWith("text-"))
           .join(" ")}`}
       >
-        {value}
+        {value || "—"}
       </p>
     </div>
   );

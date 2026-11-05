@@ -12,12 +12,28 @@ import { SkillsCard } from "../profile/SkillsCard";
 import { SportsPrizesCard } from "../profile/SportsPrizesCard";
 import { PageHeader } from "../shared/PageHeader";
 import { ProfileChip } from "../shared/ProfileChip";
-import { studentProfileData } from "../shared/data";
+import type { ProfileData } from "../shared/types";
+import { ProfileLoadError, ProfileLoading } from "../profile/ProfileStatus";
+import { useStudentDetailsData } from "./useStudentDetailsData";
 import { ArrowLeft, BriefcaseBusiness, Building2, Clock3, FileText, GraduationCap, Trophy } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
+const ignoreProfileChange = () => {};
+const ignoreNotice = () => {};
 
 export function StudentDetails() {
+  const { studentId = "" } = useParams();
+  const data = useStudentDetailsData(studentId);
+
+  if (data.isLoading) return <ProfileLoading label="Loading student details..." />;
+  if (!data.profile) return <ProfileLoadError message={data.errorMessage} onRetry={data.refetch} />;
+
+  return <StudentDetailsContent profile={data.profile} />;
+}
+
+function StudentDetailsContent({ profile }: { profile: ProfileData }) {
   const navigate = useNavigate();
+  const academicSummary = [profile.program, profile.batch && `${profile.batch} Batch`].filter(Boolean).join(" · ");
 
   return (
     <div className="space-y-4 pb-5 text-slate-800">
@@ -42,36 +58,31 @@ export function StudentDetails() {
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-cyan-100 text-xl font-bold text-cyan-600">
-            {studentProfileData.initials}
+            {profile.initials || "—"}
           </div>
 
           <div className="min-w-0">
             <h2 className="text-lg font-bold text-slate-900">
-              {studentProfileData.name}
+              {profile.name || "Name not added"}
             </h2>
 
-            <p className="mt-1 text-xs text-slate-600">
-              {studentProfileData.program} · {studentProfileData.batch} Batch
-            </p>
+            {academicSummary && <p className="mt-1 text-xs text-slate-600">{academicSummary}</p>}
 
             <div className="mt-2 flex flex-wrap gap-2">
-              <ProfileChip
-                icon={Building2}
-                text={studentProfileData.department}
-              />
+              {profile.department && <ProfileChip icon={Building2} text={profile.department} />}
               <ProfileChip
                 icon={FileText}
-                text={`Reg. No. ${studentProfileData.registrationNumber}`}
+                text={`Reg. No. ${profile.registrationNumber}`}
               />
-              <ProfileChip icon={Clock3} text={studentProfileData.semester} />
+              {profile.semester && <ProfileChip icon={Clock3} text={profile.semester} />}
             </div>
           </div>
         </div>
       </section>
 
       <div className="grid items-stretch gap-4 lg:grid-cols-2">
-        <ProfileCompletionCard profile={studentProfileData} onComplete={() => {}} />
-        <PlacementReadinessCard />
+        <ProfileCompletionCard profile={profile} />
+        <PlacementReadinessCard emptyMessage="Readiness score is not available yet." />
       </div>
 
       <ProfileGroup
@@ -81,26 +92,14 @@ export function StudentDetails() {
       >
         <div className="grid items-stretch gap-4 xl:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-4">
-            <BasicDetailsCard
-              profile={studentProfileData}
-              onProfileChange={() => {}}
-              isEditing={false}
-              onSave={() => {}}
-              onCancel={() => {}}
-            />
-            <ResumeCard
-              profile={studentProfileData}
-              onProfileChange={() => {}}
-              isEditing={false}
-              onNotice={() => {}}
-            />
+            <BasicDetailsCard profile={profile} />
+            <ResumeCard profile={profile} onProfileChange={ignoreProfileChange} readOnly onNotice={ignoreNotice} />
           </div>
 
           <AcademicPerformanceCard
-            profile={studentProfileData}
-            onProfileChange={() => {}}
-            isEditing={false}
-            onNotice={() => {}}
+            profile={profile}
+            onProfileChange={ignoreProfileChange}
+            onNotice={ignoreNotice}
           />
         </div>
       </ProfileGroup>
@@ -112,26 +111,11 @@ export function StudentDetails() {
       >
         <div className="grid items-stretch gap-4 xl:grid-cols-2">
           <div className="flex min-w-0 flex-col gap-4">
-            <SkillsCard
-              profile={studentProfileData}
-              onProfileChange={() => {}}
-              isEditing={false}
-              onNotice={() => {}}
-            />
-            <InternshipsCard
-              profile={studentProfileData}
-              onProfileChange={() => {}}
-              isEditing={false}
-              onNotice={() => {}}
-            />
+            <SkillsCard profile={profile} />
+            <InternshipsCard profile={profile} />
           </div>
 
-          <ProjectsCard
-            profile={studentProfileData}
-            onProfileChange={() => {}}
-            isEditing={false}
-            onNotice={() => {}}
-          />
+          <ProjectsCard profile={profile} />
         </div>
       </ProfileGroup>
 
@@ -142,22 +126,19 @@ export function StudentDetails() {
       >
         <div className="grid items-stretch gap-4 xl:grid-cols-3">
           <ExtracurricularsCard
-            profile={studentProfileData}
-            onProfileChange={() => {}}
-            isEditing={false}
-            onNotice={() => {}}
+            profile={profile}
+            onProfileChange={ignoreProfileChange}
+            onNotice={ignoreNotice}
           />
           <SportsPrizesCard
-            profile={studentProfileData}
-            onProfileChange={() => {}}
-            isEditing={false}
-            onNotice={() => {}}
+            profile={profile}
+            onProfileChange={ignoreProfileChange}
+            onNotice={ignoreNotice}
           />
           <AwardsCard
-            profile={studentProfileData}
-            onProfileChange={() => {}}
-            isEditing={false}
-            onNotice={() => {}}
+            profile={profile}
+            onProfileChange={ignoreProfileChange}
+            onNotice={ignoreNotice}
           />
         </div>
       </ProfileGroup>

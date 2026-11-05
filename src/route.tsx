@@ -27,6 +27,7 @@ import { StudentApplicationDetails } from "./components/student/misc/StudentAppl
 import { StudentDetails } from "./components/student/misc/StudentDetails";
 import { StudentResume } from "./components/student/misc/StudentResume";
 import { StudentProfile } from "./components/student/profile/StudentProfile";
+import { StudentProfileEdit } from "./components/student/profile/StudentProfileEdit";
 
 function AppLayout() {
   return (
@@ -147,6 +148,10 @@ export const router = createBrowserRouter([
               {
                 path: "profile",
                 element: <StudentProfile />,
+              },
+              {
+                path: "profile/edit",
+                element: <StudentProfileEdit />,
               },
               {
                 path: "resume",

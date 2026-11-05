@@ -108,7 +108,7 @@ export function AcademicPerformanceCard({
   return (
     <ProfileSection title="Academic Performance" icon={GraduationCap} className="h-full">
       <div className="grid grid-cols-3 gap-2">
-        <ProfileMetric label="CGPA" value={`${profile.cgpa} / 10`} tone="bg-cyan-50 text-cyan-600" />
+        <ProfileMetric label="CGPA" value={profile.cgpa && `${profile.cgpa} / 10`} tone="bg-cyan-50 text-cyan-600" />
         <ProfileMetric label="Attendance" value={profile.attendance} tone="bg-emerald-50 text-emerald-600" />
         <ProfileMetric label="Backlogs" value={profile.backlogs} tone="bg-amber-50 text-amber-600" />
       </div>
@@ -118,7 +118,7 @@ export function AcademicPerformanceCard({
             <p className="text-xs font-bold text-slate-800">Semester performance</p>
             <p className="mt-1 text-[10px] text-slate-500">Academic performance and backlog history by semester</p>
           </div>
-          <span className="text-[10px] font-medium text-emerald-600">Improving trend</span>
+          {profile.semesterScores.length > 0 && <span className="text-[10px] font-medium text-emerald-600">Improving trend</span>}
         </div>
         <div className="mt-3 max-h-64 space-y-2 overflow-y-auto pr-1">
           {profile.semesterScores.map((semester) => (

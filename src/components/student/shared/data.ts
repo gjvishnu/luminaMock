@@ -1,4 +1,4 @@
-import type { ApplicationDetailInfo, ApplicationRow, ApplicationStatus, JobListing, PlacementFeedbackInsight, ProfileChecklistItem, StudentProfileSnapshot, WorkflowStepStatus } from "./types";
+import type { ApplicationDetailInfo, ApplicationRow, ApplicationStatus, JobListing, PlacementFeedbackInsight, ProfileChecklistItem, ProfileData, StudentProfileSnapshot, WorkflowStepStatus } from "./types";
 import { AlertTriangle, BriefcaseBusiness, CheckCircle2, CircleMinus, Clock3, Trophy } from "lucide-react";
 
 export const jobListings: JobListing[] = [
@@ -182,8 +182,8 @@ export const studentProfileData = {
     { id: "3", title: "Campus Connect Portal", type: "Team project", dates: "Jan 2024 – May 2024", description: "Student community platform for events, announcements, and peer collaboration.", technologies: ["JavaScript", "Express", "PostgreSQL"], githubUrl: "https://github.com/arjun/campus-connect", reportFile: "" },
   ],
   internships: [
-    { id: "1", role: "Frontend Developer Intern", company: "BlueOrbit Technologies", duration: "May 2025 – Jul 2025", description: "Built responsive dashboard screens and reusable React components.", certificateFile: "BlueOrbit_Certificate.pdf", certificateSize: "1.2 MB" },
-    { id: "2", role: "Software Engineering Intern", company: "Lumina Labs", duration: "Jan 2025 – Mar 2025", description: "Worked on REST APIs, database queries, and automated testing.", certificateFile: "LuminaLabs_Intern_Certificate.pdf", certificateSize: "1.1 MB" },
+    { id: "1", isVerified: true, role: "Frontend Developer Intern", company: "BlueOrbit Technologies", duration: "May 2025 – Jul 2025", description: "Built responsive dashboard screens and reusable React components.", certificateFile: "BlueOrbit_Certificate.pdf", certificateSize: "1.2 MB" },
+    { id: "2", isVerified: true, role: "Software Engineering Intern", company: "Lumina Labs", duration: "Jan 2025 – Mar 2025", description: "Worked on REST APIs, database queries, and automated testing.", certificateFile: "LuminaLabs_Intern_Certificate.pdf", certificateSize: "1.1 MB" },
   ],
   resume: { name: "Arjun_Mehta_Resume_2026.pdf", size: "1.2 MB", updated: "28 Aug 2026" },
   sports: [
@@ -198,6 +198,35 @@ export const studentProfileData = {
     { id: "1", title: "Hackathon Winner", detail: "1st place · Lumina Buildathon 2025", year: "2025", certificateFile: "hackathon_certificate.pdf" },
     { id: "2", title: "Academic Excellence Award", detail: "Top 10% of the department", year: "2024", certificateFile: "academic_award.pdf" },
   ],
+};
+
+export const emptyStudentProfile: ProfileData = {
+  name: "",
+  initials: "",
+  registrationNumber: "",
+  department: "",
+  program: "",
+  batch: "",
+  semester: "",
+  email: "",
+  phone: "",
+  location: "",
+  dateOfBirth: "",
+  gender: "",
+  cgpa: "",
+  percentage: "",
+  attendance: "",
+  backlogs: "",
+  profileCompletion: 0,
+  semesterScores: [],
+  skillGroups: [],
+  skillsList: [],
+  projects: [],
+  internships: [],
+  resume: { name: "No resume uploaded", size: "", updated: "" },
+  sports: [],
+  extracurriculars: [],
+  awards: [],
 };
 
 export const placementReadinessChecklist: ProfileChecklistItem[] = [
