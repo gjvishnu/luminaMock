@@ -102,6 +102,8 @@ export type StudentProfileRecord = {
   degreeId: string | null;
   batch: number | null;
   semester: number | null;
+  cgpa: number | null;
+  backlogs: number | null;
   phone: string | null;
   dateOfBirth: string | null;
   location: string | null;
@@ -123,6 +125,8 @@ export type StudentRequest = {
   degreeId?: string | null;
   batch?: number | null;
   semester?: number | null;
+  cgpa?: number | null;
+  backlogs?: number | null;
   phone?: string | null;
   dateOfBirth?: string | null;
   location?: string | null;
@@ -340,6 +344,85 @@ function unwrapEntity<T>(response: unknown, entityKey: string): T {
   return response as T;
 }
 
+export type JobSortBy = "newest" | "applyBy" | "match";
+
+export type JobListParams = {
+  studentId: string;
+  search?: string;
+  companyId?: string;
+  jobRole?: string;
+  jobLocation?: string;
+  jobType?: DriveJobType;
+  sortBy?: JobSortBy;
+  page?: number;
+  pageSize?: number;
+};
+
+export type JobRecord = {
+  id: string;
+  jobRole: string;
+  jobLocation: string | null;
+  jobType: DriveJobType;
+  ctcPackage: string | null;
+  numberOfOpenings: number | null;
+  company: { id: string; name: string; website: string | null; location: string | null };
+  drive: { id: string; driveDate: string | null; driveTime: string | null; venue: string | null; status: DriveStatus };
+  applyBy: string | null;
+  daysLeft: number | null;
+  skills: { id: string; skill: string; category: string; domain: string; matched: boolean }[];
+  match: { percentage: number; label: "Excellent" | "Great" | "Good" | "Fair"; matchedSkills: number; totalSkills: number };
+  eligibility: { minimumCgpa: number | null; maximumBacklogs: number | null; graduationYears: number[]; degree: string | null };
+  // null until the student applies for this job.
+  application: { id: string; status: ApplicationStatusValue; appliedAt: string } | null;
+  createdAt: string;
+};
+
+export type JobDetailRecord = JobRecord & {
+  jobDescription: string | null;
+  jdPdfUrl: string | null;
+  selectionProcesses: SelectionProcess[];
+  eligibility: JobRecord["eligibility"] & {
+    departments: { id: string; name: string }[];
+    otherCriteria: string[];
+  };
+};
+
+export type ApplicationStatusValue = "APPLIED" | "SHORTLISTED" | "REJECTED" | "SELECTED" | "WITHDRAWN";
+
+export type ApplicationRecord = {
+  id: string;
+  status: ApplicationStatusValue;
+  appliedAt: string;
+  updatedAt: string;
+  job: Omit<JobRecord, "application">;
+};
+
+export type ApplicationListParams = {
+  studentId: string;
+  status?: ApplicationStatusValue;
+  search?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export type ApplicationListResponse = {
+  data: ApplicationRecord[];
+  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+  statusCounts: Record<"ALL" | ApplicationStatusValue, number>;
+};
+
+export type JobListResponse = {
+  data: JobRecord[];
+  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+  filterOptions: {
+    companies: { id: string; name: string }[];
+    jobRoles: string[];
+    jobLocations: string[];
+    jobTypes: DriveJobType[];
+  };
+  missingProfileFields: string[];
+};
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "";
 
 const rawBaseQuery = fetchBaseQuery({
@@ -377,7 +460,7 @@ const baseQueryWithAuthExpiry: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  tagTypes: ["Users", "Students", "Skills", "Departments", "Degrees", "Companies", "Drives"],
+  tagTypes: ["Users", "Students", "Skills", "Departments", "Degrees", "Companies", "Drives", "Jobs", "Applications"],
   baseQuery: baseQueryWithAuthExpiry,
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginCredentials>({
@@ -629,6 +712,31 @@ export const authApi = createApi({
         ? [{ type: "Drives", id: "LIST" }, ...result.drives.map((drive) => ({ type: "Drives" as const, id: drive.driveUuid ?? drive.driveId ?? drive.id }))]
         : [{ type: "Drives", id: "LIST" }],
     }),
+    getJobs: builder.query<JobListResponse, JobListParams>({
+      query: (params) => ({ url: "/api/jobs", params }),
+      // Drive changes affect which jobs a student sees.
+      providesTags: [{ type: "Drives", id: "LIST" }, { type: "Jobs", id: "LIST" }],
+    }),
+    getJob: builder.query<JobDetailRecord, { roleId: string; studentId: string }>({
+      query: ({ roleId, studentId }) => ({ url: `/api/jobs/${roleId}`, params: { studentId } }),
+      providesTags: (_result, _error, { roleId }) => [{ type: "Drives", id: "LIST" }, { type: "Jobs", id: roleId }],
+    }),
+    getApplications: builder.query<ApplicationListResponse, ApplicationListParams>({
+      query: (params) => ({ url: "/api/applications", params }),
+      providesTags: [{ type: "Applications", id: "LIST" }],
+    }),
+    applyForJob: builder.mutation<ApplicationRecord, { studentId: string; roleId: string }>({
+      query: (body) => ({
+        url: "/api/applications",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (_result, _error, { roleId }) => [
+        { type: "Applications", id: "LIST" },
+        { type: "Jobs", id: "LIST" },
+        { type: "Jobs", id: roleId },
+      ],
+    }),
     getDrive: builder.query<DriveDetailRecord, string>({
       query: (driveId) => `/api/drives/${driveId}`,
       transformResponse: (response: unknown) => unwrapEntity<DriveDetailRecord>(response, "drive"),
@@ -719,6 +827,10 @@ export const {
   useCreateCompanyMutation,
   useGetDrivesQuery,
   useGetDriveQuery,
+  useGetJobsQuery,
+  useGetJobQuery,
+  useGetApplicationsQuery,
+  useApplyForJobMutation,
   useCreateDriveMutation,
   useUpdateDriveMutation,
   useDeleteDriveMutation,

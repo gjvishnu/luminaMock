@@ -1,14 +1,11 @@
 import type { JobListing } from "../shared/types";
 import { CompanyLogo } from "../shared/CompanyLogo";
 import { SkillChips } from "../shared/SkillChips";
+import { formatDaysLeft, getMatchTones } from "./jobHelpers";
 import { CalendarDays, ChevronRight, MapPin } from "lucide-react";
 
 export function JobTableRow({ job, onOpen }: { job: JobListing; onOpen: () => void }) {
-  const matchTone = job.match >= 78 ? "text-emerald-600" : "text-amber-500";
-  const badgeTone =
-    job.match >= 78
-      ? "bg-emerald-50 text-emerald-600"
-      : "bg-amber-50 text-amber-600";
+  const { text: matchTone, badge: badgeTone } = getMatchTones(job.matchLabel);
 
   return (
     <div
@@ -42,9 +39,11 @@ export function JobTableRow({ job, onOpen }: { job: JobListing; onOpen: () => vo
           <CalendarDays size={15} className="text-slate-500" />
           {job.applyBy}
         </p>
-        <p className="mt-2 text-[10px] font-semibold text-rose-500">
-          {job.daysLeft} days left
-        </p>
+        {job.daysLeft !== null && (
+          <p className="mt-2 text-[10px] font-semibold text-rose-500">
+            {formatDaysLeft(job.daysLeft)}
+          </p>
+        )}
       </div>
       <div role="cell">
         <p className={`text-lg font-bold leading-none ${matchTone}`}>

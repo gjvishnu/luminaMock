@@ -10,7 +10,7 @@ export type JobListing = {
   location: string;
   ctc: string;
   applyBy: string;
-  daysLeft: number;
+  daysLeft: number | null;
   match: number;
   matchLabel: string;
 };
@@ -42,10 +42,12 @@ export type ProfileChecklistItem = {
 };
 
 export type ApplicationStatus =
+  | "Applied"
   | "Shortlisted"
   | "In Process"
   | "Rejected"
   | "Offer"
+  | "Selected"
   | "Withdrawn";
 
 export type ApplicationRow = {
@@ -56,6 +58,8 @@ export type ApplicationRow = {
   role: string;
   location: string;
   ctc: string;
+  /** Shown in the row meta; the mock rows leave it out and show "Full Time". */
+  jobType?: string;
   appliedOn: string;
   status: ApplicationStatus;
   updated: string;

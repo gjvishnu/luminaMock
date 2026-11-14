@@ -2,7 +2,6 @@ import type { ProfileData } from "../shared/types";
 import { PageHeader } from "../shared/PageHeader";
 import { ProfileChip } from "../shared/ProfileChip";
 import { getProfileCompletion } from "../shared/helpers";
-import { AcademicPerformanceCard } from "./AcademicPerformanceCard";
 import { AwardsCard } from "./AwardsCard";
 import { BasicDetailsCard } from "./BasicDetailsCard";
 import { ExtracurricularsCard } from "./ExtracurricularsCard";
@@ -96,7 +95,7 @@ function ProfileContent({ profile, isFreshUser }: { profile: ProfileData; isFres
 
           <div className="grid items-stretch gap-4 lg:grid-cols-2">
             <ProfileCompletionCard profile={profile} onComplete={handleStartEditing} />
-            <PlacementReadinessCard emptyMessage={isFreshUser ? "Add your details to start building your readiness." : undefined} />
+            <PlacementReadinessCard profile={profile} emptyMessage={isFreshUser ? "Add your details to start building your readiness." : undefined} />
           </div>
 
       {/* Group 1: Basic Information & Academic Performance */}
@@ -105,16 +104,9 @@ function ProfileContent({ profile, isFreshUser }: { profile: ProfileData; isFres
         description="Keep your personal details and academic progress current for placement eligibility."
         icon={GraduationCap}
       >
-        <div className="grid items-stretch gap-4 xl:grid-cols-2">
-          <div className="flex min-w-0 flex-col gap-4">
-            <BasicDetailsCard profile={profile} />
-            <ResumeCard
-              profile={profile}
-              onProfileChange={ignoreProfileChange}
-              onNotice={setNotice}
-            />
-          </div>
-          <AcademicPerformanceCard
+        <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <BasicDetailsCard profile={profile} />
+          <ResumeCard
             profile={profile}
             onProfileChange={ignoreProfileChange}
             onNotice={setNotice}

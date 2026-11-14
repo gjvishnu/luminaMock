@@ -76,6 +76,8 @@ type RoleSection = {
   selectionProcesses: string[];
 };
 
+const isActive = (record: { status?: string }) => record.status !== "INACTIVE";
+
 const jobTypeOptions = ["FULL_TIME", "PART_TIME", "INTERNSHIP", "CONTRACT", "APPRENTICESHIP"];
 const batchOptions = ["2028", "2027", "2026", "2025", "2024", "2023"];
 const driveStatusOptions = ["DRAFT", "UPCOMING", "ONGOING"];
@@ -228,14 +230,17 @@ export const AddDrive = ({ drive }: { drive?: DriveDetailRecord }) => {
   const [deleteDriveRole] = useDeleteDriveRoleMutation();
   const [createSkill, { isLoading: isCreatingSkill }] = useCreateSkillMutation();
   const [createDegree, { isLoading: isCreatingDegree }] = useCreateDegreeMutation();
-  const companies = companiesQuery.data ?? [];
-  // Drives store the degree name as text, and GET /api/degrees includes inactive degrees.
+  // Only active companies, degrees, departments and skills can be picked on this screen.
+  // A company or degree already on the drive still shows, since its dropdown uses selectedLabel.
+  const companies = (companiesQuery.data ?? []).filter(isActive);
+  // Drives store the degree name as text.
   const degreeOptions = (degreesQuery.data ?? [])
-    .filter((degree) => degree.status !== "INACTIVE")
+    .filter(isActive)
     .map((degree) => ({ value: degree.degreeName, label: degree.degreeName }));
-  // A drive can reference inactive records that the catalog lists leave out.
-  const departments = mergeCatalog(departmentsQuery.data ?? [], drive?.roles?.flatMap((role) => role.departments ?? []) ?? []);
-  const skills = mergeCatalog(skillsQuery.data ?? [], drive?.roles?.flatMap((role) => role.skills ?? []) ?? []);
+  // Departments and skills the drive being edited already uses are kept, even if
+  // inactive, so existing selections keep their labels and are not silently dropped.
+  const departments = mergeCatalog((departmentsQuery.data ?? []).filter(isActive), drive?.roles?.flatMap((role) => role.departments ?? []) ?? []);
+  const skills = mergeCatalog((skillsQuery.data ?? []).filter(isActive), drive?.roles?.flatMap((role) => role.skills ?? []) ?? []);
   const [catalogModal, setCatalogModal] = useState<CatalogModalKind | null>(null);
   const [catalogRoleId, setCatalogRoleId] = useState<string | null>(null);
   const [catalogName, setCatalogName] = useState("");

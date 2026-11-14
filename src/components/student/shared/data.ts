@@ -1,4 +1,4 @@
-import type { ApplicationDetailInfo, ApplicationRow, ApplicationStatus, JobListing, PlacementFeedbackInsight, ProfileChecklistItem, ProfileData, StudentProfileSnapshot, WorkflowStepStatus } from "./types";
+import type { ApplicationDetailInfo, ApplicationRow, ApplicationStatus, JobListing, PlacementFeedbackInsight, ProfileData, StudentProfileSnapshot, WorkflowStepStatus } from "./types";
 import { AlertTriangle, BriefcaseBusiness, CheckCircle2, CircleMinus, Clock3, Trophy } from "lucide-react";
 
 export const jobListings: JobListing[] = [
@@ -116,26 +116,6 @@ export const jobListings: JobListing[] = [
   },
 ];
 
-export const jobFilterOptions = {
-  company: ["All Companies", "TCS", "Infosys", "Zoho", "Wipro", "Accenture"],
-  role: [
-    "All Roles",
-    "Software Engineer",
-    "System Engineer",
-    "Developer",
-    "Analyst",
-  ],
-  location: [
-    "All Locations",
-    "Bangalore",
-    "Pune",
-    "Chennai",
-    "Hyderabad",
-    "Mumbai",
-  ],
-  type: ["All Job Types", "Full-time", "Internship", "Contract"],
-};
-
 export const studentProfileSnapshot: StudentProfileSnapshot = {
   branch: "CSE",
   cgpa: "8.72",
@@ -228,16 +208,6 @@ export const emptyStudentProfile: ProfileData = {
   extracurriculars: [],
   awards: [],
 };
-
-export const placementReadinessChecklist: ProfileChecklistItem[] = [
-  { label: "CGPA", status: "done" },
-  { label: "Certificates", status: "done" },
-  { label: "Resume", status: "done" },
-  { label: "Add 1 more project", status: "warning" },
-  { label: "Projects", status: "done" },
-  { label: "Add internship details", status: "warning" },
-  { label: "Skills", status: "done" },
-];
 
 export const placementFeedbackByCompany: Record<string, PlacementFeedbackInsight> = {
   TCS: {

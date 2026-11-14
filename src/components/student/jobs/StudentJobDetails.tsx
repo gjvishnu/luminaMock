@@ -1,6 +1,11 @@
+import { type JobDetailRecord, useApplyForJobMutation, useGetJobQuery } from "../../../redux/api";
+import { getApiErrorMessage } from "../../formHelpers";
+import { ProfileLoadError, ProfileLoading } from "../profile/ProfileStatus";
 import { CompanyLogo } from "../shared/CompanyLogo";
 import { DetailMeta } from "../shared/DetailMeta";
-import { jobListings } from "../shared/data";
+import { EmptyState } from "../shared/EmptyState";
+import { PageBreadcrumb } from "../shared/PageBreadcrumb";
+import { RequireStudentRecord } from "../shared/RequireStudentRecord";
 import { AboutRole } from "./AboutRole";
 import { AiPlacementInsights } from "./AiPlacementInsights";
 import { DetailSkills } from "./DetailSkills";
@@ -9,7 +14,7 @@ import { MatchCard } from "./MatchCard";
 import { ReviewsCard } from "./ReviewsCard";
 import { SelectionProcess } from "./SelectionProcess";
 import { TipsCard } from "./TipsCard";
-import { PageBreadcrumb } from "../shared/PageBreadcrumb";
+import { formatDate, formatDaysLeft, formatJobType, toJobListing } from "./jobHelpers";
 import {
   Bookmark,
   BriefcaseBusiness,
@@ -22,19 +27,71 @@ import {
   Share2,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { toast } from "material-react-toastify";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 type ApplyStep = "closed" | "confirm" | "loading" | "success";
 
+function getErrorStatus(error: unknown) {
+  return typeof error === "object" && error !== null && "status" in error ? (error as { status: unknown }).status : undefined;
+}
+
 export function StudentJobDetails() {
-  const { jobId } = useParams();
+  const { jobId = "" } = useParams();
+
+  return (
+    <RequireStudentRecord
+      loadingLabel="Loading job..."
+      emptyTitle="Complete your profile to view jobs"
+      emptyDescription="Jobs are matched to your department, batch, CGPA and skills. Add your details to see and apply for jobs."
+    >
+      {(studentId) => <JobDetailsLoader key={jobId} roleId={jobId} studentId={studentId} />}
+    </RequireStudentRecord>
+  );
+}
+
+function JobDetailsLoader({ roleId, studentId }: { roleId: string; studentId: string }) {
+  const navigate = useNavigate();
+  const { data, isLoading, error, refetch } = useGetJobQuery({ roleId, studentId }, { refetchOnMountOrArgChange: true });
+
+  if (isLoading) return <ProfileLoading label="Loading job..." />;
+
+  if (error) {
+    // The API returns 404 both for unknown jobs and for jobs the student is no longer eligible for.
+    if (getErrorStatus(error) === 404) {
+      return (
+        <div className="space-y-3 pb-5 text-slate-800">
+          <PageBreadcrumb parentLabel="Jobs" to="/jobs" currentLabel="Job" />
+          <EmptyState
+            title="This job is not available"
+            description="It may have closed, been removed, or you may no longer meet its eligibility criteria."
+            actionLabel="Back to Jobs"
+            onAction={() => navigate("/jobs")}
+          />
+        </div>
+      );
+    }
+    return <ProfileLoadError message={getApiErrorMessage(error, "Unable to load this job.")} onRetry={() => void refetch()} />;
+  }
+
+  if (!data) return null;
+  return <JobDetailsContent jobRecord={data} studentId={studentId} />;
+}
+
+function JobDetailsContent({ jobRecord, studentId }: { jobRecord: JobDetailRecord; studentId: string }) {
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState("Overview");
   const [applyStep, setApplyStep] = useState<ApplyStep>("closed");
-  const [applied, setApplied] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const job = jobListings.find((item) => item.id === jobId) ?? jobListings[0];
+  const [applyError, setApplyError] = useState("");
+  // Set right after a successful apply, before the refetched job arrives with `application`.
+  const [appliedAt, setAppliedAt] = useState<string | null>(null);
+  const [applyForJob] = useApplyForJobMutation();
+
+  const job = toJobListing(jobRecord);
+  const applicationDate = jobRecord.application?.appliedAt ?? appliedAt;
+  const applied = Boolean(applicationDate);
+  const batches = jobRecord.eligibility.graduationYears;
   const tabs = [
     "Overview",
     "Job Description",
@@ -61,27 +118,35 @@ export function StudentJobDetails() {
     };
   }, [isModalOpen, isLoading]);
 
-  // Clear any pending timer if the component unmounts
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
+  const openModal = () => {
+    setApplyError("");
+    setApplyStep("confirm");
+  };
 
   const closeModal = () => {
     if (isLoading) return; // don't allow dismissing mid-submit
     setApplyStep("closed");
   };
 
-  const confirmApply = () => {
+  const confirmApply = async () => {
+    setApplyError("");
     setApplyStep("loading");
 
-    // Simulated 2.5s request. Replace with your real API call:
-    // await applyToJob(job.id); then setApplied(true); setApplyStep("success");
-    timerRef.current = setTimeout(() => {
-      setApplied(true);
+    try {
+      const application = await applyForJob({ studentId, roleId: jobRecord.id }).unwrap();
+      setAppliedAt(application.appliedAt);
       setApplyStep("success");
-    }, 2500);
+    } catch (error) {
+      if (getErrorStatus(error) === 409) {
+        // Already applied, e.g. from another tab.
+        setAppliedAt(new Date().toISOString());
+        setApplyStep("closed");
+        toast.info("You have already applied for this job.");
+        return;
+      }
+      setApplyError(getApiErrorMessage(error, "Unable to submit your application. Please try again."));
+      setApplyStep("confirm");
+    }
   };
 
   return (
@@ -90,7 +155,7 @@ export function StudentJobDetails() {
         <PageBreadcrumb
           parentLabel="Jobs"
           to="/jobs"
-          currentLabel="Company"
+          currentLabel={job.companyName}
         />
         <div className="flex items-center gap-2">
           <button
@@ -117,18 +182,22 @@ export function StudentJobDetails() {
           <CompanyLogo job={job} large />
           <div className="min-w-0">
             <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-              {job.company} {"–"} {job.role}
+              {job.role}
             </h1>
             <p className="mt-1 text-sm text-slate-600">{job.companyName}</p>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
-              <DetailMeta icon={BriefcaseBusiness}>Full Time</DetailMeta>
+              <DetailMeta icon={BriefcaseBusiness}>{formatJobType(jobRecord.jobType)}</DetailMeta>
               <DetailMeta icon={MapPin}>{job.location}</DetailMeta>
               <DetailMeta icon={FileText}>{job.ctc}</DetailMeta>
-              <DetailMeta icon={Clock3}>2026 Batch</DetailMeta>
+              {batches.length > 0 && (
+                <DetailMeta icon={Clock3}>{batches.join(", ")} Batch</DetailMeta>
+              )}
             </div>
-            <span className="mt-4 inline-flex rounded bg-cyan-50 px-2 py-1 text-[10px] font-semibold text-cyan-600">
-              Engineering
-            </span>
+            {jobRecord.eligibility.degree && (
+              <span className="mt-4 inline-flex rounded bg-cyan-50 px-2 py-1 text-[10px] font-semibold text-cyan-600">
+                {jobRecord.eligibility.degree}
+              </span>
+            )}
           </div>
         </div>
         <aside className="border-t border-slate-100 p-4 sm:p-6 lg:border-l lg:border-t-0">
@@ -141,17 +210,19 @@ export function StudentJobDetails() {
           </p>
           {applied ? (
             <p className="mt-3 text-xs font-bold text-emerald-600">
-              Application submitted
+              Applied on {formatDate(applicationDate!)}
             </p>
           ) : (
-            <p className="mt-3 text-xs font-bold text-rose-500">
-              {job.daysLeft} Days left
-            </p>
+            job.daysLeft !== null && (
+              <p className="mt-3 text-xs font-bold text-rose-500">
+                {formatDaysLeft(job.daysLeft)}
+              </p>
+            )
           )}
           <button
             type="button"
             disabled={applied}
-            onClick={() => setApplyStep("confirm")}
+            onClick={openModal}
             className="mt-4 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-md bg-cyan-500 text-xs font-semibold text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:bg-emerald-500"
           >
             {applied ? (
@@ -241,7 +312,7 @@ export function StudentJobDetails() {
                     id="apply-modal-title"
                     className="text-base font-bold text-slate-900 sm:text-lg"
                   >
-                    Apply to {job.company}?
+                    Apply to {job.companyName}?
                   </h2>
                 </div>
                 <p className="mt-3 text-xs leading-5 text-slate-600">
@@ -252,11 +323,18 @@ export function StudentJobDetails() {
                   at {job.companyName}. Your profile and uploaded documents
                   will be shared with the recruiter.
                 </p>
-                <div className="mt-4 flex items-center gap-2 rounded-lg bg-cyan-50/70 px-3 py-2.5 text-[11px] leading-4 text-cyan-700">
-                  <CalendarDays size={15} className="shrink-0" />
-                  Applications close on {job.applyBy} ({job.daysLeft} days
-                  left).
-                </div>
+                {jobRecord.applyBy && (
+                  <div className="mt-4 flex items-center gap-2 rounded-lg bg-cyan-50/70 px-3 py-2.5 text-[11px] leading-4 text-cyan-700">
+                    <CalendarDays size={15} className="shrink-0" />
+                    Applications close on {job.applyBy}
+                    {job.daysLeft !== null && ` (${formatDaysLeft(job.daysLeft).toLowerCase()})`}.
+                  </div>
+                )}
+                {applyError && (
+                  <p role="alert" className="mt-3 rounded-lg border border-rose-100 bg-rose-50 px-3 py-2.5 text-[11px] leading-4 text-rose-600">
+                    {applyError}
+                  </p>
+                )}
                 <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                   <button
                     type="button"
@@ -267,16 +345,16 @@ export function StudentJobDetails() {
                   </button>
                   <button
                     type="button"
-                    onClick={confirmApply}
+                    onClick={() => void confirmApply()}
                     className="h-9 rounded-md bg-cyan-500 px-4 text-xs font-semibold text-white transition hover:bg-cyan-600"
                   >
-                    Yes, Apply
+                    {applyError ? "Try Again" : "Yes, Apply"}
                   </button>
                 </div>
               </>
             )}
 
-            {/* STEP 2: Loading (2.5s) */}
+            {/* STEP 2: Submitting */}
             {applyStep === "loading" && (
               <div className="flex flex-col items-center py-6 text-center">
                 <Loader2
