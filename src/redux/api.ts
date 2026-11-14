@@ -387,7 +387,72 @@ export type JobDetailRecord = JobRecord & {
   };
 };
 
-export type ApplicationStatusValue = "APPLIED" | "SHORTLISTED" | "REJECTED" | "SELECTED" | "WITHDRAWN";
+export type ApplicationStatusValue = "APPLIED" | "SHORTLISTED" | "INTERVIEW" | "REJECTED" | "SELECTED" | "WITHDRAWN";
+
+export type StudentDashboardParams = {
+  studentId: string;
+  driveLimit?: number;
+  recommendedLimit?: number;
+  skillLimit?: number;
+};
+
+export type StudentDashboardResponse = {
+  placementOverview: {
+    profileCompletion: { percentage: number; completedFields: number; totalFields: number; missingFields: string[] };
+    placementReadiness: {
+      percentage: number;
+      relevantJobs: number;
+      eligibleJobs: number;
+      components: { profileCompletion: number; eligibilityRate: number | null; averageSkillMatch: number | null };
+    };
+    applicationActivity: {
+      total: number;
+      applied: number;
+      shortlisted: number;
+      interviews: number;
+      offers: number;
+      rejected: number;
+      withdrawn: number;
+    };
+  };
+  upcomingDrives: {
+    counts: { ongoing: number; upcoming: number };
+    totalJobs: number;
+    items: {
+      jobId: string;
+      driveId: string;
+      company: { id: string; name: string };
+      jobRole: string;
+      ctcPackage: string | null;
+      driveDate: string | null;
+      driveTime: string | null;
+      driveStatus: DriveStatus;
+      applyBy: string | null;
+      daysLeft: number | null;
+      application: { id: string; status: ApplicationStatusValue; appliedAt: string } | null;
+    }[];
+  };
+  recommendedJobs: {
+    total: number;
+    items: {
+      jobId: string;
+      driveId: string;
+      company: { id: string; name: string };
+      jobRole: string;
+      ctcPackage: string | null;
+      match: JobRecord["match"];
+      departments: { id: string; name: string }[];
+      graduationYears: number[];
+      applyBy: string | null;
+      daysLeft: number | null;
+    }[];
+  };
+  skillsInDemand: {
+    totalCompanies: number;
+    totalSkills: number;
+    items: { skillId: string; skill: string; companyCount: number; studentHasSkill: boolean }[];
+  };
+};
 
 export type ApplicationRecord = {
   id: string;
@@ -721,6 +786,11 @@ export const authApi = createApi({
       query: ({ roleId, studentId }) => ({ url: `/api/jobs/${roleId}`, params: { studentId } }),
       providesTags: (_result, _error, { roleId }) => [{ type: "Drives", id: "LIST" }, { type: "Jobs", id: roleId }],
     }),
+    getStudentDashboard: builder.query<StudentDashboardResponse, StudentDashboardParams>({
+      query: (params) => ({ url: "/api/students/dashboard", params }),
+      // Applying for a job, or a drive change, updates the drives, recommendations and activity counts.
+      providesTags: [{ type: "Applications", id: "LIST" }, { type: "Jobs", id: "LIST" }, { type: "Drives", id: "LIST" }],
+    }),
     getApplications: builder.query<ApplicationListResponse, ApplicationListParams>({
       query: (params) => ({ url: "/api/applications", params }),
       providesTags: [{ type: "Applications", id: "LIST" }],
@@ -830,6 +900,7 @@ export const {
   useGetJobsQuery,
   useGetJobQuery,
   useGetApplicationsQuery,
+  useGetStudentDashboardQuery,
   useApplyForJobMutation,
   useCreateDriveMutation,
   useUpdateDriveMutation,

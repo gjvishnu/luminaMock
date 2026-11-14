@@ -3,6 +3,7 @@ import type { ApplicationStatus as ApplicationStatusValue } from "../shared/type
 export function ApplicationStatus({ status }: { status: ApplicationStatusValue }) {
   const tone = {
     Applied: "bg-blue-50 text-blue-600",
+    Interview: "bg-amber-50 text-amber-600",
     Selected: "bg-emerald-50 text-emerald-600",
     Shortlisted: "bg-emerald-50 text-emerald-600",
     "In Process": "bg-blue-50 text-blue-600",

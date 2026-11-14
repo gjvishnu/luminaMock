@@ -23,9 +23,12 @@ export function getLogoText(companyName: string) {
   return words.slice(0, 3).map((word) => word[0].toUpperCase()).join("");
 }
 
+// "6" -> "₹6 LPA", "7.5 LPA" -> "₹7.5 LPA"; anything else is shown as entered.
 export function formatCtc(ctc: string | null) {
-  if (!ctc) return "—";
-  return /^\d/.test(ctc.trim()) ? `₹${ctc.trim()}` : ctc;
+  const value = ctc?.trim();
+  if (!value) return "—";
+  if (/^\d+(\.\d+)?$/.test(value)) return `₹${value} LPA`;
+  return /^\d/.test(value) ? `₹${value}` : value;
 }
 
 export function formatDaysLeft(daysLeft: number | null) {

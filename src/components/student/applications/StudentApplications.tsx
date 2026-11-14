@@ -8,18 +8,19 @@ import { RequireStudentRecord } from "../shared/RequireStudentRecord";
 import type { ApplicationRow, ApplicationStatus } from "../shared/types";
 import { ApplicationMobileCard } from "./ApplicationMobileCard";
 import { ApplicationTableRow } from "./ApplicationTableRow";
-import { AlertTriangle, BriefcaseBusiness, CheckCircle2, CircleMinus, Clock3, Search, Trophy, X } from "lucide-react";
+import { AlertTriangle, BriefcaseBusiness, CalendarDays, CheckCircle2, CircleMinus, Clock3, Search, Trophy, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 const PAGE_SIZE = 10;
 const SEARCH_DELAY_MS = 300;
 
-const STATUS_ORDER: ApplicationStatusValue[] = ["APPLIED", "SHORTLISTED", "SELECTED", "REJECTED", "WITHDRAWN"];
+const STATUS_ORDER: ApplicationStatusValue[] = ["APPLIED", "SHORTLISTED", "INTERVIEW", "SELECTED", "REJECTED", "WITHDRAWN"];
 
 const STATUS_META: Record<ApplicationStatusValue, { label: ApplicationStatus; icon: React.ElementType; tone: string }> = {
   APPLIED: { label: "Applied", icon: Clock3, tone: "bg-blue-50 text-blue-600" },
   SHORTLISTED: { label: "Shortlisted", icon: CheckCircle2, tone: "bg-emerald-50 text-emerald-600" },
+  INTERVIEW: { label: "Interview", icon: CalendarDays, tone: "bg-amber-50 text-amber-600" },
   SELECTED: { label: "Selected", icon: Trophy, tone: "bg-violet-50 text-violet-600" },
   REJECTED: { label: "Rejected", icon: AlertTriangle, tone: "bg-rose-50 text-rose-600" },
   WITHDRAWN: { label: "Withdrawn", icon: CircleMinus, tone: "bg-slate-100 text-slate-600" },
@@ -33,6 +34,8 @@ function getNextStep(application: ApplicationRecord) {
       return { nextStep: "Awaiting shortlist", nextDate: "The placement cell is reviewing applications" };
     case "SHORTLISTED":
       return { nextStep: "Shortlisted for next round", nextDate: "The placement cell will share the next steps" };
+    case "INTERVIEW":
+      return { nextStep: "Interview stage", nextDate: "The placement cell will share your interview schedule" };
     case "SELECTED":
       return { nextStep: "Selected", nextDate: `Updated on ${updatedOn}` };
     case "REJECTED":
@@ -161,7 +164,7 @@ function ApplicationsList({ studentId }: { studentId: string }) {
 
   return (
     <div className="space-y-4 pb-5 text-slate-800">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:grid-cols-7">
         {summaryCards.map((summary) => {
           const Icon = summary.icon;
 

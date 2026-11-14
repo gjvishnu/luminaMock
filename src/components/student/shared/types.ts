@@ -45,6 +45,7 @@ export type ApplicationStatus =
   | "Applied"
   | "Shortlisted"
   | "In Process"
+  | "Interview"
   | "Rejected"
   | "Offer"
   | "Selected"
