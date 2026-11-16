@@ -4,7 +4,7 @@ import { ProfileChecklist } from "./ProfileChecklist";
 import { ProfileProgressRing } from "./ProfileProgressRing";
 import { ChevronRight, UserRound } from "lucide-react";
 
-export function ProfileCompletionCard({ profile, onComplete }: { profile: ProfileData; onComplete: () => void }) {
+export function ProfileCompletionCard({ profile, onComplete }: { profile: ProfileData; onComplete?: () => void }) {
   const { percentage, checklistItems } = getProfileCompletion(profile);
 
   return (
@@ -31,10 +31,12 @@ export function ProfileCompletionCard({ profile, onComplete }: { profile: Profil
         </div>
         <ProfileChecklist items={checklistItems} />
       </div>
-      <button type="button" onClick={onComplete} className="mt-4 inline-flex h-9 items-center justify-center gap-1.5 self-start rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600">
-        Complete Profile
-        <ChevronRight size={14} />
-      </button>
+      {onComplete && (
+        <button type="button" onClick={onComplete} className="mt-4 inline-flex h-9 items-center justify-center gap-1.5 self-start rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-600">
+          Complete Profile
+          <ChevronRight size={14} />
+        </button>
+      )}
     </section>
   );
 }

@@ -4,43 +4,50 @@ import {
   CheckCircle2,
   FileText,
   Sparkles,
-  Megaphone,
   Target,
   TrendingUp,
 } from "lucide-react";
-import { getProfileCompletion } from "./student/shared/helpers";
-import { studentProfileData } from "./student/shared/data";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { type StudentDashboardResponse, useGetStudentDashboardQuery } from "../redux/api";
+import { getApiErrorMessage } from "./formHelpers";
+import { ApplyJobDialog } from "./student/jobs/ApplyJobDialog";
+import { formatCtc, formatDate, getLogoText } from "./student/jobs/jobHelpers";
+import { ProfileLoadError, ProfileLoading } from "./student/profile/ProfileStatus";
+import { RequireStudentRecord } from "./student/shared/RequireStudentRecord";
 
-const recommendedJobs = [
-  { company: "TCS", role: "Software Engineer", logo: "tcs", match: "92% Match", package: "₹7.5 LPA", departments: "CSE, IT", deadline: "Sep 05, 2026" },
-  { company: "Infosys", role: "System Engineer", logo: "Infosys", match: "86% Match", package: "₹6.5 LPA", departments: "CSE, IT, ECE", deadline: "Sep 08, 2026" },
-  { company: "Zoho", role: "Developer", logo: "zoho", match: "81% Match", package: "₹8.0 LPA", departments: "CSE, IT", deadline: "Sep 12, 2026" },
-];
-
-const skillDemand = [
-  { name: "React.js", companies: 24, width: "100%" },
-  { name: "Python", companies: 21, width: "88%" },
-  { name: "Java", companies: 18, width: "75%" },
-  { name: "SQL", companies: 16, width: "67%" },
-  { name: "Node.js", companies: 12, width: "50%" },
-  { name: "AWS", companies: 9, width: "38%" },
-];
-
-// const missingSkills = ["AWS", "Docker", "TypeScript", "System Design"];
-
-const upcomingDrives = [
-  { month: "SEP", day: "05", company: "TCS", role: "Software Engineer", package: "₹7.5 LPA", type: "ongoing", status: "Applied" },
-  { month: "SEP", day: "12", company: "Zoho", role: "Developer", package: "₹8.0 LPA", type: "upcoming", status: "Apply Now" },
-  { month: "SEP", day: "18", company: "Wipro", role: "Project Engineer", package: "₹6.0 LPA", type: "upcoming", status: "Apply Now" },
-];
-
-const announcements = [
-  { text: "TCS Campus Drive Registration Open", date: "2 hours ago" },
-  { text: "Resume submission deadline extended", date: "Yesterday" },
-  { text: "Placement orientation on Friday", date: "2 days ago" },
-];
+type DashboardDrive = StudentDashboardResponse["upcomingDrives"]["items"][number];
 
 const cardClass = "rounded-2xl border border-slate-200  shadow-sm";
+
+// Labels for placementOverview.profileCompletion.missingFields
+const PROFILE_FIELD_LABELS: Record<string, string> = {
+  name: "Name",
+  departmentId: "Department",
+  degreeId: "Program",
+  batch: "Batch",
+  semester: "Semester",
+  cgpa: "CGPA",
+  backlogs: "Backlogs",
+  phone: "Phone",
+  dateOfBirth: "Date of birth",
+  location: "Location",
+  skills: "Skills",
+  projects: "Projects",
+};
+
+function getDriveDateParts(value: string | null) {
+  if (!value) return { month: "TBA", day: "—" };
+  const date = new Date(value);
+  return {
+    month: new Intl.DateTimeFormat("en-GB", { month: "short", timeZone: "UTC" }).format(date).toUpperCase(),
+    day: new Intl.DateTimeFormat("en-GB", { day: "2-digit", timeZone: "UTC" }).format(date),
+  };
+}
+
+function CardEmptyText({ children }: { children: React.ReactNode }) {
+  return <p className="px-4 py-8 text-center text-xs text-slate-500">{children}</p>;
+}
 
 function ProgressBar({ value, label, color }: { value: number; label: string; color: string }) {
   return (
@@ -56,28 +63,32 @@ function ProgressBar({ value, label, color }: { value: number; label: string; co
   );
 }
 
-function SectionHeading({ title, action = "View All" }: { title: string; action?: string }) {
+function SectionHeading({ title, action = "View All", onAction }: { title: string; action?: string; onAction?: () => void }) {
   return (
     <div className="flex items-center justify-between gap-3">
       <h2 className="text-sm font-bold tracking-tight text-slate-800 sm:text-base">{title}</h2>
-      <button type="button" className="inline-flex shrink-0 items-center gap-1 text-[10px] font-semibold text-cyan-500 transition hover:text-cyan-700 sm:text-xs">
-        {action}
-        <ArrowRight size={13} />
-      </button>
+      {onAction && (
+        <button type="button" onClick={onAction} className="inline-flex shrink-0 items-center gap-1 text-[10px] font-semibold text-cyan-500 transition hover:text-cyan-700 sm:text-xs">
+          {action}
+          <ArrowRight size={13} />
+        </button>
+      )}
     </div>
   );
 }
 
-function PlacementOverviewCard() {
-  const profileCompletion = getProfileCompletion(studentProfileData).percentage;
+function PlacementOverviewCard({ overview }: { overview: StudentDashboardResponse["placementOverview"] }) {
+  const navigate = useNavigate();
+  const { profileCompletion, placementReadiness, applicationActivity } = overview;
+  const missingFields = profileCompletion.missingFields.map((field) => PROFILE_FIELD_LABELS[field] ?? field);
 
   const applicationCounts = [
-    ["Applied", "12", "text-blue-500"],
-    ["Shortlisted", "6", "text-emerald-500"],
-    ["Interviews", "4", "text-amber-500"],
-    ["Offers", "1", "text-violet-500"],
-    ["Rejected", "3", "text-rose-500"],
-  ];
+    ["Applied", applicationActivity.applied, "text-blue-500"],
+    ["Shortlisted", applicationActivity.shortlisted, "text-emerald-500"],
+    ["Interviews", applicationActivity.interviews, "text-amber-500"],
+    ["Offers", applicationActivity.offers, "text-violet-500"],
+    ["Rejected", applicationActivity.rejected, "text-rose-500"],
+  ] as const;
 
   return (
     <section className={`${cardClass} h-full bg-white p-4 sm:p-5`}>
@@ -89,15 +100,27 @@ function PlacementOverviewCard() {
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-500"><FileText size={17} /></span>
       </div>
       <div className="mt-4 space-y-3 border-b border-slate-100 pb-4">
-        <ProgressBar value={profileCompletion} label="Profile Completion" color="bg-cyan-500" />
-        <ProgressBar value={82} label="Placement Readiness" color="bg-emerald-500" />
+        <ProgressBar value={profileCompletion.percentage} label="Profile Completion" color="bg-cyan-500" />
+        <ProgressBar value={placementReadiness.percentage} label="Placement Readiness" color="bg-emerald-500" />
       </div>
-      <span className="text-cyan-400 border-b text-xs cursor-pointer mt-2">Complete profile</span>
+      {missingFields.length > 0 && (
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={() => navigate("/profile/edit")}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-cyan-500 hover:text-cyan-700"
+          >
+            Complete profile
+            <ArrowRight size={13} />
+          </button>
+          <p className="mt-1 text-[10px] text-slate-500">Missing: {missingFields.join(", ")}</p>
+        </div>
+      )}
 
       <div className="mt-4">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-xs font-bold text-slate-800">Application Activity</h3>
-          <span className="text-[10px] font-semibold text-slate-500">12 total</span>
+          <span className="text-[10px] font-semibold text-slate-500">{applicationActivity.total} total</span>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
           {applicationCounts.map(([label, count, tone]) => (
@@ -109,7 +132,11 @@ function PlacementOverviewCard() {
         </div>
       </div>
 
-      <button type="button" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-500 hover:text-cyan-700">
+      <button
+        type="button"
+        onClick={() => navigate("/applications")}
+        className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-500 hover:text-cyan-700"
+      >
         View Applications
         <ArrowRight size={14} />
       </button>
@@ -117,33 +144,42 @@ function PlacementOverviewCard() {
   );
 }
 
-function RecommendedJobsCard() {
+function RecommendedJobsCard({ recommended }: { recommended: StudentDashboardResponse["recommendedJobs"] }) {
+  const navigate = useNavigate();
+
   return (
     <section className={`${cardClass} h-full min-h-[280px] max-h-[360px] overflow-x-hidden overflow-y-auto bg-white`}>
       <div className="border-b border-slate-100 p-4 sm:px-5">
-        <SectionHeading title="Recommended For You" />
+        <SectionHeading title="Recommended For You" onAction={recommended.total > 0 ? () => navigate("/jobs") : undefined} />
       </div>
       <div>
-        {recommendedJobs.map((job) => (
-          <div key={job.company} className="grid gap-3 border-b border-slate-100 p-3.5 last:border-b-0 sm:grid-cols-[74px_minmax(0,1fr)_104px] sm:items-center sm:px-5">
-            <div className={`flex h-16 w-16 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-bold ${job.logo === "tcs" ? "text-pink-500" : job.logo === "zoho" ? "text-orange-500" : "text-blue-500"}`}>
-              {job.logo === "tcs" ? "tcs" : job.company}
+        {recommended.items.length === 0 && (
+          <CardEmptyText>No new recommendations right now. Jobs you are eligible for and have not applied to will show here.</CardEmptyText>
+        )}
+        {recommended.items.map((job) => (
+          <div key={job.jobId} className="grid gap-3 border-b border-slate-100 p-3.5 last:border-b-0 sm:grid-cols-[74px_minmax(0,1fr)_104px] sm:items-center sm:px-5">
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-slate-200 bg-white text-center text-sm font-bold text-cyan-600">
+              {getLogoText(job.company.name)}
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <p className="font-bold text-slate-800">{job.company}</p>
-                <span className="text-xs font-semibold text-emerald-600">{job.match}</span>
+                <p className="font-bold text-slate-800">{job.company.name}</p>
+                <span className={`text-xs font-semibold ${job.match.label === "Fair" ? "text-amber-600" : "text-emerald-600"}`}>{job.match.percentage}% Match</span>
               </div>
-              <p className="mt-0.5 text-xs text-slate-600">{job.role}</p>
+              <p className="mt-0.5 text-xs text-slate-600">{job.jobRole}</p>
               <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-600 sm:text-[11px]">
-                <span>{job.package}</span>
-                <span>{job.departments}</span>
-                <span>2026 Batch</span>
+                <span>{formatCtc(job.ctcPackage)}</span>
+                {job.departments.length > 0 && <span>{job.departments.map((department) => department.name).join(", ")}</span>}
+                {job.graduationYears.length > 0 && <span>{job.graduationYears.join(", ")} Batch</span>}
               </div>
             </div>
             <div className="flex items-center justify-between gap-2 sm:block sm:text-right">
-              <p className="text-[10px] text-slate-500">Apply by<br /><span className="font-medium text-slate-700">{job.deadline}</span></p>
-              <button type="button" className="inline-flex h-8 items-center justify-center rounded-md bg-cyan-500 px-3 text-[10px] font-semibold text-white transition hover:bg-cyan-600 sm:mt-2">
+              <p className="text-[10px] text-slate-500">Apply by<br /><span className="font-medium text-slate-700">{job.applyBy ? formatDate(job.applyBy) : "—"}</span></p>
+              <button
+                type="button"
+                onClick={() => navigate(`/jobs/${job.jobId}`)}
+                className="inline-flex h-8 items-center justify-center rounded-md bg-cyan-500 px-3 text-[10px] font-semibold text-white transition hover:bg-cyan-600 sm:mt-2"
+              >
                 View Drive
               </button>
             </div>
@@ -154,56 +190,105 @@ function RecommendedJobsCard() {
   );
 }
 
-function SkillDemandCard() {
+function SkillDemandCard({ skills }: { skills: StudentDashboardResponse["skillsInDemand"] }) {
+  // Bars are drawn against the number of companies with open drives (or the top skill, if that is missing).
+  const maxCompanies = skills.totalCompanies || skills.items[0]?.companyCount || 1;
+
   return (
-    <section className={`${cardClass} h-full min-h-[280px] max-h-[360px] bg-white p-4 sm:p-5`}>
+    <section className={`${cardClass} h-full min-h-[280px] max-h-[360px] overflow-y-auto bg-white p-4 sm:p-5`}>
       <SectionHeading title="Skills Companies Are Looking For" />
-      <div className="mt-5 space-y-3.5">
-        {skillDemand.map((skill) => (
-          <div key={skill.name} className="grid grid-cols-[74px_minmax(0,1fr)_72px] items-center gap-2 text-[11px]">
-            <span className="font-medium text-slate-700">{skill.name}</span>
-            <span className="h-2 overflow-hidden rounded-full bg-slate-100">
-              <span className="block h-full rounded-full bg-cyan-400" style={{ width: skill.width }} />
-            </span>
-            <span className="text-right text-slate-500"><b className="text-cyan-500">{skill.companies}</b> companies</span>
-          </div>
-        ))}
-      </div>
+      {skills.items.length === 0 ? (
+        <CardEmptyText>No open drives are asking for skills right now.</CardEmptyText>
+      ) : (
+        <div className="mt-5 space-y-3.5">
+          {skills.items.map((skill) => (
+            <div key={skill.skillId} className="grid grid-cols-[88px_minmax(0,1fr)_80px] items-center gap-2 text-[11px]">
+              <span className="flex min-w-0 items-center gap-1 font-medium text-slate-700" title={skill.studentHasSkill ? "You have this skill" : undefined}>
+                <span className="truncate">{skill.skill}</span>
+                {skill.studentHasSkill && <CheckCircle2 size={12} className="shrink-0 text-emerald-500" aria-label="You have this skill" />}
+              </span>
+              <span className="h-2 overflow-hidden rounded-full bg-slate-100">
+                <span className="block h-full rounded-full bg-cyan-400" style={{ width: `${Math.min(100, (skill.companyCount / maxCompanies) * 100)}%` }} />
+              </span>
+              <span className="text-right text-slate-500">
+                <b className="text-cyan-500">{skill.companyCount}</b> compan{skill.companyCount === 1 ? "y" : "ies"}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }
 
-
-function UpcomingOngoingDrivesCard() {
-  const ongoingCount = upcomingDrives.filter((drive) => drive.type === "ongoing").length;
-  const upcomingCount = upcomingDrives.filter((drive) => drive.type === "upcoming").length;
+function UpcomingOngoingDrivesCard({ drives, studentId }: { drives: StudentDashboardResponse["upcomingDrives"]; studentId: string }) {
+  const navigate = useNavigate();
+  const [applyingTo, setApplyingTo] = useState<DashboardDrive | null>(null);
 
   return (
     <section className={`${cardClass} h-full min-w-0 bg-white p-4 sm:p-5`}>
-      <SectionHeading title="Upcoming & Ongoing Drives" />
+      <SectionHeading title="Upcoming & Ongoing Drives" onAction={() => navigate("/jobs")} />
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />{ongoingCount} Ongoing</span>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-semibold text-cyan-600"><span className="h-1.5 w-1.5 rounded-full bg-cyan-500" />{upcomingCount} Upcoming</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />{drives.counts.ongoing} Ongoing</span>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-semibold text-cyan-600"><span className="h-1.5 w-1.5 rounded-full bg-cyan-500" />{drives.counts.upcoming} Upcoming</span>
       </div>
-      <div className="mt-4 divide-y divide-slate-100">
-        {upcomingDrives.map((drive) => (
-          <div key={drive.company} className="grid grid-cols-[50px_minmax(0,1fr)_auto] items-center gap-3 py-3 first:pt-0 last:pb-0">
-            <div className="flex flex-col items-center rounded-lg bg-cyan-50 px-2 py-1.5 text-center">
-              <span className="text-[9px] font-bold text-cyan-500">{drive.month}</span>
-              <span className="text-base font-bold leading-none text-slate-800">{drive.day}</span>
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-bold text-slate-800">{drive.company}</p>
-              <p className="truncate text-[11px] text-slate-600">{drive.role}</p>
-              <p className={`mt-1 flex items-center gap-1 text-[9px] font-semibold ${drive.type === "ongoing" ? "text-emerald-600" : "text-cyan-600"}`}><span className={`h-1.5 w-1.5 rounded-full ${drive.type === "ongoing" ? "bg-emerald-500" : "bg-cyan-500"}`} />{drive.type === "ongoing" ? "Ongoing" : "Upcoming"}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[11px] font-medium text-slate-700">{drive.package}</p>
-              <button type="button" className={`mt-1 rounded-full px-2.5 py-1 text-[10px] font-semibold ${drive.status === "Applied" ? "bg-emerald-50 text-emerald-600" : "bg-cyan-50 text-cyan-600"}`}>{drive.status}</button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {drives.items.length === 0 ? (
+        <CardEmptyText>No upcoming or ongoing drives you are eligible for right now.</CardEmptyText>
+      ) : (
+        <div className="mt-4 divide-y divide-slate-100">
+          {drives.items.map((drive) => {
+            const { month, day } = getDriveDateParts(drive.driveDate);
+            const isOngoing = drive.driveStatus === "ONGOING";
+
+            return (
+              <div key={drive.jobId} className="grid grid-cols-[50px_minmax(0,1fr)_auto] items-center gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="flex flex-col items-center rounded-lg bg-cyan-50 px-2 py-1.5 text-center">
+                  <span className="text-[9px] font-bold text-cyan-500">{month}</span>
+                  <span className="text-base font-bold leading-none text-slate-800">{day}</span>
+                </div>
+                <button type="button" onClick={() => navigate(`/jobs/${drive.jobId}`)} className="min-w-0 text-left">
+                  <p className="truncate text-xs font-bold text-slate-800 hover:text-cyan-600">{drive.company.name}</p>
+                  <p className="truncate text-[11px] text-slate-600">{drive.jobRole}</p>
+                  <p className={`mt-1 flex items-center gap-1 text-[9px] font-semibold ${isOngoing ? "text-emerald-600" : "text-cyan-600"}`}><span className={`h-1.5 w-1.5 rounded-full ${isOngoing ? "bg-emerald-500" : "bg-cyan-500"}`} />{isOngoing ? "Ongoing" : "Upcoming"}</p>
+                </button>
+                <div className="text-right">
+                  <p className="text-[11px] font-medium text-slate-700">{formatCtc(drive.ctcPackage)}</p>
+                  {drive.application ? (
+                    <button
+                      type="button"
+                      onClick={() => navigate("/applications")}
+                      className="mt-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600"
+                    >
+                      Applied
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setApplyingTo(drive)}
+                      className="mt-1 rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-semibold text-cyan-600 hover:bg-cyan-100"
+                    >
+                      Apply Now
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Applying refetches the dashboard, so the row switches to "Applied" on its own. */}
+      {applyingTo && (
+        <ApplyJobDialog
+          studentId={studentId}
+          roleId={applyingTo.jobId}
+          companyName={applyingTo.company.name}
+          role={applyingTo.jobRole}
+          applyBy={applyingTo.applyBy}
+          daysLeft={applyingTo.daysLeft}
+          onClose={() => setApplyingTo(null)}
+        />
+      )}
     </section>
   );
 }
@@ -278,35 +363,33 @@ function LuminaInsightsCard() {
   );
 }
 
-function AnnouncementsCard() {
-  return (
-    <section className={`${cardClass} h-full min-w-0 overflow-hidden bg-white`}>
-      <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-5">
-        <h2 className="text font-bold text-slate-800">Announcements</h2>
-        <button type="button" className="inline-flex items-center gap-1 text-[10px] font-semibold text-cyan-500">View All <ArrowRight size={13} /></button>
-      </div>
-      <div className="divide-y divide-slate-100 px-4 sm:px-5">
-        {announcements.map((announcement) => (
-          <div key={announcement.text} className="flex items-start gap-2.5 py-3">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-500"><Megaphone size={14} /></span>
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-medium leading-4 text-slate-700 sm:truncate">{announcement.text}</p>
-              <p className="mt-0.5 text-[9px] text-slate-500">{announcement.date}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 export function StudentDashboard() {
   return (
     <div className="-m-3 min-h-full space-y-4 bg-slate-50 p-3 pb-5 text-slate-800 sm:p-4">
-      <div className="grid items-stretch gap-4 lg:grid-cols-2 xl:grid-cols-3">
-        <PlacementOverviewCard />
-        <UpcomingOngoingDrivesCard />
-        <AnnouncementsCard />
+      <RequireStudentRecord
+        loadingLabel="Loading your dashboard..."
+        emptyTitle="Complete your profile to get started"
+        emptyDescription="Add your details to see your placement readiness, the drives you are eligible for and jobs recommended for you."
+      >
+        {(studentId) => <DashboardContent studentId={studentId} />}
+      </RequireStudentRecord>
+    </div>
+  );
+}
+
+function DashboardContent({ studentId }: { studentId: string }) {
+  const { data, isLoading, error, refetch } = useGetStudentDashboardQuery({ studentId }, { refetchOnMountOrArgChange: true });
+
+  if (isLoading) return <ProfileLoading label="Loading your dashboard..." />;
+  if (error || !data) {
+    return <ProfileLoadError message={getApiErrorMessage(error, "Unable to load your dashboard.")} onRetry={() => void refetch()} />;
+  }
+
+  return (
+    <>
+      <div className="grid items-stretch gap-4 lg:grid-cols-2">
+        <PlacementOverviewCard overview={data.placementOverview} />
+        <UpcomingOngoingDrivesCard drives={data.upcomingDrives} studentId={studentId} />
       </div>
 
       <div>
@@ -314,10 +397,9 @@ export function StudentDashboard() {
       </div>
 
       <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,7fr)_minmax(0,3fr)]">
-        <RecommendedJobsCard />
-        <SkillDemandCard />
-        {/* <MissingSkillsCard /> */}
+        <RecommendedJobsCard recommended={data.recommendedJobs} />
+        <SkillDemandCard skills={data.skillsInDemand} />
       </div>
-    </div>
+    </>
   );
 }

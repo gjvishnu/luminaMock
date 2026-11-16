@@ -17,7 +17,7 @@ export function InfoItem({
           {label}
         </p>
         <p className="mt-1 truncate text-xs font-semibold text-slate-800">
-          {value}
+          {value || "—"}
         </p>
       </div>
     </div>

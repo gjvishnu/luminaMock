@@ -1,15 +1,14 @@
 import { createContext } from "react";
+import type { AuthUser } from "../redux/authSlice";
+import type { UserRole } from "../redux/roleSlice";
 
-export type UserRole = "student" | "placementOfficer" | "admin";
+export type { UserRole } from "../redux/roleSlice";
 
 export type RoleContextValue = {
   role: UserRole;
   setRole: (role: UserRole) => void;
-  /** Kept for component compatibility; always null now that login is removed. */
-  user: null;
-  /** No-op kept for component compatibility. */
-  setUser: (user: null) => void;
-  /** No-op kept for component compatibility. */
+  user: AuthUser | null;
+  setUser: (user: AuthUser | null) => void;
   logout: () => void;
 };
 

@@ -8,6 +8,7 @@ import {
   FileText,
   Home,
   ListChecks,
+  LoaderCircle,
   MapPin,
   MoreHorizontal,
   Pencil,
@@ -18,6 +19,7 @@ import {
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { type DriveDetailRecord, useGetDriveQuery } from "../redux/api";
 
 type DepartmentSummary = {
   department: string;
@@ -41,6 +43,7 @@ type DriveDetail = {
   time: string;
   venue: string;
   status: string;
+  openings: number;
   eligible: number;
   applied: number;
   notApplied: number;
@@ -112,6 +115,7 @@ const tcsDetail: DriveDetail = {
   time: "09:00 AM",
   venue: "Seminar Hall",
   status: "Upcoming",
+  openings: 25,
   eligible: 320,
   applied: 248,
   notApplied: 72,
@@ -193,6 +197,28 @@ const driveDetails: Record<string, DriveDetail> = {
   },
 };
 
+// Application and interview figures have no API yet, so they stay as sample data.
+function toDriveDetail(drive: DriveDetailRecord): DriveDetail {
+  const roles = drive.roles ?? [];
+  const company = drive.company?.name ?? drive.companyName ?? "—";
+  const status = drive.status ?? "";
+
+  return {
+    ...tcsDetail,
+    company,
+    companyFull: company,
+    role: roles.map((role) => role.jobRole).filter(Boolean).join(", ") || "—",
+    ctc: roles.map((role) => role.ctcPackage).filter(Boolean).join(", ") || "—",
+    date: drive.driveDate
+      ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(drive.driveDate))
+      : "—",
+    time: drive.driveTime ?? "—",
+    venue: drive.venue ?? "—",
+    status: status.charAt(0) + status.slice(1).toLowerCase(),
+    openings: roles.reduce((total, role) => total + (role.numberOfOpenings ?? 0), 0),
+  };
+}
+
 const summaryTabs = [
   "Applications Summary",
   "Shortlisted Students",
@@ -228,7 +254,12 @@ const summaryCell = (value: number, total: number, color: string) => (
 export const DriveDetails = () => {
   const navigate = useNavigate();
   const { driveId } = useParams();
-  const drive = driveDetails[driveId?.toLowerCase() ?? "tcs"] ?? tcsDetail;
+  const sampleDrive = driveDetails[driveId?.toLowerCase() ?? "tcs"];
+  const { data: liveDrive, error, isFetching, refetch } = useGetDriveQuery(driveId ?? "", {
+    skip: !driveId || Boolean(sampleDrive),
+    refetchOnMountOrArgChange: true,
+  });
+  const drive = sampleDrive ?? (liveDrive ? toDriveDetail(liveDrive) : tcsDetail);
   const [activeTab, setActiveTab] = useState(summaryTabs[0]);
   const notStarted = Math.max(drive.applied - drive.inProgress - drive.completed - drive.selected - drive.rejected, 0);
   const totalApplied = drive.applied;
@@ -239,6 +270,24 @@ export const DriveDetails = () => {
     { id: 3, value: drive.selected, label: "Selected" },
     { id: 4, value: drive.rejected, label: "Rejected" },
   ];
+
+  if (!sampleDrive && isFetching) {
+    return (
+      <div className="flex min-h-64 items-center justify-center gap-2 text-sm text-slate-500">
+        <LoaderCircle size={16} className="animate-spin" />
+        Loading drive details...
+      </div>
+    );
+  }
+
+  if (!sampleDrive && (error || !liveDrive)) {
+    return (
+      <div className="px-4 py-12 text-center">
+        <p className="text-sm font-semibold text-rose-600">Unable to load this campus drive.</p>
+        <button type="button" onClick={() => void refetch()} className="mt-3 rounded-md bg-cyan-500 px-3 py-2 text-xs font-semibold text-white hover:bg-cyan-600">Try again</button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50/50 p-3 text-slate-800 sm:p-4">
@@ -282,7 +331,7 @@ export const DriveDetails = () => {
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <button type="button" className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-300 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 sm:h-9">
+            <button type="button" disabled={Boolean(sampleDrive)} onClick={() => navigate(`/campusdrive/${driveId}/edit`)} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-300 px-3 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9">
               <Pencil size={14} /> Edit Drive
             </button>
             <button type="button" className="inline-flex h-8 items-center gap-1.5 rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-500 sm:h-9">
@@ -439,7 +488,7 @@ function TimelineCard({ drive }: { drive: DriveDetail }) {
           <DetailLine label="Venue" value={drive.venue} />
           <DetailLine label="Job Role" value={drive.role} />
           <DetailLine label="CTC" value={drive.ctc} />
-          <DetailLine label="Openings" value="25" />
+          <DetailLine label="Openings" value={String(drive.openings)} />
         </div>
       </div>
     </section>

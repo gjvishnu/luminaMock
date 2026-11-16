@@ -7,6 +7,7 @@ import { UserManagement } from "./components/userManagement";
 import { RouterError } from "./components/routerError";
 import { CampusDrive } from "./components/campusDrive";
 import { DriveDetails } from "./components/driveDetails";
+import { EditDrive } from "./components/editDrive";
 import { JDRecommendation } from "./components/jdRecommendation";
 import { DriveStudents } from "./components/driveStudents";
 import { AddDrive } from "./components/addDrive";
@@ -15,6 +16,8 @@ import { Reports } from "./components/reports";
 import { StatusTracker } from "./components/statusTracker";
 import { RoleProvider } from "./context/roleProvider";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { RequireAuth } from "./components/requireAuth";
+import { Login } from "./pages/login";
 
 import { ApplicationDetailRoute } from "./components/student/applications/ApplicationDetailRoute";
 import { StudentApplicationDetailRoute } from "./components/student/applications/StudentApplicationDetailRoute";
@@ -25,6 +28,7 @@ import { StudentApplicationDetails } from "./components/student/misc/StudentAppl
 import { StudentDetails } from "./components/student/misc/StudentDetails";
 import { StudentResume } from "./components/student/misc/StudentResume";
 import { StudentProfile } from "./components/student/profile/StudentProfile";
+import { StudentProfileEdit } from "./components/student/profile/StudentProfileEdit";
 
 function AppLayout() {
   return (
@@ -42,18 +46,22 @@ export const router = createBrowserRouter([
     errorElement: <RouterError />,
     children: [
       {
-        path: "/",
-        element: <Navigate to="/dashboard" replace />,
+        path: "/login",
+        element: <Login />,
       },
       {
-        path: "/",
-        element: <Home />,
+        element: <RequireAuth />,
         children: [
           {
-            path: "dashboard",
+            path: "/",
+            element: <Navigate to="/dashboard" replace />,
+          },
+          {
+            path: "/",
+            element: <Home />,
             children: [
               {
-                index: true,
+                path: "dashboard",
                 element: <Dashboard />,
               },
               {
@@ -62,7 +70,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: "user-management",
-                element: <Navigate to="/dashboard/actions" replace />,
+                element: <Navigate to="/actions" replace />,
               },
               {
                 path: "students",
@@ -87,6 +95,10 @@ export const router = createBrowserRouter([
               {
                 path: "campusdrive/:driveId",
                 element: <DriveDetails />,
+              },
+              {
+                path: "campusdrive/:driveId/edit",
+                element: <EditDrive />,
               },
               {
                 path: "jdrecommendation",
@@ -141,18 +153,14 @@ export const router = createBrowserRouter([
                 element: <StudentProfile />,
               },
               {
+                path: "profile/edit",
+                element: <StudentProfileEdit />,
+              },
+              {
                 path: "resume",
                 element: <StudentResume />,
               },
             ],
-          },
-          {
-            path: "add_drives",
-            element: <Navigate to="/dashboard/add_drives" replace />,
-          },
-          {
-            path: "campusdrive",
-            element: <Navigate to="/dashboard/campusdrive" replace />,
           },
         ],
       },

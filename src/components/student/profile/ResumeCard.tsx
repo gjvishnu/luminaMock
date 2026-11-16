@@ -7,13 +7,17 @@ export function ResumeCard({
   profile,
   onProfileChange,
   isEditing,
+  readOnly = false,
   onNotice,
 }: {
   profile: ProfileData;
   onProfileChange: React.Dispatch<React.SetStateAction<ProfileData>>;
   isEditing?: boolean;
+  readOnly?: boolean;
   onNotice: (message: string) => void;
 }) {
+  const hasResume = profile.resume.name !== "No resume uploaded";
+
   const resumeInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,9 +78,11 @@ export function ResumeCard({
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-bold text-slate-800">{profile.resume.name}</p>
-              <p className="mt-1 text-[10px] text-slate-500">
-                PDF - {profile.resume.size} · Updated {profile.resume.updated}
-              </p>
+              {hasResume && (
+                <p className="mt-1 text-[10px] text-slate-500">
+                  PDF - {profile.resume.size} · Updated {profile.resume.updated}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-1.5">
@@ -97,13 +103,15 @@ export function ResumeCard({
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => onNotice(`Opening ${profile.resume.name}.`)}
-            className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
-          >
-            View Resume
-          </button>
+          {hasResume && (
+            <button
+              type="button"
+              onClick={() => onNotice(`Opening ${profile.resume.name}.`)}
+              className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
+            >
+              View Resume
+            </button>
+          )}
           <button
             type="button"
             onClick={() => resumeInputRef.current?.click()}
@@ -111,13 +119,15 @@ export function ResumeCard({
           >
             <Upload size={14} /> Update Resume
           </button>
-          <button
-            type="button"
-            onClick={() => onNotice(`Downloading ${profile.resume.name}.`)}
-            className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
-          >
-            Download Resume
-          </button>
+          {hasResume && (
+            <button
+              type="button"
+              onClick={() => onNotice(`Downloading ${profile.resume.name}.`)}
+              className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
+            >
+              Download Resume
+            </button>
+          )}
         </div>
       </DetailCard>
     );
@@ -135,7 +145,7 @@ export function ResumeCard({
             <p className="mt-1 text-[10px] text-slate-500">Your latest resume shared with recruiters.</p>
           </div>
         </div>
-        <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">Ready to share</span>
+        {hasResume && <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-600">Ready to share</span>}
       </div>
       <div className="mt-4 flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50/80 p-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-rose-50 text-rose-500">
@@ -143,34 +153,42 @@ export function ResumeCard({
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate text-xs font-bold text-slate-800">{profile.resume.name}</p>
-          <p className="mt-1 text-[10px] text-slate-500">
-            PDF · {profile.resume.size} · Updated {profile.resume.updated}
-          </p>
+          {hasResume && (
+            <p className="mt-1 text-[10px] text-slate-500">
+              PDF · {profile.resume.size} · Updated {profile.resume.updated}
+            </p>
+          )}
         </div>
-        <CheckCircle2 size={17} className="shrink-0 text-emerald-500" />
+        {hasResume && <CheckCircle2 size={17} className="shrink-0 text-emerald-500" />}
       </div>
       <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => onNotice(`Opening ${profile.resume.name}.`)}
-          className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
-        >
-          View Resume
-        </button>
-        <button
-          type="button"
-          onClick={() => onNotice("Switch to edit mode to update resume.")}
-          className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600"
-        >
-          <Upload size={14} /> Update Resume
-        </button>
-        <button
-          type="button"
-          onClick={() => onNotice(`Downloading ${profile.resume.name}.`)}
-          className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
-        >
-          Download Resume
-        </button>
+        {hasResume && (
+          <button
+            type="button"
+            onClick={() => onNotice(`Opening ${profile.resume.name}.`)}
+            className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
+          >
+            View Resume
+          </button>
+        )}
+        {!readOnly && (
+          <button
+            type="button"
+            onClick={() => onNotice("Switch to edit mode to update resume.")}
+            className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-cyan-600"
+          >
+            <Upload size={14} /> Update Resume
+          </button>
+        )}
+        {hasResume && (
+          <button
+            type="button"
+            onClick={() => onNotice(`Downloading ${profile.resume.name}.`)}
+            className="rounded-md border border-cyan-300 px-3 py-2 text-xs font-semibold text-cyan-600 transition hover:bg-cyan-50"
+          >
+            Download Resume
+          </button>
+        )}
       </div>
     </DetailCard>
   );

@@ -10,12 +10,13 @@ export function ApplicationMobileCard({
   application: ApplicationRow;
   onView: (id: string) => void;
 }) {
+  const isOffer = application.status === "Offer" || application.status === "Selected";
   const NextIcon =
     application.status === "Rejected"
       ? AlertTriangle
       : application.status === "Withdrawn"
         ? CircleMinus
-        : application.status === "Offer"
+        : isOffer
           ? CheckCircle2
           : CalendarDays;
   const nextTone =
@@ -23,7 +24,7 @@ export function ApplicationMobileCard({
       ? "text-rose-500"
       : application.status === "Withdrawn"
         ? "text-slate-400"
-        : application.status === "Offer"
+        : isOffer
           ? "text-emerald-500"
           : "text-blue-500";
 

@@ -1,4 +1,4 @@
-import type { ApplicationDetailInfo, ApplicationRow, ApplicationStatus, JobListing, PlacementFeedbackInsight, ProfileChecklistItem, StudentProfileSnapshot, WorkflowStepStatus } from "./types";
+import type { ApplicationDetailInfo, ApplicationRow, ApplicationStatus, JobListing, PlacementFeedbackInsight, ProfileData, StudentProfileSnapshot, WorkflowStepStatus } from "./types";
 import { AlertTriangle, BriefcaseBusiness, CheckCircle2, CircleMinus, Clock3, Trophy } from "lucide-react";
 
 export const jobListings: JobListing[] = [
@@ -116,26 +116,6 @@ export const jobListings: JobListing[] = [
   },
 ];
 
-export const jobFilterOptions = {
-  company: ["All Companies", "TCS", "Infosys", "Zoho", "Wipro", "Accenture"],
-  role: [
-    "All Roles",
-    "Software Engineer",
-    "System Engineer",
-    "Developer",
-    "Analyst",
-  ],
-  location: [
-    "All Locations",
-    "Bangalore",
-    "Pune",
-    "Chennai",
-    "Hyderabad",
-    "Mumbai",
-  ],
-  type: ["All Job Types", "Full-time", "Internship", "Contract"],
-};
-
 export const studentProfileSnapshot: StudentProfileSnapshot = {
   branch: "CSE",
   cgpa: "8.72",
@@ -182,8 +162,8 @@ export const studentProfileData = {
     { id: "3", title: "Campus Connect Portal", type: "Team project", dates: "Jan 2024 – May 2024", description: "Student community platform for events, announcements, and peer collaboration.", technologies: ["JavaScript", "Express", "PostgreSQL"], githubUrl: "https://github.com/arjun/campus-connect", reportFile: "" },
   ],
   internships: [
-    { id: "1", role: "Frontend Developer Intern", company: "BlueOrbit Technologies", duration: "May 2025 – Jul 2025", description: "Built responsive dashboard screens and reusable React components.", certificateFile: "BlueOrbit_Certificate.pdf", certificateSize: "1.2 MB" },
-    { id: "2", role: "Software Engineering Intern", company: "Lumina Labs", duration: "Jan 2025 – Mar 2025", description: "Worked on REST APIs, database queries, and automated testing.", certificateFile: "LuminaLabs_Intern_Certificate.pdf", certificateSize: "1.1 MB" },
+    { id: "1", isVerified: true, role: "Frontend Developer Intern", company: "BlueOrbit Technologies", duration: "May 2025 – Jul 2025", description: "Built responsive dashboard screens and reusable React components.", certificateFile: "BlueOrbit_Certificate.pdf", certificateSize: "1.2 MB" },
+    { id: "2", isVerified: true, role: "Software Engineering Intern", company: "Lumina Labs", duration: "Jan 2025 – Mar 2025", description: "Worked on REST APIs, database queries, and automated testing.", certificateFile: "LuminaLabs_Intern_Certificate.pdf", certificateSize: "1.1 MB" },
   ],
   resume: { name: "Arjun_Mehta_Resume_2026.pdf", size: "1.2 MB", updated: "28 Aug 2026" },
   sports: [
@@ -200,15 +180,34 @@ export const studentProfileData = {
   ],
 };
 
-export const placementReadinessChecklist: ProfileChecklistItem[] = [
-  { label: "CGPA", status: "done" },
-  { label: "Certificates", status: "done" },
-  { label: "Resume", status: "done" },
-  { label: "Add 1 more project", status: "warning" },
-  { label: "Projects", status: "done" },
-  { label: "Add internship details", status: "warning" },
-  { label: "Skills", status: "done" },
-];
+export const emptyStudentProfile: ProfileData = {
+  name: "",
+  initials: "",
+  registrationNumber: "",
+  department: "",
+  program: "",
+  batch: "",
+  semester: "",
+  email: "",
+  phone: "",
+  location: "",
+  dateOfBirth: "",
+  gender: "",
+  cgpa: "",
+  percentage: "",
+  attendance: "",
+  backlogs: "",
+  profileCompletion: 0,
+  semesterScores: [],
+  skillGroups: [],
+  skillsList: [],
+  projects: [],
+  internships: [],
+  resume: { name: "No resume uploaded", size: "", updated: "" },
+  sports: [],
+  extracurriculars: [],
+  awards: [],
+};
 
 export const placementFeedbackByCompany: Record<string, PlacementFeedbackInsight> = {
   TCS: {
