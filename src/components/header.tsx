@@ -3,7 +3,6 @@ import {
   ChevronDown,
   LogOut,
   Menu,
-  Search,
   ShieldCheck,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -115,15 +114,6 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-5">
-            <div className="relative hidden md:block">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder={role === "admin" ? "Search users, jobs, companies..." : role === "student" ? "Search jobs, companies..." : "Search students, drives, companies..."}
-                className="h-10 w-70 rounded-lg border border-gray-200 bg-white pl-10 pr-4 text-sm text-gray-700 outline-none placeholder:text-gray-400 focus:border-cyan-200 focus:ring-2 focus:ring-cyan-100 lg:w-75"
-              />
-            </div>
-
             <button type="button" aria-label="Notifications" className="relative rounded-full p-2 text-gray-600 transition hover:bg-gray-100">
               <Bell size={21} strokeWidth={1.8} />
               <span className="absolute -right-0.5 -top-0.5 flex h-[17px] min-w-[17px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-semibold text-white">4</span>

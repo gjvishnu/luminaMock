@@ -17,6 +17,7 @@ import {
   Upload,
 } from "lucide-react";
 import { useRef, useState } from "react";
+import { CustomSelect } from "./CustomSelect";
 
 type Channel = "Email" | "SMS / Text Message" | "WhatsApp" | "In-App Notification";
 
@@ -182,7 +183,17 @@ function FieldLabel({ label, required = false }: { label: string; required?: boo
 }
 
 function SelectField({ label, value, options, onChange, required = false }: { label: string; value: string; options: string[]; onChange: (value: string) => void; required?: boolean }) {
-  return <label className="block"><FieldLabel label={label} required={required} /><span className="relative block"><select value={value} onChange={(event) => onChange(event.target.value)} className="h-9 w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 pr-8 text-[11px] font-medium text-slate-700 outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100 sm:text-xs">{options.map((option) => <option key={option}>{option}</option>)}</select><ChevronDown size={14} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500" /></span></label>;
+  return (
+    <div className="block">
+      <FieldLabel label={label} required={required} />
+      <CustomSelect
+        value={value}
+        onChange={onChange}
+        options={options}
+        buttonClassName="h-9 text-[11px] font-medium text-slate-700 sm:text-xs"
+      />
+    </div>
+  );
 }
 
 function RichTextEditor({ value, onChange }: { value: string; onChange: (value: string) => void }) {

@@ -3,7 +3,6 @@ import {
   Building2,
   CalendarDays,
   Check,
-  ChevronDown,
   ChevronRight,
   CircleCheckBig,
   Download,
@@ -19,6 +18,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { CustomSelect } from "./CustomSelect";
 
 type MatchCategory = "high" | "medium" | "low";
 
@@ -670,54 +670,32 @@ export const DriveStudents = () => {
             </div>
 
             {/* Department Dropdown */}
-            <label className="block">
+            <div className="block min-w-[140px]">
               <span className="mb-1 block text-[10px] font-semibold text-slate-500">Department</span>
-              <div className="relative">
-                <select
-                  value={departmentFilter}
-                  onChange={(e) => {
-                    setDepartmentFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="h-9 appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-8 text-xs font-medium text-slate-700 outline-none focus:border-cyan-400 cursor-pointer"
-                >
-                  <option value="All Departments">All Departments</option>
-                  <option value="CSE">CSE</option>
-                  <option value="ECE">ECE</option>
-                  <option value="IT">IT</option>
-                  <option value="EEE">EEE</option>
-                  <option value="MECH">MECH</option>
-                </select>
-                <ChevronDown
-                  size={14}
-                  className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-              </div>
-            </label>
+              <CustomSelect
+                value={departmentFilter}
+                onChange={(val) => {
+                  setDepartmentFilter(val);
+                  setCurrentPage(1);
+                }}
+                options={["All Departments", "CSE", "ECE", "IT", "EEE", "MECH"]}
+                buttonClassName="h-9 font-medium text-slate-700"
+              />
+            </div>
 
             {/* Batch Dropdown */}
-            <label className="block">
+            <div className="block min-w-[140px]">
               <span className="mb-1 block text-[10px] font-semibold text-slate-500">Batch</span>
-              <div className="relative">
-                <select
-                  value={batchFilter}
-                  onChange={(e) => {
-                    setBatchFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="h-9 appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-8 text-xs font-medium text-slate-700 outline-none focus:border-cyan-400 cursor-pointer"
-                >
-                  <option value="2022 - 2026">2022 - 2026</option>
-                  <option value="2023 - 2027">2023 - 2027</option>
-                  <option value="2024 - 2028">2024 - 2028</option>
-                  <option value="All Batches">All Batches</option>
-                </select>
-                <ChevronDown
-                  size={14}
-                  className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-              </div>
-            </label>
+              <CustomSelect
+                value={batchFilter}
+                onChange={(val) => {
+                  setBatchFilter(val);
+                  setCurrentPage(1);
+                }}
+                options={["2022 - 2026", "2023 - 2027", "2024 - 2028", "All Batches"]}
+                buttonClassName="h-9 font-medium text-slate-700"
+              />
+            </div>
 
             {/* Match Category Buttons in same row next to Batch */}
             <div className="flex items-center gap-2">

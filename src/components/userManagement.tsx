@@ -20,6 +20,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { CustomSelect } from "./CustomSelect";
 import {
   type CreateUserRequest,
   type ManagedUser,
@@ -142,10 +143,10 @@ function ModalShell({ title, description, icon: Icon, onClose, children }: {
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="block">
+    <div className="block">
       <span className="mb-1 block text-xs font-semibold text-slate-700">{label} <span className="text-red-500">*</span></span>
       {children}
-    </label>
+    </div>
   );
 }
 
@@ -155,6 +156,31 @@ function TextInput({ icon: Icon, ...props }: React.InputHTMLAttributes<HTMLInput
       <Icon size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
       <input {...props} className="h-10 w-full rounded-xl border border-gray-200 bg-white pl-9 pr-3 text-xs text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100" />
     </span>
+  );
+}
+
+const ROLE_OPTIONS: { value: FormRole; label: string }[] = [
+  { value: "STUDENT", label: "Student" },
+  { value: "PLACEMENT_OFFICER", label: "Placement Officer" },
+  { value: "ADMIN", label: "Admin" },
+  { value: "RECRUITER", label: "Recruiter" },
+];
+
+function RoleSelect({
+  value,
+  onChange,
+}: {
+  value: FormRole;
+  onChange: (value: FormRole) => void;
+}) {
+  return (
+    <CustomSelect
+      value={value}
+      onChange={(val) => onChange(val as FormRole)}
+      options={ROLE_OPTIONS}
+      buttonClassName="h-10 rounded-xl"
+      menuClassName="w-full"
+    />
   );
 }
 
@@ -433,12 +459,7 @@ export function UserManagement() {
               </span>
             </Field>
             <Field label="Role">
-              <select value={userRole} onChange={(event) => setUserRole(event.target.value as FormRole)} className="h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-xs text-slate-800 outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100">
-                <option value="STUDENT">Student</option>
-                <option value="PLACEMENT_OFFICER">Placement Officer</option>
-                <option value="ADMIN">Admin</option>
-                <option value="RECRUITER">Recruiter</option>
-              </select>
+              <RoleSelect value={userRole} onChange={(role) => setUserRole(role)} />
             </Field>
             <ModalActions isLoading={isCreatingUser} onCancel={closeModal} />
           </form>
@@ -483,14 +504,22 @@ function StatCard({ label, value, icon: Icon, tone }: { label: string; value: nu
 }
 
 function FilterSelect({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) {
+  const formattedOptions = options.map((option) => ({
+    value: option,
+    label: option === "ACTIVE" ? "Active" : option === "INACTIVE" ? "Inactive" : option,
+  }));
+
   return (
-    <label className="relative">
+    <div className="min-w-[132px]">
       <span className="sr-only">{label}</span>
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-9 min-w-[132px] appearance-none rounded-lg border border-gray-200 bg-white px-3 pr-8 text-xs font-medium text-gray-600 outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-100">
-        {options.map((option) => <option key={option} value={option}>{option === "ACTIVE" ? "Active" : option === "INACTIVE" ? "Inactive" : option}</option>)}
-      </select>
-      <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400">⌄</span>
-    </label>
+      <CustomSelect
+        value={value}
+        onChange={onChange}
+        options={formattedOptions}
+        placeholder={label}
+        buttonClassName="h-9 font-medium text-gray-600"
+      />
+    </div>
   );
 }
 

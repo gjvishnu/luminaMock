@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -7,7 +8,6 @@ import {
   UserRound,
   Ban,
   ArrowRight,
-  ChevronDown,
   Eye,
   FileUser,
   LoaderCircle,
@@ -15,6 +15,7 @@ import {
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useMediaQuery } from "@mui/material";
 import { type StudentRecord, useGetStudentsQuery } from "../redux/api";
+import { CustomSelect } from "./CustomSelect";
 
 export const Students = () => {
   const departments = [
@@ -644,10 +645,22 @@ export const Students = () => {
 function FilterSelect({
   label,
   options,
+  value: controlledValue,
+  onChange,
 }: {
   label: string;
   options: string[];
+  value?: string;
+  onChange?: (val: string) => void;
 }) {
+  const [internalValue, setInternalValue] = useState(options[0] || "");
+  const value = controlledValue !== undefined ? controlledValue : internalValue;
+
+  const handleChange = (val: string) => {
+    setInternalValue(val);
+    onChange?.(val);
+  };
+
   return (
     <div className="min-w-0 lg:flex-1">
       <label
@@ -664,57 +677,13 @@ function FilterSelect({
       >
         {label}
       </label>
-
-      <div className="relative">
-        <select
-          className="
-            h-9
-            w-full
-            min-w-0
-            appearance-none
-            rounded-md
-            border
-            border-gray-200
-            bg-white
-            px-2.5
-            pr-8
-            text-xs
-            text-gray-600
-            outline-none
-            transition
-            focus:border-gray-400
-            cursor-pointer
-            max-sm:h-7
-            max-sm:rounded-[4px]
-            max-sm:px-1
-            max-sm:pr-4
-            max-sm:text-[7px]
-          "
-          defaultValue={options[0]}
-        >
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-
-        <ChevronDown
-          size={14}
-          strokeWidth={1.8}
-          className="
-            pointer-events-none
-            absolute
-            right-2.5
-            top-1/2
-            -translate-y-1/2
-            text-gray-400
-            max-sm:right-1
-            max-sm:h-2.5
-            max-sm:w-2.5
-          "
-        />
-      </div>
+      <CustomSelect
+        value={value}
+        onChange={handleChange}
+        options={options}
+        placeholder={label}
+        buttonClassName="h-9 max-sm:h-7 max-sm:rounded-[4px] max-sm:px-1 max-sm:text-[7px] text-gray-600"
+      />
     </div>
   );
 }

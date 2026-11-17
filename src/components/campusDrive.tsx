@@ -1,7 +1,6 @@
 import {
   Building2,
   CalendarDays,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   CircleCheckBig,
@@ -17,6 +16,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "material-react-toastify";
+import { CustomSelect } from "./CustomSelect";
 import {
   type CompanyRecord,
   type DriveJobType,
@@ -354,16 +354,13 @@ function FilterDropdown({
   return (
     <div className="min-w-0 flex-1">
       <label className="mb-1 block text-[9px] font-medium text-slate-500">{label}</label>
-      <div className="relative">
-        <select
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className="h-9 w-full cursor-pointer appearance-none rounded-md border border-gray-200 bg-white px-2.5 pr-8 text-[11px] font-medium text-slate-700 outline-none transition focus:border-blue-300 focus:ring-1 focus:ring-blue-100"
-        >
-          {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-        </select>
-        <ChevronDown size={14} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
-      </div>
+      <CustomSelect
+        value={value}
+        onChange={onChange}
+        options={options}
+        placeholder={label}
+        buttonClassName="h-9 text-[11px] font-medium text-slate-700"
+      />
     </div>
   );
 }
