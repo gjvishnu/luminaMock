@@ -31,8 +31,6 @@ const stats: StatCard[] = [
   {
     title: "Total Students",
     value: "2,450",
-    description: "View all students",
-    action: "arrow",
     icon: Users,
     iconStyle: "bg-cyan-100 text-cyan-600",
   },

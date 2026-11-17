@@ -318,7 +318,7 @@ export function UserManagement() {
           <UserCheck size={22} strokeWidth={2} />
         </div>
         <div>
-          <h1 className="text-base font-bold text-gray-900 sm:text-lg">Actions</h1>
+          <h1 className="text-base font-bold text-gray-900 sm:text-lg">Create Users</h1>
           <p className="text-xs text-gray-500">Manage users, placements, drives and the entire platform.</p>
         </div>
       </div>
