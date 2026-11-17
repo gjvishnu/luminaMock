@@ -8,7 +8,6 @@ import {
    ArrowRight,
    Trophy,
  Percent,
-  CalendarDays,
   CirclePlus,
   Megaphone,
   Send,
@@ -626,20 +625,16 @@ const PlacementBottomSection =()=> {
                   font-medium
                   text-gray-700
                   transition
-                  hover:border-cyan-100
-                  hover:bg-cyan-50
+                  hover:border-purple-100
+                  hover:bg-purple-50
                 "
               >
-                <CalendarDays
-                  size={20}
-                  className="text-cyan-600"
-                />
+                <CirclePlus size={20}
+                  className="text-purple-600"/>
+                
 
-                <span>Schedule events</span>
+                <span>Create Drives</span>
               </button>
-
-              {/* Upload JD */}
-             
 
               {/* Send Notification */}
               <button
@@ -666,34 +661,7 @@ const PlacementBottomSection =()=> {
                   className="text-orange-500"
                 />
 
-                <span> Create announcements</span>
-              </button>
-
-              {/* Generate Report */}
-              <button
-                className="
-                  flex
-                  h-16
-                  items-center
-                  justify-center
-                  gap-2
-                  rounded-lg
-                  border
-                  border-gray-200
-                  bg-white
-                  text-xs
-                  font-medium
-                  text-gray-700
-                  transition
-                  hover:border-purple-100
-                  hover:bg-purple-50
-                "
-              >
-                <CirclePlus size={20}
-                  className="text-purple-600"/>
-                
-
-                <span>Create Drives</span>
+                <span>Create Announcements</span>
               </button>
 
             </div>
