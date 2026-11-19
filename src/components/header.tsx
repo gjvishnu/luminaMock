@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { Sidebar } from "./sideBar";
 import { type UserRole } from "../context/roleContext";
 import { useUserRole } from "../context/useUserRole";
-import { authApi, useLogoutMutation } from "../redux/api";
+import { authApi, useGetStudentProfileQuery, useLogoutMutation } from "../redux/api";
 import { clearCredentials } from "../redux/authSlice";
 import { resetRole } from "../redux/roleSlice";
 import { useAppDispatch } from "../redux";
@@ -23,7 +23,7 @@ const roleDetails: Record<UserRole, { name: string; label: string; greeting: str
 };
 
 export const Header = () => {
-  const { role } = useUserRole();
+  const { role, user } = useUserRole();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
@@ -31,6 +31,48 @@ export const Header = () => {
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const currentUser = roleDetails[role];
+
+  // Fetch the real student name from the backend instead of using the hardcoded placeholder.
+  const studentProfileQuery = useGetStudentProfileQuery(
+    user?.userUuid ?? "",
+    { skip: role !== "student" || !user?.userUuid }
+  );
+
+  const studentName = studentProfileQuery.data?.student?.name ?? null;
+  const freshUser = studentProfileQuery.data?.freshUser ?? false;
+  const studentInitials = studentName
+    ? studentName
+        .split(" ")
+        .map((part) => part[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : null;
+
+  const displayName =
+    role === "student"
+      ? freshUser
+        ? "User"
+        : studentName ?? currentUser.name
+      : currentUser.name;
+  const displayGreeting =
+    role === "student"
+      ? freshUser
+        ? "Hello User 👋"
+        : studentName
+          ? `Welcome, ${studentName} 👋`
+          : currentUser.greeting
+      : currentUser.greeting;
+  const displayInitials =
+    role === "student" && studentInitials
+      ? studentInitials
+      : role === "admin"
+        ? "AD"
+        : role === "student"
+          ? freshUser
+            ? "U"
+            : "AM"
+          : "VK";
 
   useEffect(() => {
     if (!sideBar) {
@@ -101,7 +143,7 @@ export const Header = () => {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="truncate text-base font-semibold leading-5 text-gray-900 sm:text-xl">{currentUser.greeting}</h1>
+                <h1 className="truncate text-base font-semibold leading-5 text-gray-900 sm:text-xl">{displayGreeting}</h1>
                 {role === "admin" && (
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-white shadow-sm">
                     <ShieldCheck size={14} />
@@ -138,10 +180,10 @@ export const Header = () => {
                 className="flex items-center gap-2 rounded-lg p-1.5 transition hover:bg-gray-50"
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700">
-                  {role === "admin" ? "AD" : role === "student" ? "AM" : "VK"}
+                  {displayInitials}
                 </span>
                 <div className="hidden text-left sm:block">
-                  <p className="text-xs font-semibold leading-4 text-gray-900">{currentUser.name}</p>
+                  <p className="text-xs font-semibold leading-4 text-gray-900">{displayName}</p>
                   <p className="text-[10px] leading-4 text-gray-500">{currentUser.label}</p>
                 </div>
                 <ChevronDown size={16} className={`hidden text-gray-500 transition sm:block ${roleMenuOpen ? "rotate-180" : ""}`} />
