@@ -54,7 +54,7 @@ const adminMenuSections: MenuSection[] = officerMenuSections.map((section) =>
     ? {
         ...section,
         items: [
-          { label: "Actions", icon: UserCheck, route: "actions" },
+          { label: "Create Users", icon: UserCheck, route: "actions" },
           ...section.items,
         ],
       }

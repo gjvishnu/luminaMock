@@ -238,7 +238,7 @@ export const Reports = () => {
             className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-[10px] font-semibold text-slate-700 transition hover:border-cyan-200 hover:bg-cyan-50/40 sm:text-xs md:flex-none"
           >
             <Download size={14} />
-            Export Report
+            Export
           </button>
         </div>
       </div>
