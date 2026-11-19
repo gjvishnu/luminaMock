@@ -155,7 +155,7 @@ const recommendationStats = [
   { title: "Total Eligible Students", value: "1,248", caption: "Across all drives", icon: Users, tone: "bg-emerald-50 text-emerald-600" },
   { title: "Highest Match Students", value: "842", caption: "Best suited for roles", icon: ShieldCheck, tone: "bg-violet-50 text-violet-600" },
   { title: "Medium Match Students", value: "298", caption: "May require training", icon: CircleCheckBig, tone: "bg-orange-50 text-orange-500" },
-  { title: "Low Match Students", value: "108", caption: "Not ideal fit", icon: AlertTriangle, tone: "bg-rose-50 text-rose-500" },
+  { title: "Lowest Match Students", value: "108", caption: "Not ideal fit", icon: AlertTriangle, tone: "bg-rose-50 text-rose-500" },
 ];
 
 type FilterKey = keyof typeof initialFilters;
@@ -174,7 +174,7 @@ export const JDRecommendation = () => {
 
         <div className="flex items-center gap-2">
           <button type="button" className="inline-flex h-9 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
-            <Download size={14} /> Export Report
+            <Download size={14} /> Export
           </button>
           <button type="button" onClick={() => setFilters(initialFilters)} className="inline-flex h-9 items-center gap-1.5 rounded-md bg-cyan-500 px-3 text-xs font-semibold text-white shadow-sm transition hover:bg-cyan-500">
             <RotateCcw size={14} /> Reset Filters
