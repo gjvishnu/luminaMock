@@ -1,6 +1,7 @@
 import type { JobListing } from "../shared/types";
 import { CompanyLogo } from "../shared/CompanyLogo";
 import { SkillChips } from "../shared/SkillChips";
+import { formatDaysLeft, getMatchTones } from "./jobHelpers";
 import { CalendarDays, ChevronRight, MapPin } from "lucide-react";
 
 export function JobMobileCard({
@@ -10,11 +11,7 @@ export function JobMobileCard({
   job: JobListing;
   onOpen: () => void;
 }) {
-  const matchTone = job.match >= 78 ? "text-emerald-600" : "text-amber-500";
-  const badgeTone =
-    job.match >= 78
-      ? "bg-emerald-50 text-emerald-600"
-      : "bg-amber-50 text-amber-600";
+  const { text: matchTone, badge: badgeTone } = getMatchTones(job.matchLabel);
 
   return (
     <section
@@ -56,7 +53,7 @@ export function JobMobileCard({
           {job.applyBy}
         </span>
         <span className="font-semibold text-rose-500">
-          {job.daysLeft} days left
+          {formatDaysLeft(job.daysLeft)}
         </span>
       </div>
       <button

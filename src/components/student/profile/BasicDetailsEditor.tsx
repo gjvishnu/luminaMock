@@ -25,12 +25,15 @@ type Fields = {
   degreeId: string;
   batch: string;
   semester: string;
+  cgpa: string;
+  backlogs: string;
   phone: string;
   dateOfBirth: string;
   location: string;
 };
 
-const fieldMessages: Record<keyof Fields, string> = {
+// CGPA and backlogs are optional, so they are validated separately.
+const fieldMessages: Record<Exclude<keyof Fields, "cgpa" | "backlogs">, string> = {
   name: "Student name is required.",
   registrationNumber: "Registration number is required.",
   departmentId: "Department is required.",
@@ -50,6 +53,8 @@ function toFields(student: StudentProfileRecord | null): Fields {
     degreeId: student?.degreeId ?? "",
     batch: student?.batch ? String(student.batch) : "",
     semester: student?.semester ? formatSemester(student.semester) : "",
+    cgpa: student?.cgpa == null ? "" : String(student.cgpa),
+    backlogs: student?.backlogs == null ? "" : String(student.backlogs),
     phone: student?.phone ?? "",
     dateOfBirth: student?.dateOfBirth?.slice(0, 10) ?? "",
     location: student?.location ?? "",
@@ -64,10 +69,20 @@ function toBody(fields: Fields) {
     degreeId: fields.degreeId,
     batch: Number(fields.batch),
     semester: parseInt(fields.semester, 10),
+    cgpa: fields.cgpa.trim() ? Number(fields.cgpa) : null,
+    backlogs: fields.backlogs.trim() ? Number(fields.backlogs) : null,
     phone: fields.phone.trim(),
     dateOfBirth: fields.dateOfBirth,
     location: fields.location.trim(),
   };
+}
+
+// Backend accepts a number from 0 to 10 with at most 2 decimal places.
+function getCgpaError(value: string) {
+  const cgpa = value.trim();
+  if (!cgpa) return undefined;
+  if (!/^\d{1,2}(\.\d{1,2})?$/.test(cgpa) || Number(cgpa) > 10) return "Enter a CGPA between 0 and 10 (up to 2 decimals).";
+  return undefined;
 }
 
 export function BasicDetailsEditor({
@@ -104,9 +119,14 @@ export function BasicDetailsEditor({
   };
 
   const handleSave = async () => {
-    const missing = (Object.keys(fieldMessages) as (keyof Fields)[]).filter((field) => !fields[field].trim());
-    setErrors(Object.fromEntries(missing.map((field) => [field, fieldMessages[field]])));
-    if (missing.length > 0) {
+    const missing = (Object.keys(fieldMessages) as (keyof typeof fieldMessages)[]).filter((field) => !fields[field].trim());
+    const nextErrors: Partial<Record<keyof Fields, string>> = Object.fromEntries(missing.map((field) => [field, fieldMessages[field]]));
+    const cgpaError = getCgpaError(fields.cgpa);
+    if (cgpaError) nextErrors.cgpa = cgpaError;
+    // Backend accepts a whole number of 0 or more; the input already strips non-digits.
+    if (fields.backlogs.trim() && !/^\d+$/.test(fields.backlogs.trim())) nextErrors.backlogs = "Enter backlogs as a whole number (0 or more).";
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) {
       toast.error("Please complete the highlighted fields.");
       return;
     }
@@ -197,6 +217,28 @@ export function BasicDetailsEditor({
               <FieldError message={errors.semester} />
             </div>
           </div>
+        </div>
+
+        <div>
+          <InputField
+            label="CGPA"
+            placeholder="e.g. 8.75"
+            value={fields.cgpa}
+            maxLength={5}
+            onChange={(value) => setField("cgpa", value.replace(/[^\d.]/g, ""))}
+            error={errors.cgpa}
+          />
+        </div>
+
+        <div>
+          <InputField
+            label="Backlogs"
+            placeholder="e.g. 0"
+            value={fields.backlogs}
+            maxLength={2}
+            onChange={(value) => setField("backlogs", value.replace(/\D/g, ""))}
+            error={errors.backlogs}
+          />
         </div>
 
         <div>

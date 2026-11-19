@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { type SkillRecord, useGetSkillsQuery } from "../../../redux/api";
 import { getCatalogRecordId, mergeCatalog } from "../../formHelpers";
 import { PageHeader } from "../shared/PageHeader";
-import { AcademicPerformanceCard } from "./AcademicPerformanceCard";
 import { AwardsCard } from "./AwardsCard";
 import { BasicDetailsEditor } from "./BasicDetailsEditor";
 import { ExtracurricularsCard } from "./ExtracurricularsCard";
@@ -68,7 +67,7 @@ function ProfileEditForm({ data }: { data: ProfileResult }) {
 
       <div className="flex items-center gap-2 rounded-xl border border-cyan-100 bg-cyan-50/80 px-4 py-3 text-xs font-medium text-cyan-700 shadow-sm">
         <Info size={16} className="shrink-0 text-cyan-500" />
-        Each section saves on its own. Resume, markcards and activities cannot be saved yet.
+        Each section saves on its own. Resume and activities cannot be saved yet.
       </div>
 
       <ProfileGroup
@@ -77,20 +76,17 @@ function ProfileEditForm({ data }: { data: ProfileResult }) {
         icon={GraduationCap}
         badge="Editing enabled"
       >
-        <div className="grid items-stretch gap-4 xl:grid-cols-2">
-          <div className="flex min-w-0 flex-col gap-4">
-            <BasicDetailsEditor
-              userUuid={data.user.userUuid}
-              email={data.user.email}
-              student={data.student}
-              studentId={studentId}
-              departments={data.departments}
-              degrees={data.degrees}
-              onCreated={setStudentId}
-            />
-            <ResumeCard profile={draftProfile} onProfileChange={setDraftProfile} isEditing onNotice={setNotice} />
-          </div>
-          <AcademicPerformanceCard profile={draftProfile} onProfileChange={setDraftProfile} isEditing onNotice={setNotice} />
+        <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <BasicDetailsEditor
+            userUuid={data.user.userUuid}
+            email={data.user.email}
+            student={data.student}
+            studentId={studentId}
+            departments={data.departments}
+            degrees={data.degrees}
+            onCreated={setStudentId}
+          />
+          <ResumeCard profile={draftProfile} onProfileChange={setDraftProfile} isEditing onNotice={setNotice} />
         </div>
       </ProfileGroup>
 

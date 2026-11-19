@@ -1,7 +1,7 @@
 import type { ProfileData } from "../shared/types";
 import { InfoItem } from "../shared/InfoItem";
 import { ProfileSection } from "../shared/ProfileSection";
-import { Building2, CalendarDays, FileText, GraduationCap, Mail, MapPin, Phone, UserRound } from "lucide-react";
+import { Award, Building2, ClipboardList, CalendarDays, FileText, GraduationCap, Mail, MapPin, Phone, UserRound } from "lucide-react";
 
 export function BasicDetailsCard({ profile }: { profile: ProfileData }) {
   return (
@@ -12,6 +12,8 @@ export function BasicDetailsCard({ profile }: { profile: ProfileData }) {
         <InfoItem icon={Building2} label="Department" value={profile.department} />
         <InfoItem icon={GraduationCap} label="Program" value={profile.program} />
         <InfoItem icon={CalendarDays} label="Batch / Semester" value={[profile.batch, profile.semester].filter(Boolean).join(" · ")} />
+        <InfoItem icon={Award} label="CGPA" value={profile.cgpa && `${profile.cgpa} / 10`} />
+        <InfoItem icon={ClipboardList} label="Backlogs" value={profile.backlogs} />
         <InfoItem icon={Mail} label="Email" value={profile.email} />
         <InfoItem icon={Phone} label="Phone" value={profile.phone} />
         <InfoItem icon={CalendarDays} label="Date of Birth" value={profile.dateOfBirth} />
