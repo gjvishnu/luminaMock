@@ -21,7 +21,7 @@ import { StudentDashboard } from "./studentDashboard";
 type StatCard = {
   title: string;
   value: string;
-  description: string;
+  description?: string;
   action?: string;
   icon: React.ElementType;
   iconStyle: string;
