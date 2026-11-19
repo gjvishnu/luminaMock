@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   CalendarDays,
   CheckCircle2,
-  ChevronDown,
   ChevronRight,
   Download,
   Eye,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { CustomSelect } from "./CustomSelect";
 
 type StudentStatus = "In Process" | "Interviewed" | "Rejected" | "Selected";
 
@@ -265,16 +265,16 @@ function DriveStatusList() {
                 />
               </div>
             </label>
-            <label className="block w-full sm:w-44">
+            <div className="block w-full sm:w-44">
               <span className="mb-1 block text-[10px] font-semibold text-slate-500">Drive status</span>
-              <div className="relative">
-                <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="h-9 w-full appearance-none rounded-md border border-slate-200 bg-white px-3 pr-8 text-xs text-slate-700 outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100">
-                  <option>All Status</option>
-                  {driveStatusOptions.map((status) => <option key={status}>{status}</option>)}
-                </select>
-                <ChevronDown size={14} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              </div>
-            </label>
+              <CustomSelect
+                value={statusFilter}
+                onChange={setStatusFilter}
+                options={["All Status", ...driveStatusOptions]}
+                placeholder="All Status"
+                buttonClassName="h-9 text-xs text-slate-700"
+              />
+            </div>
           </div>
         </section>
 
@@ -286,11 +286,17 @@ function DriveStatusList() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-[10px] font-medium text-slate-500">{selectedDriveIds.length} selected</span>
-              <label className="relative block w-[132px]">
+              <div className="relative block w-[132px]">
                 <span className="sr-only">Apply status to selected drives</span>
-                <select value={bulkDriveStatus} disabled={selectedDriveIds.length === 0} onChange={(event) => applyBulkDriveStatus(event.target.value as Drive["status"] | "")} className="h-8 w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 pr-7 text-[10px] font-medium text-slate-700 outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"><option value="">Apply status</option>{driveStatusOptions.map((status) => <option key={status}>{status}</option>)}</select>
-                <ChevronDown size={13} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" />
-              </label>
+                <CustomSelect
+                  value={bulkDriveStatus}
+                  disabled={selectedDriveIds.length === 0}
+                  onChange={(val) => applyBulkDriveStatus(val as Drive["status"] | "")}
+                  options={[{ value: "", label: "Apply status" }, ...driveStatusOptions.map((s) => ({ value: s, label: s }))]}
+                  placeholder="Apply status"
+                  buttonClassName="h-8 text-[10px] font-medium text-slate-700"
+                />
+              </div>
               <span className="text-[10px] font-medium text-slate-500">{filteredDrives.length} drives</span>
             </div>
           </div>
@@ -326,11 +332,15 @@ function DriveStatusList() {
                     </td>
                     <td className="px-3 py-3 font-semibold text-slate-700 sm:px-4">{drive.applicants}</td>
                     <td className="px-3 py-3 sm:px-4">
-                      <label className="relative block w-[125px]">
+                      <div className="relative block w-[125px]">
                         <span className="sr-only">Change status for {drive.company} drive</span>
-                        <select value={currentStatus} onChange={(event) => requestDriveStatusChange([drive.id], event.target.value as Drive["status"])} className="h-8 w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 pr-7 text-[10px] font-semibold text-slate-700 outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100">{driveStatusOptions.map((status) => <option key={status}>{status}</option>)}</select>
-                        <ChevronDown size={13} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" />
-                      </label>
+                        <CustomSelect
+                          value={currentStatus}
+                          onChange={(val) => requestDriveStatusChange([drive.id], val as Drive["status"])}
+                          options={driveStatusOptions}
+                          buttonClassName="h-8 text-[10px] font-semibold text-slate-700"
+                        />
+                      </div>
                     </td>
                     <td className="px-3 py-3 text-slate-500 sm:px-4">{drive.lastUpdated}</td>
                     <td className="px-3 py-3 text-right sm:px-4">
@@ -553,27 +563,43 @@ function DriveStatusDetail({ driveId }: { driveId: string }) {
                 <Search size={14} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search students..." className="h-8 w-full rounded-md border border-slate-200 pl-8 pr-2 text-[10px] text-slate-700 outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100" />
               </label>
-              <label className="relative block w-[132px]">
+              <div className="relative block w-[132px]">
                 <span className="sr-only">Filter by student status</span>
-                <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="h-8 w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 pr-7 text-[10px] text-slate-700 outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100"><option>All Status</option>{studentStatuses.map((status) => <option key={status}>{status}</option>)}</select>
-                <ChevronDown size={13} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" />
-              </label>
-              <label className="relative block w-[132px]">
+                <CustomSelect
+                  value={statusFilter}
+                  onChange={setStatusFilter}
+                  options={["All Status", ...studentStatuses]}
+                  placeholder="All Status"
+                  buttonClassName="h-8 text-[10px] text-slate-700"
+                />
+              </div>
+              <div className="relative block w-[132px]">
                 <span className="sr-only">Filter by department</span>
-                <select value={departmentFilter} onChange={(event) => setDepartmentFilter(event.target.value)} className="h-8 w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 pr-7 text-[10px] text-slate-700 outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100"><option>All Departments</option>{departmentOptions.map((department) => <option key={department}>{department}</option>)}</select>
-                <ChevronDown size={13} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" />
-              </label>
+                <CustomSelect
+                  value={departmentFilter}
+                  onChange={setDepartmentFilter}
+                  options={["All Departments", ...departmentOptions]}
+                  placeholder="All Departments"
+                  buttonClassName="h-8 text-[10px] text-slate-700"
+                />
+              </div>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 bg-cyan-50/40 px-3 py-2.5 sm:px-4">
             <p className="text-[10px] font-semibold text-slate-600">{selectedIds.length} student{selectedIds.length === 1 ? "" : "s"} selected</p>
             <div className="flex flex-wrap items-center gap-2">
-              <label className="relative block w-[132px]">
+              <div className="relative block w-[132px]">
                 <span className="sr-only">Status for selected students</span>
-                <select value={bulkStatus} disabled={selectedIds.length === 0} onChange={(event) => applyBulkStatus(event.target.value as StudentStatus | "")} className="h-8 w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 pr-7 text-[10px] font-medium text-slate-700 outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"><option value="" disabled>Apply status</option>{studentStatuses.map((status) => <option key={status}>{status}</option>)}</select>
-                <ChevronDown size={13} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" />
-              </label>
+                <CustomSelect
+                  value={bulkStatus}
+                  disabled={selectedIds.length === 0}
+                  onChange={(val) => applyBulkStatus(val as StudentStatus | "")}
+                  options={[{ value: "", label: "Apply status" }, ...studentStatuses.map((s) => ({ value: s, label: s }))]}
+                  placeholder="Apply status"
+                  buttonClassName="h-8 text-[10px] font-medium text-slate-700"
+                />
+              </div>
               <button type="button" disabled={selectedIds.length === 0} onClick={exportSelected} className="inline-flex h-8 items-center gap-1.5 rounded-md border border-cyan-300 bg-white px-3 text-[10px] font-semibold text-cyan-600 transition hover:bg-cyan-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400"><Download size={14} />Export Excel</button>
             </div>
           </div>
@@ -605,7 +631,15 @@ function DriveStatusDetail({ driveId }: { driveId: string }) {
                       <td className="px-3 py-3 text-slate-600 sm:px-4">{student.appliedOn}</td>
                       <td className="px-3 py-3 sm:px-4"><StudentStatusBadge status={studentStatus} /></td>
                       <td className="px-3 py-3 sm:px-4">
-                        <label className="relative block w-[132px]"><span className="sr-only">Update status for {student.name}</span><select value={studentStatus} onChange={(event) => requestStudentStatusChange([student.studentId], event.target.value as StudentStatus)} className="h-8 w-full appearance-none rounded-md border border-slate-200 bg-white px-2.5 pr-7 text-[10px] font-medium text-slate-700 outline-none focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100">{studentStatuses.map((status) => <option key={status}>{status}</option>)}</select><ChevronDown size={13} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-slate-400" /></label>
+                        <div className="relative block w-[132px]">
+                          <span className="sr-only">Update status for {student.name}</span>
+                          <CustomSelect
+                            value={studentStatus}
+                            onChange={(val) => requestStudentStatusChange([student.studentId], val as StudentStatus)}
+                            options={studentStatuses}
+                            buttonClassName="h-8 text-[10px] font-medium text-slate-700"
+                          />
+                        </div>
                       </td>
                     </tr>
                   );

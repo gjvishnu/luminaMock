@@ -15,6 +15,7 @@ import {
   UserX,
 } from "lucide-react";
 import { useState, type ElementType } from "react";
+import { CustomSelect } from "./CustomSelect";
 
 type ReportMetric = {
   title: string;
@@ -396,15 +397,16 @@ function RecommendationFilter({
   onChange: (value: string) => void;
  }) {
   return (
-    <label className="min-w-0">
+    <div className="min-w-0">
       <span className="mb-1 block text-[8px] font-semibold text-slate-700 sm:mb-1.5 sm:text-xs">{label}</span>
-      <span className="relative block">
-        <select value={value} onChange={(event) => onChange(event.target.value)} className="h-8 w-full appearance-none rounded-md border border-slate-200 bg-white px-1 pr-4 text-[8px] font-medium text-slate-700 outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-100 sm:h-9 sm:px-2.5 sm:pr-7 sm:text-xs">
-          {options.map((option) => <option key={option}>{option}</option>)}
-        </select>
-        <ChevronDown size={14} className="pointer-events-none absolute right-1 top-1/2 h-3 w-3 -translate-y-1/2 text-slate-500 sm:right-2 sm:h-[14px] sm:w-[14px]" />
-      </span>
-    </label>
+      <CustomSelect
+        value={value}
+        onChange={onChange}
+        options={options}
+        placeholder={label}
+        buttonClassName="h-8 text-[8px] font-medium text-slate-700 sm:h-9 sm:px-2.5 sm:text-xs"
+      />
+    </div>
   );
 }
 

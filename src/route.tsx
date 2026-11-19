@@ -15,6 +15,7 @@ import { AnnouncementsRoute } from "./components/announcementsRoute";
 import { Reports } from "./components/reports";
 import { StatusTracker } from "./components/statusTracker";
 import { RoleProvider } from "./context/roleProvider";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { RequireAuth } from "./components/requireAuth";
 import { Login } from "./pages/login";
 
@@ -31,9 +32,11 @@ import { StudentProfileEdit } from "./components/student/profile/StudentProfileE
 
 function AppLayout() {
   return (
-    <RoleProvider>
-      <Outlet />
-    </RoleProvider>
+    <ErrorBoundary level="app">
+      <RoleProvider>
+        <Outlet />
+      </RoleProvider>
+    </ErrorBoundary>
   );
 }
 
