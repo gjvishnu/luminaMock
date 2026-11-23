@@ -56,6 +56,13 @@ const stats: StatCard[] = [
      icon: Percent,
     iconStyle: "bg-orange-100 text-orange-600",
   },
+     {
+    title: " Drives conducted",
+    value: "50",
+    description: "This acedemic year",
+    icon: Megaphone,
+    iconStyle: "bg-blue-100 text-blue-600",
+  },
   {
     title: "Avg CTC",
     value: "₹6,20,000",
@@ -70,13 +77,7 @@ const stats: StatCard[] = [
     icon: Trophy,
     iconStyle: "bg-orange-100 text-orange-600",
   },
-   {
-    title: " Drives conducted",
-    value: "50",
-    description: "This acedemic year",
-    icon: Megaphone,
-    iconStyle: "bg-blue-100 text-blue-600",
-  },
+
 ];
 
 

@@ -240,7 +240,7 @@ function DriveStatusList() {
     <div className="-m-3 min-h-full bg-slate-50/60 p-3 pb-5 text-slate-800 sm:p-4">
       <div className="mx-auto w-full max-w-[1500px] space-y-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Drive Status Tracker</h1>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">Drive Status</h1>
           <p className="mt-1 text-xs text-slate-500 sm:text-sm">Review applications and update each student&apos;s placement status by drive.</p>
         </div>
 
@@ -518,7 +518,7 @@ function DriveStatusDetail({ driveId }: { driveId: string }) {
             Track &amp; Update Status
           </button>
           <ChevronRight size={13} className="text-slate-400" />
-          <span className="font-bold text-slate-900">Drive Status Tracker</span>
+          <span className="font-bold text-slate-900">Drive Status</span>
         </nav>
 
         <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">

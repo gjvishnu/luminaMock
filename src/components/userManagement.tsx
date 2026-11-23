@@ -414,7 +414,7 @@ export function UserManagement() {
             ))}
             <button type="button" aria-label="Next page" disabled={safePage === totalPages} onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"><ChevronRight size={15} /></button>
           </div>
-          <span className="text-[11px] text-slate-400">Live data from Lumina API</span>
+          <span className="text-[11px] text-slate-400"></span>
         </div>
       </div>
 
